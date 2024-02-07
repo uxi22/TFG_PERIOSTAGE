@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (
     QRadioButton,
     QVBoxLayout,
     QWidget, QHBoxLayout, QSpacerItem,
+    QPushButton
 )
 
 
@@ -117,12 +118,19 @@ class MainWindow(QMainWindow):
 
         layoutPaciente.setContentsMargins(80, 0, 50, 10)
 
+        botonSiguiente = QPushButton("Siguiente")
+        layoutBoton = QHBoxLayout()
+        layoutBoton.addWidget(botonSiguiente)
+        layoutBoton.setAlignment(Qt.AlignRight)
+        layoutBoton.setContentsMargins(0, 0, 50, 0)
+
         total = QVBoxLayout()
         total.addLayout(tit)
         tit.setAlignment(Qt.AlignCenter)
         total.addLayout(layout1)
         total.addLayout(layout2)
         total.addLayout(layoutPaciente)
+        total.addLayout(layoutBoton)
 
         widget = QWidget()
         widget.setLayout(total)
