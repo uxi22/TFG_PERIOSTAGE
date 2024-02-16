@@ -20,12 +20,15 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
 
         self.setWindowTitle("Periostage")
+        """
         self.screen = QScreen().geometry()
 
         self.setMinimumSize(QSize(400, 300))
         self.setMaximumSize(QSize(self.screen.width(), self.screen.height()))
         # self.setFixedSize(QSize(1200, 600))
         self.resize(QSize(1000, 600))
+        """
+        self.setWindowState(Qt.WindowMaximized)
 
         self.info1()
 

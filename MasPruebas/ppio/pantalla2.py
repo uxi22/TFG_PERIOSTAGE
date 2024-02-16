@@ -12,6 +12,8 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import QPainter, QPen
 
 
+
+
 class DrawingWidget(QWidget):
     def __init__(self, start_x, start_y, end_x, end_y):
         print("hola ", start_x, start_y, end_x, end_y)
@@ -39,6 +41,10 @@ class input0_3(QLineEdit):
         regex = QRegularExpression("[0-3]*")  # Expresión regular que permite solo números
         validator = QRegularExpressionValidator(regex)
         self.setValidator(validator)  # Aplicar la validación al QLineEdit
+
+    def paintEvent(self, event):
+        print(event.rect())
+        return super().paintEvent(event)
 
 
 class inputSiNo3(QHBoxLayout):
@@ -96,6 +102,7 @@ class Columna(QVBoxLayout):
             defFurca = input0_3()
         else:
             defFurca = QLabel("")
+            defFurca.setFixedSize(76, 22)
         self.addWidget(defFurca)
 
         # SANGRADO AL SONDAJE
@@ -186,6 +193,7 @@ class MainWindow(QMainWindow):
             layoutCuadro1.addLayout(col)
 
         layoutCuadro1.setContentsMargins(20, 20, 20, 20)
+        layoutCuadro1.setSpacing(0)
 
         # Dientes
         widgetDientes = QWidget()
@@ -200,6 +208,7 @@ class MainWindow(QMainWindow):
         for i in range(21, 29):
             layoutDientes.addWidget(ImagenDiente(str(i)))
 
+
         linea = DrawingWidget(widgetDientes.geometry().left(), widgetDientes.geometry().top(),
                               widgetDientes.geometry().right(), widgetDientes.geometry().top())
 
@@ -208,7 +217,7 @@ class MainWindow(QMainWindow):
 
         stacked = QStackedLayout()
         stacked.addWidget(widgetDientes)
-        stacked.addWidget(linea)
+        #stacked.addWidget(linea)
 
         total = QVBoxLayout()
         total.addLayout(tit)
