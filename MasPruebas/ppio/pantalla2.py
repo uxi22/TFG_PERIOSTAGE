@@ -1,17 +1,15 @@
 import sys
-
-from PySide6.QtCore import QSize, Qt, QRegularExpression
+from PIL import Image
+from PySide6.QtCore import Qt, QRegularExpression, QRect
 from PySide6.QtGui import QScreen, QRegularExpressionValidator, QPixmap
 from PySide6.QtWidgets import (
     QApplication,
     QLabel,
     QMainWindow,
     QVBoxLayout,
-    QWidget, QHBoxLayout, QSpacerItem, QLineEdit, QPushButton, QStackedLayout
+    QWidget, QHBoxLayout, QSpacerItem, QLineEdit, QPushButton
 )
 from PySide6.QtGui import QPainter, QPen
-
-
 
 
 class DrawingWidget(QWidget):
@@ -41,10 +39,6 @@ class input0_3(QLineEdit):
         regex = QRegularExpression("[0-3]*")  # Expresión regular que permite solo números
         validator = QRegularExpressionValidator(regex)
         self.setValidator(validator)  # Aplicar la validación al QLineEdit
-
-    def paintEvent(self, event):
-        print(event.rect())
-        return super().paintEvent(event)
 
 
 class inputSiNo3(QHBoxLayout):
@@ -83,6 +77,7 @@ class input3(QHBoxLayout):
 class Columna(QVBoxLayout):
     def __init__(self, numDiente, defFurca):
         super(Columna, self).__init__()
+        self
 
         label = QLabel(numDiente)
         label.setAlignment(Qt.AlignCenter)
@@ -127,13 +122,24 @@ class Columna(QVBoxLayout):
 
 
 class ImagenDiente(QLabel):
-    def __init__(self, numDiente):
+    def __init__(self, pos1, pos2, d):
         super(ImagenDiente, self).__init__()
 
+        width = 0
         # Añadir imagen del diente
-        pixmap = QPixmap(f"../DIENTES/periodontograma-{numDiente}.png")
+        self.dientes = []
+        for i in range(pos1, pos2, d):
+            self.dientes.append(Image.open(f"../DIENTES/periodontograma-{i}.png"))
+            width += self.dientes[-1].width
+        imagen = Image.new('RGB', (width, 156), 'black')
+        position = 0
+        for d in self.dientes:
+            imagen.paste(d, (position, 0))
+            position += d.width
+
+        pixmap = QPixmap.fromImage(imagen.toqimage())
         self.setPixmap(pixmap)
-        # self.setFixedSize(pixmap.size())
+
 
 
 class MainWindow(QMainWindow):
@@ -196,36 +202,25 @@ class MainWindow(QMainWindow):
         layoutCuadro1.setSpacing(0)
 
         # Dientes
-        widgetDientes = QWidget()
-        layoutDientes = QHBoxLayout(widgetDientes)
+
+        layoutDientes = QHBoxLayout()
         layoutDientes.addWidget(QLabel("Vestibular"))
 
-        for i in range(18, 10, -1):
-            layoutDientes.addWidget(ImagenDiente(str(i)))
+        sector1 = ImagenDiente(18,10, -1)
+        layoutDientes.addWidget(sector1)
 
         layoutDientes.addSpacerItem(QSpacerItem(20, 100))
 
-        for i in range(21, 29):
-            layoutDientes.addWidget(ImagenDiente(str(i)))
-
-
-        linea = DrawingWidget(widgetDientes.geometry().left(), widgetDientes.geometry().top(),
-                              widgetDientes.geometry().right(), widgetDientes.geometry().top())
-
-        layoutLineas = QHBoxLayout()
-        layoutLineas.addWidget(linea)
-
-        stacked = QStackedLayout()
-        stacked.addWidget(widgetDientes)
-        #stacked.addWidget(linea)
+        sector2 = ImagenDiente(21, 29, 1)
+        layoutDientes.addWidget(sector2)
+        layoutDientes.setSpacing(10)
+        layoutDientes.setAlignment(Qt.AlignCenter)
 
         total = QVBoxLayout()
         total.addLayout(tit)
-        total.addStretch()
+        #total.addStretch()
         total.addLayout(layoutCuadro1)
-        # total.addLayout(layoutDientes)
-        # total.addWidget(widgetDientes)
-        total.addLayout(stacked)
+        total.addLayout(layoutDientes)
 
         widget = QWidget()
         widget.setLayout(total)
