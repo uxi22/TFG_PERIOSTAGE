@@ -41,7 +41,7 @@ class Dientes(QWidget):
         print(self.points[0], self.points[-1])
 
     def minimumSizeHint(self):
-        return QSize(1,1)
+        return QSize(1, 1)
 
 class ImagenDiente(QImage):
     def __init__(self, pos1, pos2, d1, pos3, pos4, d2):
