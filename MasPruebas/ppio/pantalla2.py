@@ -187,28 +187,28 @@ class input3(QHBoxLayout):
         self.w1 = QLineEdit()
         self.addWidget(self.w1)
         self.w1.setStyleSheet(style)
-        self.w1.editingFinished.connect(lambda: self.texto(ndiente, tipo, widgetDientes, self.w1))
+        self.w1.editingFinished.connect(lambda: self.texto(ndiente, tipo, widgetDientes, self.w1, 0))
 
         self.w2 = QLineEdit()
         self.addWidget(self.w2)
         self.w2.setStyleSheet(style)
-        self.w2.editingFinished.connect(lambda: self.texto(ndiente, tipo, widgetDientes, self.w2))
+        self.w2.editingFinished.connect(lambda: self.texto(ndiente, tipo, widgetDientes, self.w2, 1))
 
         self.w3 = QLineEdit()
         self.addWidget(self.w3)
         self.w3.setStyleSheet(style)
-        self.w3.editingFinished.connect(lambda: self.texto(ndiente, tipo, widgetDientes, self.w3))
+        self.w3.editingFinished.connect(lambda: self.texto(ndiente, tipo, widgetDientes, self.w3, 2))
 
-    def texto(self, ndiente, tipo, widgetDientes, inpt):
+    def texto(self, ndiente, tipo, widgetDientes, inpt, num):
         if tipo == 1 and es_numero(self.w1.text()):
             if -21 < int(inpt.text()) < 21:
-                altura_rojo[int(ndiente)][0] = int(inpt.text())
+                altura_rojo[int(ndiente)][num] = int(inpt.text())
                 widgetDientes.update()
             else:
                 inpt.setText("")
         elif tipo == 2 and es_numero(inpt.text()):
             if 0 < int(inpt.text()) < 21:
-                altura_azul[int(ndiente)][0] = int(inpt.text())
+                altura_azul[int(ndiente)][num] = int(inpt.text())
                 widgetDientes.update()
             else:
                 inpt.setText("")
