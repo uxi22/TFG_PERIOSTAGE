@@ -11,12 +11,13 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtGui import QPainter, QPen
 
-arriba1 = [[1, 4], [5, 6], [4, 8], [9, 8], [9, 8], [7, 7], [6, 8], [10, 6]]  # del 18 al 11
+arriba1 = [[1, 5], [5, 6], [4, 8], [9, 8], [9, 8], [7, 7], [6, 8], [10, 6]]  # del 18 al 11
 arriba2 = [[7, 11], [6, 6], [7, 8], [8, 9], [8, 10], [7, 5], [5, 5], [2, 1]]  # del 21 al 28
 
 dientes = [18, 17 ,16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28]
 
 altura_rojo = [[0, 0, 0] for _ in range(16)]
+altura_azul = [[0, 0, 0] for _ in range(16)]
 
 
 class LineasSobreDientes(QWidget):
@@ -39,18 +40,20 @@ class LineasSobreDientes(QWidget):
             altura += 5.6
             qp.drawLine(0, altura, tam.width(), altura)
         # termina con la altura de la última línea
-        qp.setPen(QPen(Qt.red, 2, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
-        qp.setRenderHint(QPainter.Antialiasing, True)
 
         self.points = QPointList()
+        self.points2 = QPointList()
         dist = 5 # inicio de la imagen del primer diente
         for i, diente in enumerate(self.imagen.dientes1):
             dist += arriba1[i][0]
-            self.points.append(QPoint(dist, int(altura +  5.6*altura_rojo[i][0])))  # inicio diente
+            self.points.append(QPoint(dist, int(altura + 5.6*altura_rojo[i][0])))  # inicio diente
+            self.points2.append(QPoint(dist, int(altura + 5.6*(altura_rojo[i][0] - altura_azul[i][0]))))
             wdiente = diente.width - arriba1[i][0] - arriba1[i][1]
-            self.points.append(QPoint(dist + wdiente // 2, int(altura +  5.6*altura_rojo[i][1])))  # punto medio del diente
+            self.points.append(QPoint(dist + wdiente // 2, int(altura + 5.6*altura_rojo[i][1])))  # punto medio del diente
+            self.points2.append(QPoint(dist + wdiente // 2, int(altura + 5.6*(altura_rojo[i][1] - altura_azul[i][1]))))
             dist += wdiente
-            self.points.append(QPoint(dist, int(altura +  5.6*altura_rojo[i][2])))  # fin diente, ppio siguiente
+            self.points.append(QPoint(dist, int(altura + 5.6*altura_rojo[i][2])))  # fin diente, ppio siguiente
+            self.points2.append(QPoint(dist, int(altura + 5.6*(altura_rojo[i][2] - altura_azul[i][2]))))
             dist += arriba1[i][1]
 
         dist += 30 # separación entre bloques de dientes
@@ -58,18 +61,20 @@ class LineasSobreDientes(QWidget):
         for i, diente in enumerate(self.imagen.dientes2):
             dist += arriba2[i][0]
             self.points.append(QPoint(dist, int(altura + 5.6*altura_rojo[i+8][0])))
+            self.points2.append(QPoint(dist, int(altura + 5.6*(altura_rojo[i+8][0] - altura_azul[i+8][0]))))
             wdiente = diente.width - arriba2[i][0] - arriba2[i][1]
             self.points.append(QPoint(dist + wdiente // 2, int(altura + 5.6*altura_rojo[i+8][1])))
+            self.points2.append(QPoint(dist + wdiente // 2, int(altura + 5.6*(altura_rojo[i+8][1] - altura_azul[i+8][1]))))
             dist += wdiente
-            self.points.append(QPoint(dist, int(altura +  5.6*altura_rojo[i+8][2])))
+            self.points.append(QPoint(dist, int(altura + 5.6*altura_rojo[i+8][2])))
+            self.points2.append(QPoint(dist, int(altura + 5.6*(altura_rojo[i+8][2] - altura_azul[i+8][2]))))
             dist += arriba2[i][1]
 
+        qp.setPen(QPen(Qt.blue, 2, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
+        qp.setRenderHint(QPainter.Antialiasing, True)
+        qp.drawPolyline(self.points2)
+        qp.setPen(QPen(Qt.red, 2, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
         qp.drawPolyline(self.points)
-
-        """qp.setPen(QPen(Qt.blue, 3))
-        for point in self.points:
-            qp.drawPoint(point)
-            """
 
     def minimumSizeHint(self):
         return QSize(1, 1)
@@ -158,6 +163,12 @@ class input3(QHBoxLayout):
                 widgetDientes.update()
             else:
                 self.w1.setText("")
+        elif tipo == 2 and es_numero(self.w1.text()):
+            if 0 < int(self.w1.text()) < 21:
+                altura_azul[int(ndiente)][0] = int(self.w1.text())
+                widgetDientes.update()
+            else:
+                self.w1.setText("")
 
     def textow2(self, ndiente, tipo, widgetDientes):
         if tipo == 1 and es_numero(self.w2.text()):
@@ -166,11 +177,23 @@ class input3(QHBoxLayout):
                 widgetDientes.update()
             else:
                 self.w2.setText("")
+        elif tipo == 2 and es_numero(self.w2.text()):
+            if 0 < int(self.w2.text()) < 21:
+                altura_azul[int(ndiente)][1] = int(self.w2.text())
+                widgetDientes.update()
+            else:
+                self.w2.setText("")
 
     def textow3(self, ndiente, tipo, widgetDientes):
         if tipo == 1 and es_numero(self.w3.text()):
             if -21 < int(self.w3.text()) < 21:
                 altura_rojo[int(ndiente)][2] = int(self.w3.text())
+                widgetDientes.update()
+            else:
+                self.w3.setText("")
+        elif tipo == 2 and es_numero(self.w3.text()):
+            if 0 < int(self.w3.text()) < 21:
+                altura_azul[int(ndiente)][2] = int(self.w3.text())
                 widgetDientes.update()
             else:
                 self.w3.setText("")
