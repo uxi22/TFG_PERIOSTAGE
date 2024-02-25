@@ -1,7 +1,7 @@
 import sys
 from PIL import Image
 from PySide6.QtCore import Qt, QRegularExpression, QRect, QSize, QPoint
-from PySide6.QtGui import QScreen, QRegularExpressionValidator, QImage, QPolygon, QBrush, QGradient, QColor
+from PySide6.QtGui import QScreen, QRegularExpressionValidator, QImage, QPolygon, QBrush, QColor
 from PySide6.QtWidgets import (
     QApplication,
     QLabel,
@@ -19,13 +19,13 @@ dientes = [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28]
 altura_rojo = [[0, 0, 0] for _ in range(16)]
 altura_azul = [[0, 0, 0] for _ in range(16)]
 
-style = "margin: 1px; border: 1px solid grey; border-radius: 3px;"
+style = "margin: 0.5px; border: 1px solid grey; border-radius: 3px;"
+
 
 class LineasSobreDientes(QWidget):
     def __init__(self, imagen, *a):
         super().__init__(*a)
         self.imagen = imagen  # imagen de los dientes con sus atributos
-
 
     def paintEvent(self, event):
         qp = QPainter(self)
@@ -303,25 +303,28 @@ class MainWindow(QMainWindow):
 
         for n in range(0, 3):
             col = Columna(str(n), 1, widgetDientes)
+            col.setSpacing(0)
             layoutCuadro1.addLayout(col)
 
         for n in range(3, 8):
             col = Columna(str(n), 0, widgetDientes)
+            col.setSpacing(0)
             layoutCuadro1.addLayout(col)
 
         layoutCuadro1.addSpacerItem(QSpacerItem(20, 100))
 
         for n in range(8, 13):
             col = Columna(str(n), 0, widgetDientes)
-
+            col.setSpacing(0)
             layoutCuadro1.addLayout(col)
 
         for n in range(13, 16):
             col = Columna(str(n), 1, widgetDientes)
+            col.setSpacing(0)
             layoutCuadro1.addLayout(col)
 
         layoutCuadro1.setContentsMargins(10, 5, 10, 10)
-        layoutCuadro1.setSpacing(0)
+        layoutCuadro1.setSpacing(5)
 
         # Dientes
         layoutDientes = QHBoxLayout()
