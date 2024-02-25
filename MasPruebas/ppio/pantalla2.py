@@ -14,6 +14,9 @@ from PySide6.QtGui import QPainter, QPen
 arriba1 = [[1, 4], [5, 6], [4, 8], [9, 8], [9, 8], [7, 7], [6, 8], [10, 6]]  # del 18 al 11
 arriba2 = [[7, 11], [6, 6], [7, 8], [8, 9], [8, 10], [7, 5], [5, 5], [2, 1]]  # del 21 al 28
 
+dientes = [18, 17 ,16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28]
+
+altura_rojo = [[0, 0, 0] for _ in range(16)]
 
 class Dientes(QWidget):
     def __init__(self, imagen, *a):
@@ -41,29 +44,30 @@ class Dientes(QWidget):
         dist = 5 # inicio de la imagen del primer diente
         for i, diente in enumerate(self.imagen.dientes1):
             dist += arriba1[i][0]
-            self.points.append(QPoint(dist, altura))  # inicio diente
+            self.points.append(QPoint(dist, int(altura + altura_rojo[i][0])))  # inicio diente
             wdiente = diente.width - arriba1[i][0] - arriba1[i][1]
-            self.points.append(QPoint(dist + round(wdiente/2), altura))  # punto medio del diente
+            self.points.append(QPoint(dist + wdiente // 2, int(altura + altura_rojo[i][1])))  # punto medio del diente
             dist += wdiente
-            self.points.append(QPoint(dist, altura))  # fin diente, ppio siguiente
+            self.points.append(QPoint(dist, int(altura + altura_rojo[i][2])))  # fin diente, ppio siguiente
             dist += arriba1[i][1]
 
         dist += 30 # separación entre bloques de dientes
 
         for i, diente in enumerate(self.imagen.dientes2):
             dist += arriba2[i][0]
-            self.points.append(QPoint(dist, altura))
+            self.points.append(QPoint(dist, int(altura + altura_rojo[i+8][0])))
             wdiente = diente.width - arriba2[i][0] - arriba2[i][1]
-            self.points.append(QPoint(dist + round(wdiente/2), altura))
+            self.points.append(QPoint(dist + wdiente // 2, int(altura + altura_rojo[i+8][1])))
             dist += wdiente
-            self.points.append(QPoint(dist, altura))
+            self.points.append(QPoint(dist, int(altura + altura_rojo[i+8][2])))
             dist += arriba2[i][1]
 
         qp.drawPolyline(self.points)
 
-        qp.setPen(QPen(Qt.blue, 3))
+        """qp.setPen(QPen(Qt.blue, 3))
         for point in self.points:
             qp.drawPoint(point)
+            """
 
     def minimumSizeHint(self):
         return QSize(1, 1)
@@ -100,26 +104,6 @@ class ImagenDiente(QImage):
         self.swap(imagen.toqimage())
 
 
-class DrawingWidget(QWidget):
-    def __init__(self, start_x, start_y, end_x, end_y):
-        print("hola ", start_x, start_y, end_x, end_y)
-        super().__init__()
-        self.start_x = start_x
-        self.start_y = start_y
-        self.end_x = end_x
-        self.end_y = end_y
-
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing)
-
-        pen = QPen(Qt.black, 2, Qt.SolidLine)
-        painter.setPen(pen)
-
-        print("Dibujando ", self.start_x, self.start_y, self.end_x, self.end_y)
-        painter.drawLine(self.start_x, self.start_y, self.end_x, self.end_y)
-
-
 class input0_3(QLineEdit):
     def __init__(self):
         super(input0_3, self).__init__()
@@ -142,24 +126,38 @@ class inputSiNo3(QHBoxLayout):
 
 
 class input3(QHBoxLayout):
-    def __init__(self, min, max):
+    def __init__(self, ndiente, tipo):
         super(input3, self).__init__()
 
-        # expresion que permite los numeros entre min y max
-        regex = QRegularExpression(f"[{min}-{max}]*")
-        validator = QRegularExpressionValidator(regex)
-
         self.w1 = QLineEdit()
-        self.w1.setValidator(validator)
         self.addWidget(self.w1)
-
+        self.w1.editingFinished.connect(self.textow1(ndiente, tipo))
+        #editingFinished
         self.w2 = QLineEdit()
-        self.w2.setValidator(validator)
         self.addWidget(self.w2)
+        self.w2.editingFinished.connect(self.textow2(ndiente, tipo))
 
         self.w3 = QLineEdit()
-        self.w3.setValidator(validator)
         self.addWidget(self.w3)
+        self.w3.editingFinished.connect(self.textow3(ndiente, tipo))
+
+    def textow1(self, ndiente, tipo):
+        print("cambiado w1 diente ",ndiente)
+        if tipo == 1 and self.w1.text().isdigit():
+            if -20 < int(self.w1.text()) < 20:
+                altura_rojo[int(ndiente)][0] = int(self.w1.text())
+
+    def textow2(self, ndiente, tipo):
+        print("cambiado w2 diente ",ndiente)
+        if tipo == 1 and self.w2.text().isdigit():
+            if -20 < int(self.w2.text()) < 20:
+                altura_rojo[int(ndiente)][1] = int(self.w2.text())
+
+    def textow3(self, ndiente, tipo):
+        print("cambiado w3 diente ",ndiente)
+        if tipo == 1 and self.w3.text().isdigit():
+            if -20 < int(self.w3.text()) < 20:
+                altura_rojo[int(ndiente)][2] = int(self.w3.text())
 
 
 class Columna(QVBoxLayout):
@@ -167,7 +165,7 @@ class Columna(QVBoxLayout):
         super(Columna, self).__init__()
         self
 
-        label = QLabel(numDiente)
+        label = QLabel(str(dientes[int(numDiente)]))
         label.setAlignment(Qt.AlignCenter)
         self.addWidget(label)
 
@@ -201,11 +199,11 @@ class Columna(QVBoxLayout):
         self.addLayout(supuracion)
 
         # MARGEN GINGIVAL
-        margenGingival = input3(-20, 20)
+        margenGingival = input3(numDiente, 1)
         self.addLayout(margenGingival)
 
         # PROFUNDIDAD DE SONDAJE
-        profSondaje = input3(0, 20)
+        profSondaje = input3(numDiente, 2)
         self.addLayout(profSondaje)
 
 
@@ -244,25 +242,25 @@ class MainWindow(QMainWindow):
 
         layoutCuadro1.setAlignment(Qt.AlignLeft)
 
-        for n in range(18, 15, -1):
+        for n in range(0, 3):
             col = Columna(str(n), 1)
             layoutCuadro1.addLayout(col)
 
-        for n in range(15, 10, -1):
+        for n in range(3, 8):
             col = Columna(str(n), 0)
             layoutCuadro1.addLayout(col)
 
         layoutCuadro1.addSpacerItem(QSpacerItem(20, 100))
 
-        for n in range(21, 26):
+        for n in range(8, 13):
             col = Columna(str(n), 0)
             layoutCuadro1.addLayout(col)
 
-        for n in range(26, 29):
+        for n in range(13, 16):
             col = Columna(str(n), 1)
             layoutCuadro1.addLayout(col)
 
-        layoutCuadro1.setContentsMargins(20, 20, 20, 20)
+        layoutCuadro1.setContentsMargins(10, 5, 10, 10)
         layoutCuadro1.setSpacing(0)
 
         # Dientes
