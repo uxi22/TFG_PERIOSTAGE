@@ -18,7 +18,8 @@ dientes = [18, 17 ,16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28]
 
 altura_rojo = [[0, 0, 0] for _ in range(16)]
 
-class Dientes(QWidget):
+
+class LineasSobreDientes(QWidget):
     def __init__(self, imagen, *a):
         super().__init__(*a)
         self.imagen = imagen # imagen de los dientes con sus atributos
@@ -38,7 +39,8 @@ class Dientes(QWidget):
             altura += 5.6
             qp.drawLine(0, altura, tam.width(), altura)
         # termina con la altura de la última línea
-        qp.setPen(QPen(Qt.red, 2))
+        qp.setPen(QPen(Qt.red, 2, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
+        qp.setRenderHint(QPainter.Antialiasing, True)
 
         self.points = QPointList()
         dist = 5 # inicio de la imagen del primer diente
@@ -125,45 +127,52 @@ class inputSiNo3(QHBoxLayout):
         self.addWidget(self.w3)
 
 
+def es_numero(texto):
+    if len(texto) == 0:
+        return False
+    if texto[0] in ('-', '+'):
+        return texto[1:].isdigit()
+    return texto.isdigit()
+
+
 class input3(QHBoxLayout):
-    def __init__(self, ndiente, tipo):
+    def __init__(self, ndiente, tipo, widgetDientes):
         super(input3, self).__init__()
 
         self.w1 = QLineEdit()
         self.addWidget(self.w1)
-        self.w1.editingFinished.connect(self.textow1(ndiente, tipo))
-        #editingFinished
+        self.w1.editingFinished.connect(lambda: self.textow1(ndiente, tipo, widgetDientes))
+
         self.w2 = QLineEdit()
         self.addWidget(self.w2)
-        self.w2.editingFinished.connect(self.textow2(ndiente, tipo))
+        self.w2.editingFinished.connect(lambda: self.textow2(ndiente, tipo, widgetDientes))
 
         self.w3 = QLineEdit()
         self.addWidget(self.w3)
-        self.w3.editingFinished.connect(self.textow3(ndiente, tipo))
+        self.w3.editingFinished.connect(lambda: self.textow3(ndiente, tipo, widgetDientes))
 
-    def textow1(self, ndiente, tipo):
-        print("cambiado w1 diente ",ndiente)
-        if tipo == 1 and self.w1.text().isdigit():
-            if -20 < int(self.w1.text()) < 20:
+    def textow1(self, ndiente, tipo, widgetDientes):
+        if tipo == 1 and es_numero(self.w1.text()):
+            if -21 < int(self.w1.text()) < 21:
                 altura_rojo[int(ndiente)][0] = int(self.w1.text())
+                widgetDientes.update()
 
-    def textow2(self, ndiente, tipo):
-        print("cambiado w2 diente ",ndiente)
-        if tipo == 1 and self.w2.text().isdigit():
-            if -20 < int(self.w2.text()) < 20:
+    def textow2(self, ndiente, tipo, widgetDientes):
+        if tipo == 1 and es_numero(self.w2.text()):
+            if -21 < int(self.w2.text()) < 21:
                 altura_rojo[int(ndiente)][1] = int(self.w2.text())
+                widgetDientes.update()
 
-    def textow3(self, ndiente, tipo):
-        print("cambiado w3 diente ",ndiente)
-        if tipo == 1 and self.w3.text().isdigit():
-            if -20 < int(self.w3.text()) < 20:
+    def textow3(self, ndiente, tipo, widgetDientes):
+        if tipo == 1 and es_numero(self.w3.text()):
+            if -21 < int(self.w3.text()) < 21:
                 altura_rojo[int(ndiente)][2] = int(self.w3.text())
+                widgetDientes.update()
 
 
 class Columna(QVBoxLayout):
-    def __init__(self, numDiente, defFurca):
+    def __init__(self, numDiente, defFurca, widgetDientes):
         super(Columna, self).__init__()
-        self
 
         label = QLabel(str(dientes[int(numDiente)]))
         label.setAlignment(Qt.AlignCenter)
@@ -199,11 +208,11 @@ class Columna(QVBoxLayout):
         self.addLayout(supuracion)
 
         # MARGEN GINGIVAL
-        margenGingival = input3(numDiente, 1)
+        margenGingival = input3(numDiente, 1, widgetDientes)
         self.addLayout(margenGingival)
 
         # PROFUNDIDAD DE SONDAJE
-        profSondaje = input3(numDiente, 2)
+        profSondaje = input3(numDiente, 2, widgetDientes)
         self.addLayout(profSondaje)
 
 
@@ -237,27 +246,31 @@ class MainWindow(QMainWindow):
             label.setAlignment(Qt.AlignRight)
             layoutEtiquetas.addWidget(label)
 
+        # Creamos antes la imagen de los dientes para poder pasar el objeto y actualizarlo
+        vestibular = ImagenDiente(18, 10, -1, 21, 29, 1)
+        widgetDientes = LineasSobreDientes(vestibular)
+
         # Input de datos
         layoutCuadro1.addLayout(layoutEtiquetas)
 
         layoutCuadro1.setAlignment(Qt.AlignLeft)
 
         for n in range(0, 3):
-            col = Columna(str(n), 1)
+            col = Columna(str(n), 1, widgetDientes)
             layoutCuadro1.addLayout(col)
 
         for n in range(3, 8):
-            col = Columna(str(n), 0)
+            col = Columna(str(n), 0, widgetDientes)
             layoutCuadro1.addLayout(col)
 
         layoutCuadro1.addSpacerItem(QSpacerItem(20, 100))
 
         for n in range(8, 13):
-            col = Columna(str(n), 0)
+            col = Columna(str(n), 0, widgetDientes)
             layoutCuadro1.addLayout(col)
 
         for n in range(13, 16):
-            col = Columna(str(n), 1)
+            col = Columna(str(n), 1, widgetDientes)
             layoutCuadro1.addLayout(col)
 
         layoutCuadro1.setContentsMargins(10, 5, 10, 10)
@@ -266,19 +279,13 @@ class MainWindow(QMainWindow):
         # Dientes
         layoutDientes = QHBoxLayout()
         layoutDientes.addWidget(QLabel("Vestibular"))
-
-        vestibular = ImagenDiente(18, 10, -1, 21, 29, 1)
-
-        widgetDientes = Dientes(vestibular)
         layoutDientes.addWidget(widgetDientes)
         layoutDientes.setAlignment(Qt.AlignCenter)
 
         total = QVBoxLayout()
         total.addLayout(tit)
-        #total.addStretch()
         total.addLayout(layoutCuadro1)
         total.addLayout(layoutDientes)
-
 
         widget = QWidget()
         widget.setLayout(total)
