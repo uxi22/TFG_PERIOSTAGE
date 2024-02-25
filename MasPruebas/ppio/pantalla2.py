@@ -46,22 +46,22 @@ class LineasSobreDientes(QWidget):
         dist = 5 # inicio de la imagen del primer diente
         for i, diente in enumerate(self.imagen.dientes1):
             dist += arriba1[i][0]
-            self.points.append(QPoint(dist, int(altura + altura_rojo[i][0])))  # inicio diente
+            self.points.append(QPoint(dist, int(altura +  5.6*altura_rojo[i][0])))  # inicio diente
             wdiente = diente.width - arriba1[i][0] - arriba1[i][1]
-            self.points.append(QPoint(dist + wdiente // 2, int(altura + altura_rojo[i][1])))  # punto medio del diente
+            self.points.append(QPoint(dist + wdiente // 2, int(altura +  5.6*altura_rojo[i][1])))  # punto medio del diente
             dist += wdiente
-            self.points.append(QPoint(dist, int(altura + altura_rojo[i][2])))  # fin diente, ppio siguiente
+            self.points.append(QPoint(dist, int(altura +  5.6*altura_rojo[i][2])))  # fin diente, ppio siguiente
             dist += arriba1[i][1]
 
         dist += 30 # separación entre bloques de dientes
 
         for i, diente in enumerate(self.imagen.dientes2):
             dist += arriba2[i][0]
-            self.points.append(QPoint(dist, int(altura + altura_rojo[i+8][0])))
+            self.points.append(QPoint(dist, int(altura + 5.6*altura_rojo[i+8][0])))
             wdiente = diente.width - arriba2[i][0] - arriba2[i][1]
-            self.points.append(QPoint(dist + wdiente // 2, int(altura + altura_rojo[i+8][1])))
+            self.points.append(QPoint(dist + wdiente // 2, int(altura + 5.6*altura_rojo[i+8][1])))
             dist += wdiente
-            self.points.append(QPoint(dist, int(altura + altura_rojo[i+8][2])))
+            self.points.append(QPoint(dist, int(altura +  5.6*altura_rojo[i+8][2])))
             dist += arriba2[i][1]
 
         qp.drawPolyline(self.points)
@@ -156,18 +156,24 @@ class input3(QHBoxLayout):
             if -21 < int(self.w1.text()) < 21:
                 altura_rojo[int(ndiente)][0] = int(self.w1.text())
                 widgetDientes.update()
+            else:
+                self.w1.setText("")
 
     def textow2(self, ndiente, tipo, widgetDientes):
         if tipo == 1 and es_numero(self.w2.text()):
             if -21 < int(self.w2.text()) < 21:
                 altura_rojo[int(ndiente)][1] = int(self.w2.text())
                 widgetDientes.update()
+            else:
+                self.w2.setText("")
 
     def textow3(self, ndiente, tipo, widgetDientes):
         if tipo == 1 and es_numero(self.w3.text()):
             if -21 < int(self.w3.text()) < 21:
                 altura_rojo[int(ndiente)][2] = int(self.w3.text())
                 widgetDientes.update()
+            else:
+                self.w3.setText("")
 
 
 class Columna(QVBoxLayout):
