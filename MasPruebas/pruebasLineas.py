@@ -28,97 +28,127 @@ class LineasSobreDientes(QWidget):
         self.imagen = imagen  # imagen de los dientes con sus atributos
         self.dientes_desactivados = []
 
+        # inicializamos las listas de los puntos de las líneas
+        self.points = QPointList()
+        self.points2 = QPointList()
+
+        dist = 5
+        self.altura = 90
+        # Valores iniciales de los
+        for i, diente in enumerate(self.imagen.dientes1):
+            dist += arriba1[i][0]
+            self.points.append(QPoint(dist, int(self.altura)))  # inicio diente
+            self.points2.append(QPoint(dist, int(self.altura)))
+            wdiente = diente.width - arriba1[i][0] - arriba1[i][1]
+            self.points.append(QPoint(dist + wdiente // 2, int(self.altura)))
+            self.points2.append(QPoint(dist + wdiente // 2, int(self.altura)))
+            dist += wdiente
+            self.points.append(QPoint(dist, int(self.altura)))  # fin diente, ppio siguiente
+            self.points2.append(QPoint(dist, int(self.altura)))
+            dist += arriba1[i][1]
+        dist += 30
+
+        for i, diente in enumerate(self.imagen.dientes2):
+            dist += arriba2[i][0]
+            self.points.append(QPoint(dist, int(self.altura)))
+            self.points2.append(QPoint(dist, int(self.altura)))
+            wdiente = diente.width - arriba2[i][0] - arriba2[i][1]
+            self.points.append(QPoint(dist + wdiente // 2, int(self.altura)))
+            self.points2.append(QPoint(dist + wdiente // 2, int(self.altura)))
+            dist += wdiente
+            self.points.append(QPoint(dist, int(self.altura)))
+            self.points2.append(QPoint(dist, int(self.altura)))
+            dist += arriba2[i][1]
+
     def paintEvent(self, event):
         qp = QPainter(self)
-        imagen = QImage(self.imagen)  # imagen de los dientes
+
+        # Imagen de los dientes
+        imagen = QImage(self.imagen)
         tam = QRect(0, 0, imagen.width(), imagen.height())
         self.setMinimumSize(imagen.width(), imagen.height())
-        qp.drawImage(tam, imagen)  # dibujar una línea
+        qp.drawImage(tam, imagen)
 
         pen = qp.pen()
         pen.setWidth(1.5)
         qp.setPen(pen)
-        altura = -5.6
+        altura_ini = -5.6
+
+        # Dibujamos las líneas negras horizontales
         for i in range(1, 18):
-            altura += 5.6
-            qp.drawLine(0, altura, tam.width(), altura)
-        # termina con la altura de la última línea
+            altura_ini += 5.6
+            qp.drawLine(0, altura_ini, tam.width(), altura_ini)
 
-        self.points = QPointList()
-        self.points2 = QPointList()
-
-        dist = 5  # inicio de la imagen del primer diente
-        for i, diente in enumerate(self.imagen.dientes1):
-            dist += arriba1[i][0]
-            self.points.append(QPoint(dist, int(altura + 5.6*altura_rojo[i][0])))  # inicio diente
-            self.points2.append(QPoint(dist, int(altura + 5.6*(altura_rojo[i][0] - altura_azul[i][0]))))
-            wdiente = diente.width - arriba1[i][0] - arriba1[i][1]
-            self.points.append(QPoint(dist + wdiente // 2, int(altura + 5.6*altura_rojo[i][1])))
-            self.points2.append(QPoint(dist + wdiente // 2, int(altura + 5.6*(altura_rojo[i][1] - altura_azul[i][1]))))
-            dist += wdiente
-            self.points.append(QPoint(dist, int(altura + 5.6*altura_rojo[i][2])))  # fin diente, ppio siguiente
-            self.points2.append(QPoint(dist, int(altura + 5.6*(altura_rojo[i][2] - altura_azul[i][2]))))
-            dist += arriba1[i][1]
-
-        dist += 30  # separación entre bloques de dientes
-
-        for i, diente in enumerate(self.imagen.dientes2):
-            dist += arriba2[i][0]
-            self.points.append(QPoint(dist, int(altura + 5.6*altura_rojo[i+8][0])))
-            self.points2.append(QPoint(dist, int(altura + 5.6*(altura_rojo[i+8][0] - altura_azul[i+8][0]))))
-            wdiente = diente.width - arriba2[i][0] - arriba2[i][1]
-            self.points.append(QPoint(dist + wdiente // 2, int(altura + 5.6*altura_rojo[i+8][1])))
-            self.points2.append(QPoint(dist + wdiente // 2, int(altura + 5.6*(altura_rojo[i+8][1] -
-                                                                              altura_azul[i+8][1]))))
-            dist += wdiente
-            self.points.append(QPoint(dist, int(altura + 5.6*altura_rojo[i+8][2])))
-            self.points2.append(QPoint(dist, int(altura + 5.6*(altura_rojo[i+8][2] - altura_azul[i+8][2]))))
-            dist += arriba2[i][1]
-
-        qp.setPen(QPen(Qt.blue, 2, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
         qp.setRenderHint(QPainter.Antialiasing, True)
-        qp.drawPolyline(self.points2)
-        qp.setPen(QPen(Qt.red, 2, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
-        qp.drawPolyline(self.points)
 
         poligono = QPolygon()
-        for punto in self.points:
-            poligono.append(punto)
-        for punto in reversed(self.points2):
-            poligono.append(punto)
-
         brush = QBrush(QColor(50, 0, 100, 100))
-        qp.setPen(QPen(Qt.NoPen))
         qp.setBrush(brush)
-        qp.drawPolygon(poligono)
 
-        if len(self.dientes_desactivados) > 0:
-            qp.setPen(QPen(Qt.black, 2, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
-            for i in self.dientes_desactivados:
-                if i < 8:
-                    # borrar el rectangulo entre el final del diente anterior y el ppio del siguiente
-                    if i != 0 and i != 7:
-                        qp.eraseRect(self.points[(i-1)*3+2].x(), 0, self.points[(i+1)*3].x()-self.points[(i-1)*3+2].x(), self.height())
-                    elif i == 0:
-                        qp.eraseRect(0, 0, self.points[3].x(), self.height())
-                    else:
-                        qp.eraseRect(self.points[(i-1)*3+2].x(), 0, self.width() - self.points[(i-1)*3+2].x(), self.height())
+        auxpuntos = []
 
-                    # dibujar una línea para tachar el diente
-                    punto_ini = QPoint(self.points[i*3+2].x(), 0)
-                    punto_fin = QPoint(self.points[i*3].x(), self.height())
-                    qp.drawLine(punto_ini, punto_fin)
-                else:
-                    qp.drawLine(self.points2[(i-8)*3], self.points2[(i-8)*3+2])
+        for i in range(16):
+            if i not in self.dientes_desactivados:
+                qp.setPen(QPen(Qt.blue, 2, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
+                auxpuntos.append(self.points2[i * 3])
+                auxpuntos.append(self.points2[i * 3 + 1])
+                auxpuntos.append(self.points2[i * 3 + 2])
+                qp.drawPolyline(auxpuntos)  # línea azul
+                poligono.append(auxpuntos)
+                qp.setPen(QPen(Qt.red, 2, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
+                auxpuntos.clear()
+                auxpuntos.append(self.points[i * 3])
+                auxpuntos.append(self.points[i * 3 + 1])
+                auxpuntos.append(self.points[i * 3 + 2])
+                qp.drawPolyline(auxpuntos)  # línea roja
+                poligono.append(list(reversed(auxpuntos)))
+                qp.setPen(QPen(Qt.NoPen))
+                qp.drawPolygon(poligono)
+                if (i + 1 not in self.dientes_desactivados) and i != 7 and i != 15:
+                    poligono.clear()
+                    auxpuntos.clear()
+                    qp.setPen(QPen(Qt.blue, 2, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
+                    auxpuntos.append(self.points2[i * 3 + 2])
+                    auxpuntos.append(self.points2[i * 3 + 3])
+                    qp.drawPolyline(auxpuntos)  # línea azul
+                    poligono.append(auxpuntos)
+                    qp.setPen(QPen(Qt.red, 2, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
+                    auxpuntos.clear()
+                    auxpuntos.append(self.points[i * 3 + 2])
+                    auxpuntos.append(self.points[i * 3 + 3])
+                    qp.drawPolyline(auxpuntos)  # línea roja
+                    poligono.append(list(reversed(auxpuntos)))
+                    qp.setPen(QPen(Qt.NoPen))
+                    qp.drawPolygon(poligono)
+                poligono.clear()
+                auxpuntos.clear()
+            else:
+                # dibujar una línea para tachar el diente
+                punto_ini = QPoint(self.points[i * 3 + 2].x(), 0)
+                punto_fin = QPoint(self.points[i * 3].x(), self.height())
+                qp.drawLine(punto_ini, punto_fin)
 
     def minimumSizeHint(self):
         return QSize(1, 1)
 
-    def desactivar_diente(self, num):
+    def desactivar_activar_diente(self, num):
         if num not in self.dientes_desactivados:
             self.dientes_desactivados.append(num)
         else:
             self.dientes_desactivados.remove(num)
+
+    def actualizar_alturas(self, numeroDiente, tipo, indice):
+        if tipo == 1:  # Margen gingival
+            aux = self.points[numeroDiente * 3 + indice]
+            aux.setY(int(self.altura + 5.6 * altura_rojo[numeroDiente][indice]))
+            self.points[numeroDiente * 3 + indice] = aux
+            aux = self.points2[numeroDiente * 3 + indice]
+            aux.setY(int(self.points[numeroDiente * 3 + indice].y() - 5.6 * altura_azul[numeroDiente][indice]))
+            self.points2[numeroDiente * 3 + indice] = aux
+        elif tipo == 2:  # Profundidad de sondaje
+            aux = self.points[numeroDiente * 3 + indice]
+            aux.setY(int(self.altura + 5.6 * (altura_rojo[numeroDiente][indice] - altura_azul[numeroDiente][indice])))
+            self.points2[numeroDiente * 3 + indice] = aux
 
 
 class ImagenDiente(QImage):
@@ -130,13 +160,13 @@ class ImagenDiente(QImage):
         self.dientes1 = []
         # primer sector
         for i in range(pos1, pos2, d1):
-            self.dientes1.append(Image.open(f"../DIENTES/periodontograma-{i}.png"))
+            self.dientes1.append(Image.open(f"./DIENTES/periodontograma-{i}.png"))
             width += self.dientes1[-1].width
 
         # segundo sector
         self.dientes2 = []
         for i in range(pos3, pos4, d2):
-            self.dientes2.append(Image.open(f"../DIENTES/periodontograma-{i}.png"))
+            self.dientes2.append(Image.open(f"./DIENTES/periodontograma-{i}.png"))
             width += self.dientes2[-1].width
 
         imagen = Image.new('RGB', (width + 40, 156), 'white')
@@ -232,15 +262,17 @@ class input3(QHBoxLayout):
         self.w3.editingFinished.connect(lambda: self.texto(ndiente, tipo, widgetDientes, self.w3, 2))
 
     def texto(self, ndiente, tipo, widgetDientes, inpt, num):
-        if tipo == 1 and es_numero(self.w1.text()):
+        if tipo == 1 and es_numero(self.w1.text()):  # Margen gingival
             if -21 < int(inpt.text()) < 21:
                 altura_rojo[int(ndiente)][num] = int(inpt.text())
+                widgetDientes.actualizar_alturas(int(ndiente), tipo, num)
                 widgetDientes.update()
             else:
                 inpt.setText("")
         elif tipo == 2 and es_numero(inpt.text()):
             if 0 < int(inpt.text()) < 21:
                 altura_azul[int(ndiente)][num] = int(inpt.text())
+                widgetDientes.actualizar_alturas(int(ndiente), tipo, num)
                 widgetDientes.update()
             else:
                 inpt.setText("")
@@ -250,11 +282,11 @@ class Columna(QVBoxLayout):
     def __init__(self, numDiente, defFurca, widgetDientes):
         super(Columna, self).__init__()
 
-        numeroDiente = QPushButton(str(dientes[int(numDiente)]))
-        numeroDiente.setCheckable(True)
-        numeroDiente.setStyleSheet(style + "background-color: #BEBEBE; font-weight: bold; font-size: 12px;")
-        numeroDiente.clicked.connect(lambda: self.desactivar_diente(numeroDiente, numDiente, widgetDientes))
-        self.addWidget(numeroDiente)
+        botonNumeroDiente = QPushButton(str(dientes[int(numDiente)]))
+        botonNumeroDiente.setCheckable(True)
+        botonNumeroDiente.setStyleSheet(style + "background-color: #BEBEBE; font-weight: bold; font-size: 12px;")
+        botonNumeroDiente.clicked.connect(lambda: self.desactivar_diente(botonNumeroDiente, numDiente, widgetDientes))
+        self.addWidget(botonNumeroDiente)
 
         # MOVILIDAD
         movilidad = input0_3()
@@ -295,18 +327,17 @@ class Columna(QVBoxLayout):
         profSondaje = input3(numDiente, 2, widgetDientes)
         self.addLayout(profSondaje)
 
+
     def desactivar_diente(self, boton, numDiente, widgetDientes):
-        if boton.isChecked():
-            # boton.setStyleSheet(style + "background-color: #BEBEBE; font-weight: bold; font-size: 12px;")
-            altura_rojo[int(numDiente)] = [0, 0, 0]
-            altura_azul[int(numDiente)] = [0, 0, 0]
-            widgetDientes.desactivar_diente(int(numDiente))
-            widgetDientes.update()
+        widgetDientes.desactivar_activar_diente(int(numDiente))
+        widgetDientes.update()
+        """if boton.isChecked():
+            self.activado = False
+            self.update()
         else:
-            # boton.setStyleSheet(style + "background-color: #FFD700; font-weight: bold; font-size: 12px;")
-            # boton.setChecked(True)
-            widgetDientes.desactivar_diente(int(numDiente))
-            widgetDientes.update()
+            self.activado = True
+            self.update()"""
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -336,6 +367,7 @@ class MainWindow(QMainWindow):
         for n in etiquetas:
             label = QLabel(n)
             label.setAlignment(Qt.AlignRight)
+            # label.setFixedWidth(90)
             layoutEtiquetas.addWidget(label)
 
         # Creamos antes la imagen de los dientes para poder pasar el objeto y actualizarlo
