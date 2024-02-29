@@ -21,16 +21,19 @@ altura_azul = [[0, 0, 0] for _ in range(16)]
 
 style = "margin: 0.5px; border: 1px solid grey; border-radius: 3px;"
 
+implantes = []
+
 
 class LineasSobreDientes(QWidget):
-    def __init__(self, imagen, *a):
+    def __init__(self, *a):
         super().__init__(*a)
-        self.imagen = imagen  # imagen de los dientes con sus atributos
-        self.dientes_desactivados = []
+        self.imagen = ImagenDiente(18, 10, -1, 21, 29, 1)  # imagen de los dientes con sus atributos
 
         # inicializamos las listas de los puntos de las líneas
         self.points = QPointList()
         self.points2 = QPointList()
+
+        self.dientes_desactivados = []
 
         dist = 5
         self.altura = 90
@@ -132,6 +135,9 @@ class LineasSobreDientes(QWidget):
     def minimumSizeHint(self):
         return QSize(1, 1)
 
+    def actualizar_imagen(self):
+        self.imagen = ImagenDiente(18, 10, -1, 21, 29, 1)
+
     def desactivar_activar_diente(self, num):
         if num not in self.dientes_desactivados:
             self.dientes_desactivados.append(num)
@@ -161,13 +167,19 @@ class ImagenDiente(QImage):
         self.dientes1 = []
         # primer sector
         for i in range(pos1, pos2, d1):
-            self.dientes1.append(Image.open(f"./DIENTES/periodontograma-{i}.png"))
+            if i in implantes:
+                self.dientes1.append(Image.open(f"./DIENTES/periodontograma-i{i}.png"))
+            else:
+                self.dientes1.append(Image.open(f"./DIENTES/periodontograma-{i}.png"))
             width += self.dientes1[-1].width
 
         # segundo sector
         self.dientes2 = []
         for i in range(pos3, pos4, d2):
-            self.dientes2.append(Image.open(f"./DIENTES/periodontograma-{i}.png"))
+            if i in implantes:
+                self.dientes2.append(Image.open(f"./DIENTES/perdiodontograma-i{i}.png"))
+            else:
+                self.dientes2.append(Image.open(f"./DIENTES/periodontograma-{i}.png"))
             width += self.dientes2[-1].width
 
         imagen = Image.new('RGB', (width + 40, 156), 'white')
@@ -297,7 +309,7 @@ class Columna(QVBoxLayout):
         boton = QPushButton("")
         boton.setCheckable(True)
         boton.setStyleSheet("background-color: #BEBEBE;" + style)
-        boton.clicked.connect(lambda: cambiar_color(boton, "#333333"))
+        boton.clicked.connect(lambda: self.diente_implante(numDiente, boton, widgetDientes))
         self.addWidget(boton)
 
         # DEFECTO DE FURCA
@@ -327,6 +339,16 @@ class Columna(QVBoxLayout):
         # PROFUNDIDAD DE SONDAJE
         profSondaje = input3(numDiente, 2, widgetDientes)
         self.addLayout(profSondaje)
+
+    def diente_implante(self, numDiente, boton, widgetDientes):
+        cambiar_color(boton, "#333333")
+        if boton.isChecked():
+            implantes.append(dientes[int(numDiente)])
+        else:
+            implantes.remove(dientes[int(numDiente)])
+        widgetDientes.actualizar_imagen()
+        widgetDientes.update()
+
 
 
     def desactivar_diente(self, boton, numDiente, widgetDientes):
@@ -372,8 +394,7 @@ class MainWindow(QMainWindow):
             layoutEtiquetas.addWidget(label)
 
         # Creamos antes la imagen de los dientes para poder pasar el objeto y actualizarlo
-        vestibular = ImagenDiente(18, 10, -1, 21, 29, 1)
-        widgetDientes = LineasSobreDientes(vestibular)
+        widgetDientes = LineasSobreDientes()
 
         # Input de datos
         layoutCuadro1.addLayout(layoutEtiquetas)
