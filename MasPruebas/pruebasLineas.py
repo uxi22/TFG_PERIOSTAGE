@@ -126,6 +126,7 @@ class LineasSobreDientes(QWidget):
                 # dibujar una línea para tachar el diente
                 punto_ini = QPoint(self.points[i * 3 + 2].x(), 0)
                 punto_fin = QPoint(self.points[i * 3].x(), self.height())
+                qp.setPen(QPen(Qt.black, 2, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
                 qp.drawLine(punto_ini, punto_fin)
 
     def minimumSizeHint(self):
