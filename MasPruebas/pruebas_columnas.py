@@ -14,6 +14,8 @@ from PySide6.QtGui import QPainter, QPen
 arriba1 = [[1, 5], [5, 6], [4, 8], [9, 8], [9, 8], [7, 7], [6, 8], [10, 6]]  # del 18 al 11
 arriba2 = [[7, 11], [6, 6], [7, 8], [8, 9], [8, 10], [7, 5], [5, 5], [2, 1]]  # del 21 al 28
 
+triangulos_arriba = [[58, 25], [62, 24], [67, 21], [64, 28], [63, 27], [58, 25]]
+
 dientes = [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28]
 
 altura_rojo = [[0, 0, 0] for _ in range(16)]
@@ -32,17 +34,23 @@ class LineasSobreDientes(QWidget):
         # inicializamos las listas de los puntos de las líneas
         self.points = QPointList()
         self.points2 = QPointList()
+        self.puntos_furca = QPointList()
 
         self.dientes_desactivados = []
+        self.dientes_furca = {}
+        self.furcas = [18, 17, 16, 26, 27, 28]
 
         dist = 5
         self.altura = 90
-        # Valores iniciales de los
-        for i, diente in enumerate(self.imagen.dientes1):
+        # Valores iniciales de los puntos de los dientes
+        for i, diente_imagen in enumerate(self.imagen.dientes1):
+            if dientes[i] in self.furcas:
+                self.puntos_furca.append(QPoint(dist + triangulos_arriba[self.furcas.index(dientes[i])][1],
+                                                triangulos_arriba[self.furcas.index(dientes[i])][0]))
             dist += arriba1[i][0]
             self.points.append(QPoint(dist, int(self.altura)))  # inicio diente
             self.points2.append(QPoint(dist, int(self.altura)))
-            wdiente = diente.width - arriba1[i][0] - arriba1[i][1]
+            wdiente = diente_imagen.width - arriba1[i][0] - arriba1[i][1]
             self.points.append(QPoint(dist + wdiente // 2, int(self.altura)))
             self.points2.append(QPoint(dist + wdiente // 2, int(self.altura)))
             dist += wdiente
@@ -51,11 +59,14 @@ class LineasSobreDientes(QWidget):
             dist += arriba1[i][1]
         dist += 30
 
-        for i, diente in enumerate(self.imagen.dientes2):
+        for i, diente_imagen in enumerate(self.imagen.dientes2):
+            if dientes[i+8] in self.furcas:
+                self.puntos_furca.append(QPoint(dist + triangulos_arriba[self.furcas.index(dientes[i+8])][1],
+                                                triangulos_arriba[self.furcas.index(dientes[i+8])][0]))
             dist += arriba2[i][0]
             self.points.append(QPoint(dist, int(self.altura)))
             self.points2.append(QPoint(dist, int(self.altura)))
-            wdiente = diente.width - arriba2[i][0] - arriba2[i][1]
+            wdiente = diente_imagen.width - arriba2[i][0] - arriba2[i][1]
             self.points.append(QPoint(dist + wdiente // 2, int(self.altura)))
             self.points2.append(QPoint(dist + wdiente // 2, int(self.altura)))
             dist += wdiente
@@ -123,8 +134,27 @@ class LineasSobreDientes(QWidget):
                     poligono.append(list(reversed(auxpuntos)))
                     qp.setPen(QPen(Qt.NoPen))
                     qp.drawPolygon(poligono)
+                qp.setBrush(Qt.NoBrush)
                 poligono.clear()
                 auxpuntos.clear()
+
+                # defectos de furca
+                if len(self.dientes_furca) > 0 and dientes[i] in self.dientes_furca.keys():
+                    valor = self.dientes_furca[dientes[i]]
+                    qp.setPen(QPen(Qt.darkRed, 2, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
+                    auxpuntos = [self.puntos_furca[self.furcas.index(dientes[i])].x(),
+                                 self.puntos_furca[self.furcas.index(dientes[i])].y()]
+                    (poligono << QPoint(auxpuntos[0]-10, auxpuntos[1]) <<
+                     QPoint(auxpuntos[0], auxpuntos[1] + 15) << QPoint(auxpuntos[0]+10, auxpuntos[1]))
+                    if valor == "1":
+                        qp.drawPolyline(poligono)  # triángulo sin cerrar y sin rellenar
+                    else:
+                        if valor == "3":
+                            qp.setBrush(QBrush(Qt.darkRed, Qt.SolidPattern))
+                        qp.drawPolygon(poligono)
+                    poligono.clear()
+                    auxpuntos.clear()
+
             else:
                 # dibujar una línea para tachar el diente
                 punto_ini = QPoint(self.points[i * 3 + 2].x(), 0)
@@ -156,6 +186,18 @@ class LineasSobreDientes(QWidget):
             aux = self.points[numeroDiente * 3 + indice]
             aux.setY(int(self.altura + 5.6 * (altura_rojo[numeroDiente][indice] - altura_azul[numeroDiente][indice])))
             self.points2[numeroDiente * 3 + indice] = aux
+
+    def def_furca(self, numDiente, valor, txt=''):
+        if valor == -1:
+            if numDiente in self.dientes_furca.keys():
+                del self.dientes_furca[numDiente]
+            else:
+                self.dientes_furca[numDiente] = int(txt)
+        elif valor != 0:
+            self.dientes_furca[numDiente] = valor
+        elif numDiente in self.dientes_furca.keys():  # si val = 0 y diente en dientes_Furca
+            del self.dientes_furca[numDiente]
+        self.update()
 
 
 class ImagenDiente(QImage):
@@ -197,15 +239,19 @@ class ImagenDiente(QImage):
 
 # Input movilidad y defecto de furca
 class input0_3(QLineEdit):
-    def __init__(self):
+    def __init__(self, furca=False, widgetDientes=None, numDiente=0):
         super(input0_3, self).__init__()
 
         regex = QRegularExpression("[0-3]")  # Expresión regular que permite solo números
         validator = QRegularExpressionValidator(regex)
         self.setValidator(validator)  # Aplicar la validación al QLineEdit
-        # self.setMaxLength(1) # ya lo hace automaticamente con la expresión regular
         self.setAlignment(Qt.AlignCenter)
+        if furca:
+            self.editingFinished.connect(lambda: self.texto_furca(widgetDientes, numDiente))
         self.setStyleSheet(style)
+
+    def texto_furca(self, widgetDientes, numDiente):
+        widgetDientes.def_furca(numDiente, self.text())
 
 
 colorBoton = "background-color: #BEBEBE;"
@@ -305,19 +351,22 @@ class Columna(QVBoxLayout):
         movilidad = input0_3()
         self.addWidget(movilidad)
 
+        # DEFECTO DE FURCA
+        if defFurca == 1:
+            defFurca = input0_3(True, widgetDientes, dientes[int(numDiente)])
+        else:
+            defFurca = QLabel("")
+            defFurca.setFixedSize(76, 22)
+
         # IMPLANTE
         boton = QPushButton("")
         boton.setCheckable(True)
         boton.setStyleSheet("background-color: #BEBEBE;" + style)
-        boton.clicked.connect(lambda: self.diente_implante(numDiente, boton, widgetDientes))
+        boton.clicked.connect(lambda: self.diente_implante(numDiente, boton, widgetDientes, defFurca))
         self.addWidget(boton)
 
-        # DEFECTO DE FURCA
-        if defFurca == 1:
-            defFurca = input0_3()
-        else:
-            defFurca = QLabel("")
-            defFurca.setFixedSize(76, 22)
+        # Añadimos el botón de implante antes del defecto de furca
+
         self.addWidget(defFurca)
 
         # SANGRADO AL SONDAJE
@@ -340,26 +389,19 @@ class Columna(QVBoxLayout):
         profSondaje = input3(numDiente, 2, widgetDientes)
         self.addLayout(profSondaje)
 
-    def diente_implante(self, numDiente, boton, widgetDientes):
+    def diente_implante(self, numDiente, boton, widgetDientes, deffurca):
         cambiar_color(boton, "#333333")
         if boton.isChecked():
             implantes.append(dientes[int(numDiente)])
         else:
             implantes.remove(dientes[int(numDiente)])
         widgetDientes.actualizar_imagen()
+        widgetDientes.def_furca(dientes[int(numDiente)], -1, deffurca.text())
         widgetDientes.update()
-
-
 
     def desactivar_diente(self, boton, numDiente, widgetDientes):
         widgetDientes.desactivar_activar_diente(int(numDiente))
         widgetDientes.update()
-        """if boton.isChecked():
-            self.activado = False
-            self.update()
-        else:
-            self.activado = True
-            self.update()"""
 
 
 class MainWindow(QMainWindow):
