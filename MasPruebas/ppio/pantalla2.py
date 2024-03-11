@@ -103,6 +103,7 @@ class LineasSobreDientes(QWidget):
 
         for i in range(16):
             if i not in self.dientes_desactivados:
+                qp.setBrush(brush)
                 qp.setPen(QPen(Qt.blue, 2, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
                 auxpuntos.append(self.points2[i * 3])
                 auxpuntos.append(self.points2[i * 3 + 1])
@@ -210,18 +211,18 @@ class ImagenDiente(QImage):
         # primer sector
         for i in range(pos1, pos2, d1):
             if i in implantes:
-                self.dientes1.append(Image.open(f"./DIENTES/periodontograma-i{i}.png"))
+                self.dientes1.append(Image.open(f"../DIENTES/periodontograma-i{i}.png"))
             else:
-                self.dientes1.append(Image.open(f"./DIENTES/periodontograma-{i}.png"))
+                self.dientes1.append(Image.open(f"../DIENTES/periodontograma-{i}.png"))
             width += self.dientes1[-1].width
 
         # segundo sector
         self.dientes2 = []
         for i in range(pos3, pos4, d2):
             if i in implantes:
-                self.dientes2.append(Image.open(f"./DIENTES/perdiodontograma-i{i}.png"))
+                self.dientes2.append(Image.open(f"/DIENTES/periodontograma-i{i}.png"))
             else:
-                self.dientes2.append(Image.open(f"./DIENTES/periodontograma-{i}.png"))
+                self.dientes2.append(Image.open(f"../DIENTES/periodontograma-{i}.png"))
             width += self.dientes2[-1].width
 
         imagen = Image.new('RGB', (width + 40, 156), 'white')
