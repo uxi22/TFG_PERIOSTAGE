@@ -239,19 +239,15 @@ class ImagenDiente(QImage):
 
 # Input movilidad y defecto de furca
 class Input03(QLineEdit):
-    def __init__(self, desactivado, furca=False, widgetDientes=None, numDiente=0):
+    def __init__(self, furca=False, widgetDientes=None, numDiente=0):
         super(Input03, self).__init__()
-
-        if desactivado:
-            self.setReadOnly(True)
-        else:
-            regex = QRegularExpression("[0-3]")  # Expresión regular que permite solo números
-            validator = QRegularExpressionValidator(regex)
-            self.setValidator(validator)  # Aplicar la validación al QLineEdit
-            self.setAlignment(Qt.AlignCenter)
-            self.setPlaceholderText("0")
-            if furca:
-                self.editingFinished.connect(lambda: self.texto_furca(widgetDientes, numDiente))
+        regex = QRegularExpression("[0-3]")  # Expresión regular que permite solo números
+        validator = QRegularExpressionValidator(regex)
+        self.setValidator(validator)  # Aplicar la validación al QLineEdit
+        self.setAlignment(Qt.AlignCenter)
+        self.setPlaceholderText("0")
+        if furca:
+            self.editingFinished.connect(lambda: self.texto_furca(widgetDientes, numDiente))
         self.setStyleSheet("QLineEdit { " + style + "font-size: 10px; } QLineEdit:focus { border: 1px solid #C3C3C3; }")
 
     def texto_furca(self, widgetDientes, numDiente):
@@ -344,7 +340,7 @@ class Input3(QHBoxLayout):
                 widgetDientes.update()
             else:
                 inpt.setText("")
-        elif tipo == 2 and es_numero(inpt.text()):  # Porfundidad de sondaje
+        elif tipo == 2 and es_numero(inpt.text()):  # Profundidad de sondaje
             if 0 < int(inpt.text()) < 21:
                 altura_azul[int(ndiente)][num] = int(inpt.text())
                 widgetDientes.actualizar_alturas(int(ndiente), tipo, num)
@@ -354,10 +350,8 @@ class Input3(QHBoxLayout):
 
 
 class Columna(QVBoxLayout):
-    def __init__(self, numDiente, defFurca, widgetDientes, desactivado=False):
+    def __init__(self, numDiente, defFurca, widgetDientes):
         super(Columna, self).__init__()
-
-        self.desactivado = desactivado
 
         botonNumeroDiente = QPushButton(str(dientes[int(numDiente)]))
         botonNumeroDiente.setCheckable(True)
@@ -366,7 +360,7 @@ class Columna(QVBoxLayout):
         self.addWidget(botonNumeroDiente)
 
         # MOVILIDAD
-        movilidad = Input03(self.desactivado)
+        movilidad = Input03(False)
 
         # DEFECTO DE FURCA
         if defFurca == 1:
@@ -421,8 +415,6 @@ class Columna(QVBoxLayout):
     def desactivar_diente(self, numDiente, widgetDientes):
         widgetDientes.desactivar_activar_diente(int(numDiente))
         widgetDientes.update()
-        self.desactivado = not self.desactivado  # si era true pasa a false y viceversa
-        self.update()
 
 
 class MainWindow(QMainWindow):
@@ -465,24 +457,24 @@ class MainWindow(QMainWindow):
         layoutCuadro1.setAlignment(Qt.AlignLeft)
 
         for n in range(0, 3):
-            col = Columna(str(n), 1, widgetDientes, False)
+            col = Columna(str(n), 1, widgetDientes)
             col.setSpacing(0)
             layoutCuadro1.addLayout(col)
 
         for n in range(3, 8):
-            col = Columna(str(n), 0, widgetDientes, False)
+            col = Columna(str(n), 0, widgetDientes)
             col.setSpacing(0)
             layoutCuadro1.addLayout(col)
 
         layoutCuadro1.addSpacerItem(QSpacerItem(20, 100))
 
         for n in range(8, 13):
-            col = Columna(str(n), 0, widgetDientes, False)
+            col = Columna(str(n), 0, widgetDientes)
             col.setSpacing(0)
             layoutCuadro1.addLayout(col)
 
         for n in range(13, 16):
-            col = Columna(str(n), 1, widgetDientes, False)
+            col = Columna(str(n), 1, widgetDientes)
             col.setSpacing(0)
             layoutCuadro1.addLayout(col)
 
