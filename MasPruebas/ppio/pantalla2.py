@@ -211,21 +211,25 @@ class ImagenDiente(QImage):
         # primer sector
         for i in range(pos1, pos2, d1):
             if i in implantes:
-                self.dientes1.append(Image.open(f"../DIENTES/periodontograma-i{i}.png"))
+                self.dientes1.append(Image.open(f"C:/Users/Uxi/Documents/TFG/MasPruebas/DIENTES/periodontograma-i{i}.png"))
+                self.dientes1[-1] = self.dientes1[-1].convert("RGBA")
             else:
-                self.dientes1.append(Image.open(f"../DIENTES/periodontograma-{i}.png"))
+                self.dientes1.append(Image.open(f"C:/Users/Uxi/Documents/TFG/MasPruebas/DIENTES/periodontograma-{i}.png"))
+                self.dientes1[-1] = self.dientes1[-1].convert("RGBA")
             width += self.dientes1[-1].width
 
         # segundo sector
         self.dientes2 = []
         for i in range(pos3, pos4, d2):
             if i in implantes:
-                self.dientes2.append(Image.open(f"/DIENTES/periodontograma-i{i}.png"))
+                self.dientes2.append(Image.open(f"C:/Users/Uxi/Documents/TFG/MasPruebas/DIENTES/periodontograma-i{i}.png"))
+                #self.dientes2[-1] = self.dientes2[-1].convert("RGBA")
             else:
-                self.dientes2.append(Image.open(f"../DIENTES/periodontograma-{i}.png"))
+                self.dientes2.append(Image.open(f"C:/Users/Uxi/Documents/TFG/MasPruebas/DIENTES/periodontograma-{i}.png"))
+                #self.dientes2[-1] = self.dientes2[-1].convert("RGBA")
             width += self.dientes2[-1].width
 
-        imagen = Image.new('RGB', (width + 40, 156), 'white')
+        imagen = Image.new('RGBA', (width + 40, 156), (0, 0, 0, 0))
 
         position = 5
         for d in self.dientes1:
@@ -424,7 +428,7 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle("Periostage")
         self.screen = QScreen().geometry()
-
+        self.setStyleSheet("background-color: #DCDCDC")
         self.setMinimumSize(QSize(1000, 500))
         # self.setWindowState(Qt.WindowMaximized)
 
@@ -432,7 +436,7 @@ class MainWindow(QMainWindow):
 
     def info1(self):
         tit = QHBoxLayout()
-        titu = QLabel("Cara superior")
+        titu = QLabel("Arcada superior")
         tit.addWidget(titu)
         tit.setAlignment(Qt.AlignCenter)
 

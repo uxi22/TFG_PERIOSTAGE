@@ -7,7 +7,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QMainWindow,
     QVBoxLayout,
-    QWidget, QHBoxLayout, QSpacerItem, QLineEdit, QPushButton, QPointList, QFrame
+    QWidget, QHBoxLayout, QLineEdit, QPushButton, QPointList, QFrame
 )
 from PySide6.QtGui import QPainter, QPen
 
@@ -212,18 +212,18 @@ class ImagenDiente(QImage):
         # primer sector
         for i in range(pos1, pos2, d1):
             if i in implantes:
-                self.dientes1.append(Image.open(f"../DIENTES/periodontograma-i{i}.png"))
+                self.dientes1.append(Image.open(f"./DIENTES/periodontograma-i{i}.png"))
             else:
-                self.dientes1.append(Image.open(f"../DIENTES/periodontograma-{i}.png"))
+                self.dientes1.append(Image.open(f"./DIENTES/periodontograma-{i}.png"))
             width += self.dientes1[-1].width
 
         # segundo sector
         self.dientes2 = []
         for i in range(pos3, pos4, d2):
             if i in implantes:
-                self.dientes2.append(Image.open(f"../DIENTES/perdiodontograma-i{i}.png"))
+                self.dientes2.append(Image.open(f"./DIENTES/perdiodontograma-i{i}.png"))
             else:
-                self.dientes2.append(Image.open(f"../DIENTES/periodontograma-{i}.png"))
+                self.dientes2.append(Image.open(f"./DIENTES/periodontograma-{i}.png"))
             width += self.dientes2[-1].width
 
         imagen = Image.new('RGB', (width + 40, 156), 'white')
@@ -351,15 +351,22 @@ class Input3(QHBoxLayout):
                 inpt.setText("")
 
 
-class Columna(QVBoxLayout):
-    def __init__(self, numDiente, defFurca, widgetDientes):
+class Columna(QFrame):
+    def __init__(self, numDiente, defFurca, widgetDientes, frame):
         super(Columna, self).__init__()
 
+        if 0 <= int(numDiente) < 8:
+            self.setGeometry(90, 0, widgetDientes.imagen.dientes1[int(numDiente)].width, 9*15)
+        elif 8 <= int(numDiente) < 16:
+            self.setGeometry(90, 0, widgetDientes.imagen.dientes2[int(numDiente) - 8].width, 9*15)
+
+        self.layoutcolumna = QVBoxLayout()
+        self.layoutcolumna.setSpacing(0)
         botonNumeroDiente = QPushButton(str(dientes[int(numDiente)]))
         botonNumeroDiente.setCheckable(True)
         botonNumeroDiente.setStyleSheet(style + "background-color: #BEBEBE; font-weight: bold; font-size: 12px;")
         botonNumeroDiente.clicked.connect(lambda: self.desactivar_diente(numDiente, widgetDientes))
-        self.addWidget(botonNumeroDiente)
+        self.layoutcolumna.addWidget(botonNumeroDiente)
 
         # MOVILIDAD
         movilidad = Input03(False)
@@ -369,7 +376,7 @@ class Columna(QVBoxLayout):
             defFurca = Input03(True, widgetDientes, dientes[int(numDiente)])
         else:
             defFurca = QLabel("")
-            defFurca.setFixedSize(76, 22)
+            #defFurca.setFixedSize(76, 22)
 
         # IMPLANTE
         boton = QPushButton("")
@@ -395,14 +402,14 @@ class Columna(QVBoxLayout):
         profSondaje = Input3(numDiente, 2, widgetDientes)
 
         # añadimos los elementos
-        self.addWidget(movilidad)
-        self.addWidget(boton)
-        self.addWidget(defFurca)
-        self.addLayout(sangrado)
-        self.addLayout(placa)
-        self.addLayout(supuracion)
-        self.addLayout(margenGingival)
-        self.addLayout(profSondaje)
+        self.layoutcolumna.addWidget(movilidad)
+        self.layoutcolumna.addWidget(boton)
+        self.layoutcolumna.addWidget(defFurca)
+        self.layoutcolumna.addLayout(sangrado)
+        self.layoutcolumna.addLayout(placa)
+        self.layoutcolumna.addLayout(supuracion)
+        self.layoutcolumna.addLayout(margenGingival)
+        self.layoutcolumna.addLayout(profSondaje)
 
     def diente_implante(self, numDiente, boton, widgetDientes, deffurca):
         cambiar_color(boton, "#333333")
@@ -432,56 +439,52 @@ class MainWindow(QMainWindow):
         self.info1()
 
     def info1(self):
-        tit = QHBoxLayout()
-        titu = QLabel("Cara superior")
-        tit.addWidget(titu)
-        tit.setAlignment(Qt.AlignCenter)
+        tit = QFrame(self)
+        tit.setGeometry(0, 0, QScreen().geometry().width(), 50)
+        titu = QLabel(tit)
+        titu.setText("Cara superior")
+        titu.setStyleSheet("text-align: center; font-size: 1.2em; color: black")
+        tit.setStyleSheet("text-align: center;")
 
-        layoutCuadro1 = QHBoxLayout()
+        #layoutCuadro1 = QHBoxLayout()
+        frameCuadro1 = QFrame(self)
 
         # Etiquetas
+        frameEtiquetas = QFrame(frameCuadro1)
         layoutEtiquetas = QVBoxLayout()
         etiquetas = ["", "Movilidad", "Implante", "Defecto de furca",
                      "Sangrado al sondaje", "Placa", "Supuración", "Margen Gingival", "Profundidad de sondaje"]
 
         for n in etiquetas:
             label = QLabel(n)
+            # Alineamos el texto a la derecha
             label.setAlignment(Qt.AlignRight)
-            #label.setFixedWidth(90)
             layoutEtiquetas.addWidget(label)
 
+        frameEtiquetas.setGeometry(QRect(0, 50, 90, len(etiquetas) * 15))
+        frameEtiquetas.setLayout(layoutEtiquetas)
+        #frameEtiquetas.setStyleSheet("background-color: black")
         # Creamos antes la imagen de los dientes para poder pasar el objeto y actualizarlo
         widgetDientes = LineasSobreDientes()
 
-        # Input de datos
-        layoutCuadro1.addLayout(layoutEtiquetas)
-
-        layoutCuadro1.setAlignment(Qt.AlignLeft)
-
+        # Columnas
         for n in range(0, 3):
-            col = Columna(str(n), 1, widgetDientes)
-            col.setSpacing(0)
-            layoutCuadro1.addLayout(col)
+            col = Columna(str(n), 1, widgetDientes, frameCuadro1)
 
         for n in range(3, 8):
-            col = Columna(str(n), 0, widgetDientes)
-            col.setSpacing(0)
-            layoutCuadro1.addLayout(col)
+            col = Columna(str(n), 0, widgetDientes, frameCuadro1)
 
-        layoutCuadro1.addSpacerItem(QSpacerItem(20, 100))
+        # layoutCuadro1.addSpacerItem(QSpacerItem(20, 100))
 
         for n in range(8, 13):
-            col = Columna(str(n), 0, widgetDientes)
-            col.setSpacing(0)
-            layoutCuadro1.addLayout(col)
+            col = Columna(str(n), 0, widgetDientes, frameCuadro1)
 
         for n in range(13, 16):
-            col = Columna(str(n), 1, widgetDientes)
-            col.setSpacing(0)
-            layoutCuadro1.addLayout(col)
+            col = Columna(str(n), 1, widgetDientes, frameCuadro1)
 
-        layoutCuadro1.setContentsMargins(10, 5, 10, 10)
-        layoutCuadro1.setSpacing(5)
+        #layoutCuadro1.setContentsMargins(10, 5, 10, 10)
+        #layoutCuadro1.setSpacing(5)
+        frameCuadro1.setStyleSheet("content-margin: 10px, 5px, 10px, 10px; spacing: 5px")
 
         # Dientes
         layoutDientes = QHBoxLayout()
@@ -490,9 +493,11 @@ class MainWindow(QMainWindow):
         layoutDientes.setAlignment(Qt.AlignCenter)
 
         total = QVBoxLayout()
-        total.addLayout(tit)
-        total.addLayout(layoutCuadro1)
-        total.addLayout(layoutDientes)
+        # total.addSpacerItem(QSpacerItem(QScreen().geometry().width(), 50))
+        total.addWidget(frameCuadro1)
+        frameDientes = QFrame()
+        frameDientes.setLayout(layoutDientes)
+        total.addWidget(frameDientes)
 
         widget = QWidget()
         widget.setLayout(total)
