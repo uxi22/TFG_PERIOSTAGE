@@ -128,14 +128,19 @@ def cambiar_color(boton, color):
 
 
 class Columna(QVBoxLayout):
-    def __init__(self, numDiente, defFurca, widgetDientes):
+    def __init__(self, numDiente, defFurca, widgetDientes, frame):
         super(Columna, self).__init__()
+
+        print("alignment", self.alignment())
+        print(self.contentsMargins())
 
         botonNumeroDiente = QPushButton(str(dientes[int(numDiente)]))
         botonNumeroDiente.setCheckable(True)
         botonNumeroDiente.setStyleSheet(style + "background-color: #BEBEBE; font-weight: bold; font-size: 12px;")
         botonNumeroDiente.clicked.connect(lambda: self.desactivar_diente(numDiente, widgetDientes))
-        self.addWidget(botonNumeroDiente)
+        #botonNumeroDiente.setGeometry(0, 0, frame.frameSize().width(), 20)
+
+        self.addWidget(botonNumeroDiente, stretch=0, alignment=Qt.AlignTop)
 
         # MOVILIDAD
         movilidad = Input03(False)
@@ -171,14 +176,16 @@ class Columna(QVBoxLayout):
         profSondaje = Input3(numDiente, 2, widgetDientes)
 
         # añadimos los elementos
-        self.addWidget(movilidad)
-        self.addWidget(boton)
-        self.addWidget(defFurca)
+        self.addWidget(movilidad, stretch=0, alignment=Qt.AlignTop)
+        self.addWidget(boton, stretch=0, alignment=Qt.AlignTop)
+        self.addWidget(defFurca, stretch=0, alignment=Qt.AlignTop)
         self.addLayout(sangrado)
         self.addLayout(placa)
         self.addLayout(supuracion)
         self.addLayout(margenGingival)
         self.addLayout(profSondaje)
+        self.addStretch()
+        
 
     def diente_implante(self, numDiente, boton, widgetDientes, deffurca):
         cambiar_color(boton, "#333333")
@@ -433,11 +440,11 @@ class MainWindow(QMainWindow):
 
         # Frame cuadro
         frameCuadro = QFrame(frameTotal)
-        frameCuadro.setGeometry(0, 50, self.frameSize().width(), 25*9)
+        frameCuadro.setGeometry(0, 50, self.frameSize().width(), 20*9)
 
         # Frame columna de las etiquetas
         frameEtiquetas = QFrame(frameCuadro)
-        frameEtiquetas.setStyleSheet("border: 1px solid grey;")
+        frameEtiquetas.setStyleSheet("padding: 0px; margin: 0px;")
         frameEtiquetas.setGeometry(0, 0, 150, frameCuadro.frameSize().height())
         etiquetas = ["", "Movilidad", "Implante", "Defecto de furca",
                      "Sangrado al sondaje", "Placa", "Supuración", "Margen Gingival", "Profundidad de sondaje"]
@@ -445,9 +452,9 @@ class MainWindow(QMainWindow):
         for n in etiquetas:
             etiqueta = QLabel(n, parent=frameEtiquetas)
             etiqueta.setAlignment(Qt.AlignRight)
-            etiqueta.setGeometry(0, etiquetas.index(n)*25, frameEtiquetas.frameSize().width(), 20)
+            etiqueta.setGeometry(0, etiquetas.index(n)*20, frameEtiquetas.frameSize().width(), 20)
             etiqueta.setWordWrap(True)
-            etiqueta.setStyleSheet("font-size: 11px; color: black;")
+            etiqueta.setStyleSheet("font-size: 11px; color: black; border: 1px solid grey;")
 
         # Widget dientes
         widgetDientes = LineasSobreDientes()
@@ -458,15 +465,13 @@ class MainWindow(QMainWindow):
         posicion_y = frameEtiquetas.width()
         framesColumnas = [QFrame(frameCuadro) for _ in range(0, 16)]
         for n in range(0, 3):
-            col = Columna(n, 1, widgetDientes)
             framesColumnas[n].setGeometry(posicion_y, 0, widgetDientes.imagen.dientes1[n].width,
                                  frameEtiquetas.height())
             posicion_y += widgetDientes.imagen.dientes1[n].width
+            col = Columna(n, 1, widgetDientes, framesColumnas[n])
             framesColumnas[n].setLayout(col)
-            # col.setParent(framesColumnas[n])
             col.setGeometry(QRect(0, 0, framesColumnas[n].width(), framesColumnas[n].height()))
-            framesColumnas[n].setStyleSheet("") # cambiar los margenes y espacios
-
+            framesColumnas[n].setStyleSheet("border: 1px solid blue; padding: 0px; margin: 0px;") # cambiar los margenes y espacios
 
 
 app = QApplication(sys.argv)

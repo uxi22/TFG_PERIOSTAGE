@@ -354,6 +354,84 @@ class Input3(QHBoxLayout):
                 inpt.setText("")
 
 
+class PPD(QWidget):
+    def __init__(self, datos):
+        super().__init__()
+        self.setGeometry(QRect(0, 0, 300, 100))
+
+        self.datos = datos
+
+    def minimumSizeHint(self):
+        return QSize(1, 1)
+
+    def paintEvent(self, event):
+
+        self.setMinimumSize(300, 100)
+
+        qp = QPainter(self)
+        qp.setRenderHint(QPainter.Antialiasing, True)
+
+        qp.setPen(QPen(Qt.transparent, 2, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
+        qp.setBrush(QBrush(Qt.green, Qt.SolidPattern))
+        qp.drawRect(50, 20, 45, 25)
+        qp.setBrush(QBrush(Qt.yellow, Qt.SolidPattern))
+        qp.drawRect(95, 20, 45, 25)
+        qp.setBrush(QBrush(QColor(255, 136, 30), Qt.SolidPattern))
+        qp.drawRect(140, 20, 45, 25)
+        qp.setBrush(QBrush(Qt.red, Qt.SolidPattern))
+        qp.drawRect(185, 20, 45, 25)
+        qp.setBrush(QBrush(QColor(200, 0, 0), Qt.SolidPattern))
+        qp.drawRect(230, 20, 45, 25)
+
+        qp.setPen(QPen(Qt.black, 5, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
+        qp.drawText(QPoint(140, 10), "PPD")
+        """
+        qp.drawText(QPoint(65, 37), "1-3")
+        qp.drawText(QPoint(114, 37), "4")
+        qp.drawText(QPoint(158, 37), "5")
+        qp.drawText(QPoint(197, 37), "6-8")
+        qp.drawText(QPoint(246, 37), "≥9")
+        qp.drawText(QPoint(8, 36), "mm")
+        qp.drawText(QPoint(1, 62), "Nº sites")
+        qp.drawText(QPoint(12, 88), "%")"""
+        d = ["1-3", "4", "5", "6-8", "≥9"]
+        total_w = sum(qp.fontMetrics().horizontalAdvance(t) for t in d)
+        interval = (230 - total_w) / (len(d) + 1)
+        x_offset = interval + 65
+        for t in d:
+            qp.drawText(x_offset, 37, t)
+            x_offset += qp.fontMetrics().horizontalAdvance(t) + interval
+
+class Datos():
+    def __init__(self, layoutDientes):
+        self.sangrados = []
+        self.placas = []
+        self.supuraciones = []
+        self.margenes = []
+        self.profundidades = []
+        self.layout = layoutDientes
+        for i in range(1, 8):
+            item = layoutDientes.itemAt(i)
+            self.sangrados.append([item.itemAt(4).w1.isChecked(), item.itemAt(4).w2.isChecked(), item.itemAt(4).w3.isChecked()])
+            self.placas.append([item.itemAt(5).w1.isChecked(), item.itemAt(5).w2.isChecked(), item.itemAt(5).w3.isChecked()])
+            self.supuraciones.append([item.itemAt(6).w1.isChecked(), item.itemAt(6).w2.isChecked(), item.itemAt(6).w3.isChecked()])
+            self.margenes.append([item.itemAt(7).w1.text(), item.itemAt(7).w2.text(), item.itemAt(7).w3.text()])
+            self.profundidades.append([item.itemAt(8).w1.text(), item.itemAt(8).w2.text(), item.itemAt(8).w3.text()])
+
+    def actualizar(self, tipo, indice):
+        item = self.layout.itemAt(indice + 1)
+        if tipo == 1:  # Sangrado
+            self.sangrados[indice] = [item.itemAt(4).w1.isChecked(), item.itemAt(4).w2.isChecked(), item.itemAt(4).w3.isChecked()]
+        elif tipo == 2:
+            self.placas[indice] = [item.itemAt(5).w1.isChecked(), item.itemAt(5).w2.isChecked(), item.itemAt(5).w3.isChecked()]
+        elif tipo == 3:
+            self.supuraciones[indice] = [item.itemAt(6).w1.isChecked(), item.itemAt(6).w2.isChecked(), item.itemAt(6).w3.isChecked()]
+        elif tipo == 4:
+            self.margenes[indice] = [item.itemAt(7).w1.text(), item.itemAt(7).w2.text(), item.itemAt(7).w3.text()]
+        elif tipo == 5:
+            self.profundidades[indice] = [item.itemAt(8).w1.text(), item.itemAt(8).w2.text(), item.itemAt(8).w3.text()]
+
+
 class Columna(QVBoxLayout):
     def __init__(self, numDiente, defFurca, widgetDientes):
         super(Columna, self).__init__()
@@ -485,6 +563,10 @@ class MainWindow(QMainWindow):
 
         layoutCuadro1.setContentsMargins(10, 5, 10, 10)
         layoutCuadro1.setSpacing(5)
+        item1 = layoutCuadro1.itemAt(1)
+
+        datos = Datos(layoutCuadro1)
+        ppd = PPD(datos.profundidades)
 
         # Dientes
         layoutDientes = QHBoxLayout()
@@ -492,10 +574,16 @@ class MainWindow(QMainWindow):
         layoutDientes.addWidget(widgetDientes)
         layoutDientes.setAlignment(Qt.AlignCenter)
 
+        # Datos
+        layoutDatos = QHBoxLayout()
+        layoutDatos.addWidget(ppd)
+        layoutDatos.setAlignment(Qt.AlignCenter)
+
         total = QVBoxLayout()
         total.addLayout(tit)
         total.addLayout(layoutCuadro1)
         total.addLayout(layoutDientes)
+        total.addLayout(layoutDatos)
 
         widget = QWidget()
         widget.setLayout(total)
