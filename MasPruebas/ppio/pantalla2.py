@@ -3,7 +3,8 @@ from collections import defaultdict
 
 from PIL import Image
 from PySide6.QtCore import Qt, QRegularExpression, QRect, QSize, QPoint
-from PySide6.QtGui import QScreen, QRegularExpressionValidator, QImage, QPolygon, QBrush, QColor
+from PySide6.QtGui import QScreen, QRegularExpressionValidator, QImage, QPolygon, QBrush, QColor, QPainter, QPen, \
+    QFontMetricsF
 from PySide6.QtWidgets import (
     QApplication,
     QLabel,
@@ -11,7 +12,6 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget, QHBoxLayout, QSpacerItem, QLineEdit, QPushButton, QPointList
 )
-from PySide6.QtGui import QPainter, QPen
 
 arriba1 = [[1, 5], [5, 6], [4, 8], [9, 8], [9, 8], [7, 7], [6, 8], [10, 6]]  # del 18 al 11
 arriba2 = [[7, 11], [6, 6], [7, 8], [8, 9], [8, 10], [7, 5], [5, 5], [2, 1]]  # del 21 al 28
@@ -40,7 +40,7 @@ class LineasSobreDientes(QWidget):
         self.dientes_furca = {}
         self.furcas = [18, 17, 16, 26, 27, 28]
 
-        triangulos_arriba = [[58, 25], [62, 24], [67, 21], [64, 28], [63, 27], [58, 25]]
+        triangulos_arriba = [[62, 25], [64, 24], [66, 21], [64, 28], [63, 27], [60, 25]]
 
         dist = 5
         self.altura = 90
@@ -144,16 +144,16 @@ class LineasSobreDientes(QWidget):
                 # defectos de furca
                 if len(self.dientes_furca) > 0 and dientes[i] in self.dientes_furca.keys():
                     valor = self.dientes_furca[dientes[i]]
-                    qp.setPen(QPen(Qt.darkRed, 2, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
+                    qp.setPen(QPen(QColor(165, 10, 135, 210), 1.5, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
                     auxpuntos = [self.puntos_furca[self.furcas.index(dientes[i])].x(),
                                  self.puntos_furca[self.furcas.index(dientes[i])].y()]
-                    (poligono << QPoint(auxpuntos[0] - 10, auxpuntos[1]) <<
-                     QPoint(auxpuntos[0], auxpuntos[1] + 15) << QPoint(auxpuntos[0] + 10, auxpuntos[1]))
+                    (poligono << QPoint(auxpuntos[0] - 8, auxpuntos[1]) <<
+                     QPoint(auxpuntos[0], auxpuntos[1] + 11) << QPoint(auxpuntos[0] + 8, auxpuntos[1]))
                     if valor == "1":
                         qp.drawPolyline(poligono)  # triángulo sin cerrar y sin rellenar
                     else:
                         if valor == "3":
-                            qp.setBrush(QBrush(Qt.darkRed, Qt.SolidPattern))
+                            qp.setBrush(QBrush(QColor(165, 10, 135, 120), Qt.SolidPattern))
                         qp.drawPolygon(poligono)
                     poligono.clear()
                     auxpuntos.clear()
@@ -276,43 +276,29 @@ def cambiar_color(boton, color):
 
 
 class InputSiNo3(QHBoxLayout):
-    def __init__(self, color, numDiente, padre):
+    def __init__(self, color, numDiente, padre, tipo):
         super(InputSiNo3, self).__init__()
 
-        self.w1 = QPushButton("")
-        self.w1.setCheckable(True)
-        self.w1.setStyleSheet("QPushButton { " + style + colorBoton + "}" +
-                              "QPushButton:hover { background-color: #AAAAAA; }")
-        self.w1.setDefault(True)  # Para que se pulsen los botones al darle al Enter
-        self.w1.clicked.connect(lambda: self.pulsarBoton(color, 1, padre, numDiente))
-        self.addWidget(self.w1)
+        self.botones = []
+        for n in range(1, 4):
+            boton = QPushButton("")
+            boton.setCheckable(True)
+            boton.setStyleSheet("QPushButton { " + style + colorBoton + "}" +
+                                "QPushButton:hover { background-color: #AAAAAA; }")
+            boton.setDefault(True)
+            boton.clicked.connect(lambda *args, ind=n, t=tipo: self.pulsar_boton(color, ind, padre, numDiente, t))
+            self.addWidget(boton)
+            self.botones.append(boton)
 
-        self.w2 = QPushButton("")
-        self.w2.setCheckable(True)
-        self.w2.setStyleSheet(
-            "QPushButton { " + style + colorBoton + "} QPushButton:hover { background-color: #AAAAAA; }")
-        self.w2.setDefault(True)
-        self.w2.clicked.connect(lambda: self.pulsarBoton(color, 2, padre, numDiente))
-        self.addWidget(self.w2)
-
-        self.w3 = QPushButton("")
-        self.w3.setCheckable(True)
-        self.w3.setStyleSheet(
-            "QPushButton { " + style + colorBoton + "} QPushButton:hover { background-color: #AAAAAA; }")
-        self.w3.setDefault(True)
-        self.w3.clicked.connect(lambda: self.pulsarBoton(color, 3, padre, numDiente))
-        self.addWidget(self.w3)
-
-    def pulsarBoton(self, color, tipo, numDiente, padre):
+    def pulsar_boton(self, color, ind, padre, numDiente, tipo):
+        boton = self.botones[ind - 1]
+        cambiar_color(boton, color)
         if tipo == 1:
-            cambiar_color(self.w1, color)
-            padre.sangrado.actualizarPorcentajes(int(numDiente) * 3 + tipo, self.w1.isChecked())
+            padre.sangrado.actualizarPorcentajes(int(numDiente) * 3 + ind, boton.isChecked())
         elif tipo == 2:
-            cambiar_color(self.w2, color)
-            padre.placa.actualizarPorcentajes(int(numDiente) * 3 + tipo, self.w2.isChecked())
+            padre.placa.actualizarPorcentajes(int(numDiente) * 3 + ind, boton.isChecked())
         elif tipo == 3:
-            cambiar_color(self.w3, color)
-            padre.supuracion.actualizarPorcentajes(int(numDiente) * 3 + tipo, self.w3.isChecked())
+            padre.supuracion.actualizarPorcentajes(int(numDiente) * 3 + ind, boton.isChecked())
 
 
 def es_numero(texto):
@@ -326,36 +312,22 @@ def es_numero(texto):
 class Input3(QHBoxLayout):
     def __init__(self, ndiente, tipo, widgetDientes, padre):
         super(Input3, self).__init__()
+        self.validator = QRegularExpressionValidator(QRegularExpression(r"^[+-]?\d{1,2}$"))
 
-        regex = QRegularExpression(r"^[+-]?\d{1,2}$")  # Expresión regular que permite solo números
-        validator = QRegularExpressionValidator(regex)
+        self.inpts = []
 
-        self.w1 = QLineEdit()
-        self.w1.setValidator(validator)
-        self.addWidget(self.w1)
-        self.w1.setStyleSheet(
-            "QLineEdit { " + style + "font-size: 10px; } QLineEdit:focus { border: 1px solid #C3C3C3; }")
-        self.w1.setPlaceholderText("0")
-        self.w1.selectAll()
-        self.w1.editingFinished.connect(lambda: self.texto(ndiente, tipo, widgetDientes, self.w1, 0, padre))
+        for i in range(1, 4):
+            inpt = QLineEdit()
+            inpt.setValidator(self.validator)
+            inpt.setStyleSheet(
+                "QLineEdit { " + style + "font-size: 10px; } QLineEdit:focus { border: 1px solid #C3C3C3; }")
+            inpt.setPlaceholderText("0")
+            inpt.editingFinished.connect(lambda: self.texto(ndiente, tipo, widgetDientes, i - 1, padre))
+            self.addWidget(inpt)
+            self.inpts.append(inpt)
 
-        self.w2 = QLineEdit()
-        self.w2.setValidator(validator)
-        self.addWidget(self.w2)
-        self.w2.setStyleSheet(
-            "QLineEdit { " + style + "font-size: 10px; } QLineEdit:focus { border: 1px solid #C3C3C3; }")
-        self.w2.setPlaceholderText("0")
-        self.w2.editingFinished.connect(lambda: self.texto(ndiente, tipo, widgetDientes, self.w2, 1, padre))
-
-        self.w3 = QLineEdit()
-        self.w3.setValidator(validator)
-        self.addWidget(self.w3)
-        self.w3.setStyleSheet(
-            "QLineEdit { " + style + "font-size: 10px; } QLineEdit:focus { border: 1px solid #C3C3C3; }")
-        self.w3.setPlaceholderText("0")
-        self.w3.editingFinished.connect(lambda: self.texto(ndiente, tipo, widgetDientes, self.w3, 2, padre))
-
-    def texto(self, ndiente, tipo, widgetDientes, inpt, num, padre):
+    def texto(self, ndiente, tipo, widgetDientes, num, padre):
+        inpt = self.inpts[num]
         if tipo == 1 and es_numero(inpt.text()):  # Margen gingival
             if -21 < int(inpt.text()) < 21:
                 altura_rojo[int(ndiente)][num] = int(inpt.text())
@@ -366,6 +338,10 @@ class Input3(QHBoxLayout):
                 inpt.setText("0")
         elif tipo == 2 and es_numero(inpt.text()):  # Profundidad de sondaje
             if 0 < int(inpt.text()) < 21:
+                if (int(inpt.text()) >= 4):
+                    self.inpts[num].setStyleSheet("QLineEdit { " + style + "color: red; font-size: 10px; }")
+                else:
+                    self.inpts[num].setStyleSheet("QLineEdit { " + style + "color: black; font-size: 10px; }")
                 altura_azul[int(ndiente)][num] = int(inpt.text())
                 widgetDientes.actualizar_alturas(int(ndiente), tipo, num)
                 widgetDientes.update()
@@ -382,43 +358,44 @@ class BarraPorcentajes(QWidget):
         self.datos = datos
         self.tipo = n
 
-    def minimunSizeHint(self):
+    def minimumSizeHint(self):
         return QSize(1, 1)
 
     def actualizarPorcentajes(self, indice, nuevo):
         self.datos[indice] = nuevo
-        self.porcentaje = (sum(self.datos) / len(self.datos)) * 100
+        self.porcentaje = (sum(self.datos) / len(self.datos))
         self.update()
 
     def paintEvent(self, event):
         self.setMinimumSize(300, 100)
-        qp.setRenderHint(QPainter.Antialiasing, True)
         # Pintamos un rectángulo con un % pintado
         qp = QPainter(self)
-        width = 300
+        qp.setRenderHint(QPainter.Antialiasing, True)
+        width = 220
         w_coloreado = int(width * self.porcentaje)
         qp.setBrush(QBrush(Qt.gray, Qt.SolidPattern))
         if self.tipo == 1:
             # Sangrado
-            qp.setPen(QColor(255, 43, 50), 2, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin)
+            qp.setPen(QPen(Qt.red, 2, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
             # Rectángulo vacío
-            qp.drawRect(0, 50 - 20, width, 40)
-            qp.setBrush(QBrush(QColor(255, 43, 50), Qt.SolidPattern))
+            qp.drawRect(0, 30, width, 20)
+            qp.setBrush(QBrush(Qt.red, Qt.SolidPattern))
         elif self.tipo == 2:
             # Placa
-            qp.setPen(QColor(88, 96, 255), 2, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin)
+            qp.setPen(QPen(QColor(88, 96, 255), 2, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
             # Rectángulo vacío
-            qp.drawRect(0, 50 - 20, width, 40)
+            qp.drawRect(0, 30, width, 20)
             qp.setBrush(QBrush(QColor(88, 96, 255), Qt.SolidPattern))
         elif self.tipo == 3:
             # Supuración
-            qp.setPen(QColor(124, 235, 160), 2, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin)
+            qp.setPen(QPen(QColor(124, 235, 160), 2, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
             # Rectángulo vacío
-            qp.drawRect(0, 50 - 20, width, 40)
+            qp.drawRect(0, 30, width, 20)
             qp.setBrush(QBrush(QColor(124, 235, 160), Qt.SolidPattern))
 
         # Rectángulo coloreado
-        qp.drawRect(0, 50 - 20, w_coloreado, 40)
+        if w_coloreado > 0:
+            qp.drawRect(0, 30, w_coloreado, 20)
 
 
 class CuadroColores(QWidget):
@@ -442,77 +419,63 @@ class CuadroColores(QWidget):
         self.update()
 
     def paintEvent(self, event):
-        self.setMinimumSize(300, 100)
+        self.setMinimumSize(300, 80)
 
         qp = QPainter(self)
         qp.setRenderHint(QPainter.Antialiasing, True)
 
-        qp.setPen(QPen(Qt.transparent, 2, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
-
-        # Dibujamos los rectángulos de colores
-        colores = [Qt.green, Qt.yellow, QColor(255, 136, 30), Qt.red, QColor(200, 0, 0)]
-        total_w = 0
-        for i in range(self.n):
-            qp.setBrush(QBrush(colores[i], Qt.SolidPattern))
-            qp.drawRect(50 + total_w, 20, 45, 20)
-            total_w += 45
-
-        # Ponemos el título del cuadro
-        qp.setPen(QPen(Qt.black, 5, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
-        if self.n == 5:
-            qp.drawText(QPoint(140, 10), "PPD")
-            d = ["1-3", "4", "5", "6-8", "≥9"]
-            nsites = [str(self.datos[1] + self.datos[2] + self.datos[3]), str(self.datos[4]),
-                      str(self.datos[5]), str(self.datos[6] + self.datos[7]
-                                              + self.datos[8]),
-                      str(sum(self.datos.values()) - sum([self.datos[i] for i in range(0, 9)]))]
-        else:
-            qp.drawText(QPoint(140, 10), "CAL")
+        if self.n == 4:
+            text = "CAL"
             d = ["0", "1-2", "3-4", "≥5"]
             nsites = [str(self.datos[0]), str(self.datos[1] + self.datos[2]),
                       str(self.datos[3] + self.datos[4]),
                       str(sum(self.datos.values()) - sum([self.datos[i] for i in range(0, 5)]))]
+        else:
+            text = "PPD"
+            d = ["0-3", "4", "5", "6-8", "≥9"]
+            nsites = [str(self.datos[0] + self.datos[1] + self.datos[2] + self.datos[3]), str(self.datos[4]),
+                      str(self.datos[5]), str(self.datos[6] + self.datos[7] + self.datos[8]),
+                      str(sum(self.datos.values()) - sum([self.datos[i] for i in range(0, 9)]))]
+
+        # Título del cuadro
+        qp.setPen(QPen(Qt.black, 5, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
+        qp.drawText(QPoint((self.width() - qp.fontMetrics().horizontalAdvance(text))/2, 0), text)
 
         etiqs = ["mm", "Nº sites", "%"]
 
-        # Ponemos las etiquetas de las columnas
-        total_w = sum(qp.fontMetrics().horizontalAdvance(t) for t in d)
-        interval = ((45 * len(d) + 10 - total_w) / (len(d) + 1) + 5)
-        x_offset = interval + 30
-        for t in d:
-            qp.drawText(x_offset, 34, t)
-            x_offset += qp.fontMetrics().horizontalAdvance(t) + interval
-
         # Ponemos las etiquetas de las filas
-        total_w = sum(qp.fontMetrics().height() for t in etiqs)
-        interval = (80 - total_w) / (len(etiqs) + 1)
-        y_offset = interval + 28
+        first_h = 35
+        total_h = first_h
+        ancho_etq = qp.fontMetrics().horizontalAdvance("Nº sites")
         for t in etiqs:
-            qp.drawText((20 - qp.fontMetrics().horizontalAdvance(t) / 2), y_offset, t)
-            y_offset += qp.fontMetrics().height() + interval
+            qp.drawText((ancho_etq - qp.fontMetrics().horizontalAdvance(t))/2, total_h, t)
+            total_h += qp.fontMetrics().height() + 7
 
-        # Ponemos los valores de los datos
-        total_w = sum(qp.fontMetrics().horizontalAdvance(t) for t in nsites)
-        interval = ((45 * len(d) + 10 - total_w) / (len(nsites) + 1) + 5)
-        x_offset = interval + 30
-        for t in nsites:
-            qp.drawText(x_offset, 60, t)
-            x_offset += qp.fontMetrics().horizontalAdvance(t) + interval
-
-        # Porcentajes de los datos
+        colores = [Qt.green, Qt.yellow, QColor(255, 136, 30), Qt.red, QColor(200, 0, 0)]
+        # Columnas de los datos
         total = sum(self.datos.values()) - self.datos[-1]
-        porctjs = [0] * self.n
-        for i in range(len(nsites)):
+        total_w = ancho_etq + 5
+        widthcuadro = 220 / self.n
+        for i in range(self.n):
+            total_h = first_h
+            # Dibujamos los rectángulos de colores
+            qp.setPen(QPen(Qt.transparent, 2, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
+            qp.setBrush(QBrush(colores[i], Qt.SolidPattern))
+            qp.drawRect(total_w, 20, widthcuadro, 20)
+            # Las etiquetas de las colummnas
+            qp.setPen(QPen(Qt.black, 5, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
+            qp.drawText(total_w + widthcuadro/2 - qp.fontMetrics().horizontalAdvance(d[i])/2, total_h, d[i])
+            total_h += qp.fontMetrics().height() + 7
+            # Cantidades
+            qp.drawText(total_w + widthcuadro/2 - qp.fontMetrics().horizontalAdvance(nsites[i])/2, total_h, nsites[i])
+            total_h += qp.fontMetrics().height() + 7
+            # Porcentajes
             if total != 0:
-                porctjs[i] = str(round(int(nsites[i]) / total * 100, 2))
+                pct = str(round(int(nsites[i]) / total * 100, 1))
             else:
-                porctjs[i] = "0"
-        total_w = sum(qp.fontMetrics().horizontalAdvance(t) for t in porctjs)
-        interval = ((45 * len(d) + 10 - total_w) / (len(porctjs) + 1) + 5)
-        x_offset = interval + 30
-        for t in porctjs:
-            qp.drawText(x_offset, 86, t)
-            x_offset += qp.fontMetrics().horizontalAdvance(t) + interval
+                pct = "0.0"
+            qp.drawText(total_w + widthcuadro/2 - qp.fontMetrics().horizontalAdvance(pct)/2, total_h, pct)
+            total_w += widthcuadro
 
 
 class Datos():
@@ -572,13 +535,13 @@ class Columna(QVBoxLayout):
         boton.clicked.connect(lambda: self.diente_implante(numDiente, boton, widgetDientes, defFurca))
 
         # SANGRADO AL SONDAJE
-        sangrado = InputSiNo3("#FF2B32", numDiente, padre)
+        sangrado = InputSiNo3("#FF2B32", numDiente, padre, 1)
 
         # PLACA
-        placa = InputSiNo3("#5860FF", numDiente, padre)
+        placa = InputSiNo3("#5860FF", numDiente, padre, 2)
 
         # SUPURACION
-        supuracion = InputSiNo3("#7CEBA0", numDiente, padre)
+        supuracion = InputSiNo3("#7CEBA0", numDiente, padre, 3)
 
         # MARGEN GINGIVAL
         margenGingival = Input3(numDiente, 1, widgetDientes, padre)
@@ -714,5 +677,6 @@ class MainWindow(QMainWindow):
 
 app = QApplication(sys.argv)
 window = MainWindow()
+window.showMaximized()
 window.show()
 app.exec()
