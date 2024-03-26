@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QMainWindow,
     QVBoxLayout,
-    QWidget, QHBoxLayout, QSpacerItem, QLineEdit, QPushButton, QPointList
+    QWidget, QHBoxLayout, QSpacerItem, QLineEdit, QPushButton, QPointList, QFrame
 )
 
 arriba1 = [[1, 5], [5, 6], [4, 8], [9, 8], [9, 8], [7, 7], [6, 8], [10, 6]]  # del 18 al 11
@@ -322,7 +322,7 @@ class Input3(QHBoxLayout):
             inpt.setStyleSheet(
                 "QLineEdit { " + style + "font-size: 10px; } QLineEdit:focus { border: 1px solid #C3C3C3; }")
             inpt.setPlaceholderText("0")
-            inpt.editingFinished.connect(lambda: self.texto(ndiente, tipo, widgetDientes, i - 1, padre))
+            inpt.editingFinished.connect(lambda ind=i-1: self.texto(ndiente, tipo, widgetDientes, ind, padre))
             self.addWidget(inpt)
             self.inpts.append(inpt)
 
@@ -339,9 +339,9 @@ class Input3(QHBoxLayout):
         elif tipo == 2 and es_numero(inpt.text()):  # Profundidad de sondaje
             if 0 < int(inpt.text()) < 21:
                 if (int(inpt.text()) >= 4):
-                    self.inpts[num].setStyleSheet("QLineEdit { " + style + "color: red; font-size: 10px; }")
+                    self.inpts[num].setStyleSheet("QLineEdit { " + style + "color: crimson; font-size: 12px; }")
                 else:
-                    self.inpts[num].setStyleSheet("QLineEdit { " + style + "color: black; font-size: 10px; }")
+                    self.inpts[num].setStyleSheet("QLineEdit { " + style + "color: black; font-size: 12px; }")
                 altura_azul[int(ndiente)][num] = int(inpt.text())
                 widgetDientes.actualizar_alturas(int(ndiente), tipo, num)
                 widgetDientes.update()
@@ -496,7 +496,7 @@ class Datos():
         self.layout = layoutDientes
 
     def actualizar(self, tipo, indice):
-        item = self.layout.itemAt(indice + 1)
+        item = self.layout.itemAt(indice)
         if tipo == 1:  # Sangrado
             self.sangrados[indice] = [item.itemAt(4).w1.isChecked(), item.itemAt(4).w2.isChecked(),
                                       item.itemAt(4).w3.isChecked()]
@@ -515,7 +515,7 @@ class Datos():
 
 
 class Columna(QVBoxLayout):
-    def __init__(self, numDiente, defFurca, widgetDientes, padre):
+    def     __init__(self, numDiente, defFurca, widgetDientes, padre):
         super(Columna, self).__init__()
 
         botonNumeroDiente = QPushButton(str(dientes[int(numDiente)]))
@@ -596,9 +596,9 @@ class MainWindow(QMainWindow):
         self.sangrado = None
         self.placa = None
         self.supuracion = None
-        self.info1()
+        self.elementos_pantalla()
 
-    def info1(self):
+    def elementos_pantalla(self):
         tit = QHBoxLayout()
         titu = QLabel("Arcada superior")
         tit.addWidget(titu)
@@ -607,47 +607,54 @@ class MainWindow(QMainWindow):
         layoutCuadro1 = QHBoxLayout()
 
         # Etiquetas
+        frameEtiquetas = QFrame()
         layoutEtiquetas = QVBoxLayout()
         etiquetas = ["", "Movilidad", "Implante", "Defecto de furca",
                      "Sangrado al sondaje", "Placa", "Supuración", "Margen Gingival", "Profundidad de sondaje"]
 
         for n in etiquetas:
             label = QLabel(n)
+            # Alineamos el texto a la derecha
             label.setAlignment(Qt.AlignRight)
-            # label.setFixedWidth(90)
             layoutEtiquetas.addWidget(label)
+        layoutEtiquetas.setSpacing(2)
+
+        layoutCuadro1.addWidget(frameEtiquetas)
+
+        frameEtiquetas.setGeometry(QRect(0, 0, self.fontMetrics().horizontalAdvance("Profundidad de sondaje"), len(etiquetas) * self.fontMetrics().height()))
+        frameEtiquetas.setLayout(layoutEtiquetas)
 
         # Creamos antes la imagen de los dientes para poder pasar el objeto y actualizarlo
         widgetDientes = LineasSobreDientes()
 
-        # Input de datos
-        layoutCuadro1.addLayout(layoutEtiquetas)
-
-        layoutCuadro1.setAlignment(Qt.AlignLeft)
+        layoutColumnas = QHBoxLayout()
+        layoutColumnas.setAlignment(Qt.AlignLeft)
 
         for n in range(0, 3):
             col = Columna(str(n), 1, widgetDientes, self)
             col.setSpacing(0)
-            layoutCuadro1.addLayout(col)
+            layoutColumnas.addLayout(col)
 
         for n in range(3, 8):
             col = Columna(str(n), 0, widgetDientes, self)
             col.setSpacing(0)
-            layoutCuadro1.addLayout(col)
+            layoutColumnas.addLayout(col)
 
-        layoutCuadro1.addSpacerItem(QSpacerItem(20, 100))
+        layoutColumnas.addSpacerItem(QSpacerItem(20, frameEtiquetas.height()))
 
         for n in range(8, 13):
             col = Columna(str(n), 0, widgetDientes, self)
             col.setSpacing(0)
-            layoutCuadro1.addLayout(col)
+            layoutColumnas.addLayout(col)
 
         for n in range(13, 16):
             col = Columna(str(n), 1, widgetDientes, self)
             col.setSpacing(0)
-            layoutCuadro1.addLayout(col)
+            layoutColumnas.addLayout(col)
 
-        datos = Datos(layoutCuadro1)
+        layoutCuadro1.addLayout(layoutColumnas)
+
+        datos = Datos(layoutColumnas)
         self.ppd = CuadroColores(datos.profundidades, 5)
         self.cal = CuadroColores(datos.margenes, 4)
         self.sangrado = BarraPorcentajes(datos.sangrados, 1)
