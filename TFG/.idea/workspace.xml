@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="77a5a611-8ae6-42fd-9274-676cde59c03b" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/.idea/.name" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/.idea/TFG.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-11.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-11b.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-12.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-12b.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-13.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-13b.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-14.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-14b.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-15.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-15b.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-16.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-16b.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-17.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-17b.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-18.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-18b.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-21.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-21b.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-22.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-22b.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-23.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-23b.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-24.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-24b.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-25b.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-26b.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-27b.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-28.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-28b.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-i11.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-i11b.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-i12.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-i12b.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-i13.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-i13b.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-i14.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-i14b.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-i15.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-i15b.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-i16.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-i16b.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-i17.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-i17b.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-i18.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-i18b.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-i21.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-i21b.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-i22.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-i22b.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-i23.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-i23b.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-i24.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-i24b.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-i25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-i25b.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-i26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-i26b.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-i27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-i27b.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-i28.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/DIENTES/periodontograma-i28b.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/diente.ico" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/nuevo.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/ppio/pantalla1.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/ppio/pantalla2.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/pruebas_columnas.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MasPruebas/python.py" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+    <option name="showPreview" value="true" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 6
+}</component>
+  <component name="ProjectId" id="2bxFzAWirPqmjDXCSrZXoMHqKya" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.__init__.executor": "Run",
+    "Python.app.executor": "Run",
+    "Python.nuevo.executor": "Run",
+    "Python.pantalla1.executor": "Run",
+    "Python.pantalla2.executor": "Run",
+    "Python.pruebasLineas.executor": "Run",
+    "Python.pruebas_columnas.executor": "Run",
+    "Python.python.executor": "Run",
+    "Python.soloTabla.executor": "Run",
+    "Python.superposicion.executor": "Run",
+    "Python.tabla.executor": "Run",
+    "Python.tablaInput.executor": "Run",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "C:/Users/Uxi/Documents/TFG/TFG",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-python-sdk-d68999036c7f-b11f5e8da5ad-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-233.14475.56" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="77a5a611-8ae6-42fd-9274-676cde59c03b" name="Changes" comment="" />
+      <created>1707149083095</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1707149083095</updated>
+      <workItem from="1707149087694" duration="2244000" />
+      <workItem from="1707212405594" duration="9117000" />
+      <workItem from="1707294868431" duration="2316000" />
+      <workItem from="1707385618105" duration="1269000" />
+      <workItem from="1707387089214" duration="4487000" />
+      <workItem from="1707392077087" duration="9533000" />
+      <workItem from="1707930392251" duration="1000000" />
+      <workItem from="1708078861809" duration="130000" />
+      <workItem from="1708091387320" duration="195000" />
+      <workItem from="1708109707379" duration="14114000" />
+      <workItem from="1708425946688" duration="14921000" />
+      <workItem from="1708513804411" duration="12526000" />
+      <workItem from="1708766524602" duration="4113000" />
+      <workItem from="1708855868689" duration="9063000" />
+      <workItem from="1708879529964" duration="8791000" />
+      <workItem from="1708940483007" duration="4887000" />
+      <workItem from="1709024871614" duration="8835000" />
+      <workItem from="1709122325685" duration="3089000" />
+      <workItem from="1709134315983" duration="4523000" />
+      <workItem from="1709142276980" duration="69000" />
+      <workItem from="1709206128423" duration="605000" />
+      <workItem from="1709218189567" duration="4424000" />
+      <workItem from="1709225842458" duration="124000" />
+      <workItem from="1709226317944" duration="618000" />
+      <workItem from="1709231924074" duration="234000" />
+      <workItem from="1709290195634" duration="7074000" />
+      <workItem from="1709548176971" duration="681000" />
+      <workItem from="1709549090666" duration="12450000" />
+      <workItem from="1709632088551" duration="2163000" />
+      <workItem from="1709634274097" duration="6817000" />
+      <workItem from="1709817308844" duration="42000" />
+      <workItem from="1709830396153" duration="3966000" />
+      <workItem from="1710172392482" duration="5263000" />
+      <workItem from="1710240385533" duration="183000" />
+      <workItem from="1710262592953" duration="6885000" />
+      <workItem from="1710276597537" duration="1208000" />
+      <workItem from="1710316727350" duration="38000" />
+      <workItem from="1710344934515" duration="4328000" />
+      <workItem from="1710352890029" duration="3250000" />
+      <workItem from="1710400618366" duration="47000" />
+      <workItem from="1710403116180" duration="32000" />
+      <workItem from="1710588559277" duration="3381000" />
+      <workItem from="1710672165535" duration="595000" />
+      <workItem from="1710706609491" duration="2656000" />
+      <workItem from="1710747448174" duration="23000" />
+      <workItem from="1710865377763" duration="8077000" />
+      <workItem from="1710926240338" duration="12000" />
+      <workItem from="1710953641672" duration="9224000" />
+      <workItem from="1711010956954" duration="30000" />
+      <workItem from="1711037692987" duration="838000" />
+      <workItem from="1711091611960" duration="296000" />
+      <workItem from="1711214477734" duration="4557000" />
+      <workItem from="1711271570795" duration="11255000" />
+      <workItem from="1711283860700" duration="734000" />
+      <workItem from="1711350598608" duration="30000" />
+      <workItem from="1711393644889" duration="2933000" />
+      <workItem from="1711471196208" duration="3804000" />
+      <workItem from="1711475138214" duration="88000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/MasPruebas$python.coverage" NAME="python Coverage Results" MODIFIED="1710962654535" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MasPruebas$nuevo.coverage" NAME="nuevo Coverage Results" MODIFIED="1710709246138" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MasPruebas$pantalla1.coverage" NAME="pantalla1 Coverage Results" MODIFIED="1710345232104" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ppio" />
+    <SUITE FILE_PATH="coverage/MasPruebas$tabla.coverage" NAME="tabla Coverage Results" MODIFIED="1708867467139" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MasPruebas$__init__.coverage" NAME="__init__ Coverage Results" MODIFIED="1707295625142" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ppio" />
+    <SUITE FILE_PATH="coverage/MasPruebas$pruebasLineas.coverage" NAME="pruebasLineas Coverage Results" MODIFIED="1709220117100" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MasPruebas$pruebas_columnas.coverage" NAME="pruebas_columnas Coverage Results" MODIFIED="1710589842406" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MasPruebas$pantalla2.coverage" NAME="pantalla2 Coverage Results" MODIFIED="1711474774339" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ppio" />
+    <SUITE FILE_PATH="coverage/MasPruebas$superposicion.coverage" NAME="superposicion Coverage Results" MODIFIED="1708602485135" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MasPruebas$tablaInput.coverage" NAME="tablaInput Coverage Results" MODIFIED="1708430748371" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MasPruebas$soloTabla.coverage" NAME="soloTabla Coverage Results" MODIFIED="1708605784916" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MasPruebas$app.coverage" NAME="app Coverage Results" MODIFIED="1709231543459" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+  </component>
+</project>

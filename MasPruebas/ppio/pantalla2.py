@@ -250,19 +250,25 @@ class ImagenDiente(QImage):
 
 # Input movilidad y defecto de furca
 class Input03(QLineEdit):
-    def __init__(self, furca=False, widgetDientes=None, numDiente=0):
+    def __init__(self, furca=False, numDiente=0):
         super(Input03, self).__init__()
         regex = QRegularExpression("[0-3]")  # Expresión regular que permite solo números
         validator = QRegularExpressionValidator(regex)
         self.setValidator(validator)  # Aplicar la validación al QLineEdit
         self.setAlignment(Qt.AlignCenter)
         self.setPlaceholderText("0")
-        if furca:
-            self.editingFinished.connect(lambda: self.texto_furca(widgetDientes, numDiente))
+        self.editingFinished.connect(lambda: self.texto_cambiado(numDiente, furca))
         self.setStyleSheet("QLineEdit { " + style + "font-size: 10px; } QLineEdit:focus { border: 1px solid #C3C3C3; }")
 
-    def texto_furca(self, widgetDientes, numDiente):
-        widgetDientes.def_furca(numDiente, self.text())
+    def texto_cambiado(self, numDiente, furca):
+        if furca:
+            # Actualizar dibujo dientes
+            window.widgetDientes.def_furca(numDiente, self.text())
+            # actualizar datos
+            window.datos.actualizar_defecto_furca(numDiente, self.text())
+        else:
+            # actualizar datos
+            window.datos.actualizar_movilidad(numDiente, self.text())
 
 
 colorBoton = "background-color: #BEBEBE;"
@@ -310,7 +316,7 @@ def es_numero(texto):
 
 
 class Input3(QHBoxLayout):
-    def __init__(self, ndiente, tipo, widgetDientes, padre):
+    def __init__(self, ndiente, tipo, padre):
         super(Input3, self).__init__()
         self.validator = QRegularExpressionValidator(QRegularExpression(r"^[+-]?\d{1,2}$"))
 
@@ -322,17 +328,17 @@ class Input3(QHBoxLayout):
             inpt.setStyleSheet(
                 "QLineEdit { " + style + "font-size: 10px; } QLineEdit:focus { border: 1px solid #C3C3C3; }")
             inpt.setPlaceholderText("0")
-            inpt.editingFinished.connect(lambda ind=i-1: self.texto(ndiente, tipo, widgetDientes, ind, padre))
+            inpt.editingFinished.connect(lambda ind=i-1: self.texto(ndiente, tipo, ind, padre))
             self.addWidget(inpt)
             self.inpts.append(inpt)
 
-    def texto(self, ndiente, tipo, widgetDientes, num, padre):
+    def texto(self, ndiente, tipo, num, padre):
         inpt = self.inpts[num]
         if tipo == 1 and es_numero(inpt.text()):  # Margen gingival
             if -21 < int(inpt.text()) < 21:
                 altura_rojo[int(ndiente)][num] = int(inpt.text())
-                widgetDientes.actualizar_alturas(int(ndiente), tipo, num)
-                widgetDientes.update()
+                window.widgetDientes.actualizar_alturas(int(ndiente), tipo, num)
+                window.widgetDientes.update()
                 padre.cal.actualizarDatos(int(ndiente) * 3 + num, abs(int(inpt.text())))
             else:
                 inpt.setText("0")
@@ -343,8 +349,8 @@ class Input3(QHBoxLayout):
                 else:
                     self.inpts[num].setStyleSheet("QLineEdit { " + style + "color: black; font-size: 12px; }")
                 altura_azul[int(ndiente)][num] = int(inpt.text())
-                widgetDientes.actualizar_alturas(int(ndiente), tipo, num)
-                widgetDientes.update()
+                window.widgetDientes.actualizar_alturas(int(ndiente), tipo, num)
+                window.widgetDientes.update()
                 padre.ppd.actualizarDatos(int(ndiente) * 3 + num, abs(int(inpt.text())))
             else:
                 inpt.setText("0")
@@ -493,43 +499,59 @@ class Datos():
         self.supuraciones = [False] * 3 * 16
         self.margenes = [0] * 3 * 16
         self.profundidades = [0] * 3 * 16
+        self.defectosfurca = [0] * 16
+        self.implantes = [False] * 16
+        self.movilidad = [0] * 16
+        self.desactivados = []
         self.layout = layoutDientes
 
-    def actualizar(self, tipo, indice):
-        item = self.layout.itemAt(indice)
-        if tipo == 1:  # Sangrado
-            self.sangrados[indice] = [item.itemAt(4).w1.isChecked(), item.itemAt(4).w2.isChecked(),
-                                      item.itemAt(4).w3.isChecked()]
-        elif tipo == 2:
-            self.placas[indice] = [item.itemAt(5).w1.isChecked(), item.itemAt(5).w2.isChecked(),
-                                   item.itemAt(5).w3.isChecked()]
-        elif tipo == 3:
-            self.supuraciones[indice] = [item.itemAt(6).w1.isChecked(), item.itemAt(6).w2.isChecked(),
-                                         item.itemAt(6).w3.isChecked()]
-        elif tipo == 4:
-            self.margenes[indice] = [abs(int(item.itemAt(7).w1.text())), abs(int(item.itemAt(7).w2.text())),
-                                     abs(int(item.itemAt(7).w3.text()))]
-        elif tipo == 5:
-            self.profundidades[indice] = [abs(int(item.itemAt(8).w1.text())), abs(int(item.itemAt(8).w2.text())),
-                                          abs(int(item.itemAt(8).w3.text()))]
+    def actualizar_movilidad(self, diente, valor):
+        self.movilidad[diente] = abs(int(valor))
+
+    def actualizar_implante(self, diente, valor):
+        self.implantes[diente] = valor
+
+    def actualizar_defecto_furca(self, diente, valor):
+        self.defectosfurca[diente] = abs(int(valor))
+
+    def actualizar_sangrado(self, diente, valores):
+        self.sangrados[diente] = valores
+
+    def actualizar_placa(self, diente, valores):
+        self.placas[diente] = valores
+
+    def actualizar_supuracion(self, diente, valores):
+        self.supuraciones[diente] = valores
+
+    def actualizar_margen(self, diente, i, valor):
+        self.margenes[diente][i] = abs(int(valor))
+
+    def actualizar_profundidad(self, diente, i, valor):
+        self.profundidades[diente][i] = abs(int(valor))
+
+    def actualizar_desactivados(self, diente):
+        if diente in self.desactivados:
+            self.desactivados.remove(diente)
+        else:
+            self.desactivados.append(diente)
 
 
 class Columna(QVBoxLayout):
-    def     __init__(self, numDiente, defFurca, widgetDientes, padre):
+    def     __init__(self, numDiente, defFurca, padre):
         super(Columna, self).__init__()
 
         botonNumeroDiente = QPushButton(str(dientes[int(numDiente)]))
         botonNumeroDiente.setCheckable(True)
         botonNumeroDiente.setStyleSheet(style + "background-color: #BEBEBE; font-weight: bold; font-size: 12px;")
-        botonNumeroDiente.clicked.connect(lambda: self.desactivar_diente(numDiente, widgetDientes))
+        botonNumeroDiente.clicked.connect(lambda: self.desactivar_diente(numDiente))
         self.addWidget(botonNumeroDiente)
 
         # MOVILIDAD
-        movilidad = Input03(False)
+        movilidad = Input03(False, dientes[int(numDiente)])
 
         # DEFECTO DE FURCA
         if defFurca == 1:
-            defFurca = Input03(True, widgetDientes, dientes[int(numDiente)])
+            defFurca = Input03(True, dientes[int(numDiente)])
         else:
             defFurca = QLabel("")
             defFurca.setFixedSize(76, 22)
@@ -540,7 +562,7 @@ class Columna(QVBoxLayout):
         boton.setStyleSheet(
             "QPushButton { " + style + " background-color: #BEBEBE; } QPushButton:hover { background-color: #AAAAAA; }")
         boton.setDefault(True)
-        boton.clicked.connect(lambda: self.diente_implante(numDiente, boton, widgetDientes, defFurca))
+        boton.clicked.connect(lambda: self.diente_implante(numDiente, boton, defFurca))
 
         # SANGRADO AL SONDAJE
         sangrado = InputSiNo3("#FF2B32", numDiente, padre, 1)
@@ -552,10 +574,10 @@ class Columna(QVBoxLayout):
         supuracion = InputSiNo3("#7CEBA0", numDiente, padre, 3)
 
         # MARGEN GINGIVAL
-        margenGingival = Input3(numDiente, 1, widgetDientes, padre)
+        margenGingival = Input3(numDiente, 1, padre)
 
         # PROFUNDIDAD DE SONDAJE
-        profSondaje = Input3(numDiente, 2, widgetDientes, padre)
+        profSondaje = Input3(numDiente, 2, padre)
 
         # añadimos los elementos
         self.addWidget(movilidad)
@@ -567,19 +589,19 @@ class Columna(QVBoxLayout):
         self.addLayout(margenGingival)
         self.addLayout(profSondaje)
 
-    def diente_implante(self, numDiente, boton, widgetDientes, deffurca):
+    def diente_implante(self, numDiente, boton, deffurca):
         cambiar_color(boton, "#333333")
         if boton.isChecked():
             implantes.append(dientes[int(numDiente)])
         else:
             implantes.remove(dientes[int(numDiente)])
-        widgetDientes.actualizar_imagen()
-        widgetDientes.def_furca(dientes[int(numDiente)], -1, deffurca.text())
-        widgetDientes.update()
+        window.widgetDientes.actualizar_imagen()
+        window.widgetDientes.def_furca(dientes[int(numDiente)], -1, deffurca.text())
+        window.widgetDientes.update()
 
-    def desactivar_diente(self, numDiente, widgetDientes):
-        widgetDientes.desactivar_activar_diente(int(numDiente))
-        widgetDientes.update()
+    def desactivar_diente(self, numDiente):
+        window.widgetDientes.desactivar_activar_diente(int(numDiente))
+        window.widgetDientes.update()
 
 
 class MainWindow(QMainWindow):
@@ -625,41 +647,41 @@ class MainWindow(QMainWindow):
         frameEtiquetas.setLayout(layoutEtiquetas)
 
         # Creamos antes la imagen de los dientes para poder pasar el objeto y actualizarlo
-        widgetDientes = LineasSobreDientes()
+        self.widgetDientes = LineasSobreDientes()
 
         layoutColumnas = QHBoxLayout()
         layoutColumnas.setAlignment(Qt.AlignLeft)
 
         for n in range(0, 3):
-            col = Columna(str(n), 1, widgetDientes, self)
+            col = Columna(str(n), 1, self)
             col.setSpacing(0)
             layoutColumnas.addLayout(col)
 
         for n in range(3, 8):
-            col = Columna(str(n), 0, widgetDientes, self)
+            col = Columna(str(n), 0, self)
             col.setSpacing(0)
             layoutColumnas.addLayout(col)
 
         layoutColumnas.addSpacerItem(QSpacerItem(20, frameEtiquetas.height()))
 
         for n in range(8, 13):
-            col = Columna(str(n), 0, widgetDientes, self)
+            col = Columna(str(n), 0, self)
             col.setSpacing(0)
             layoutColumnas.addLayout(col)
 
         for n in range(13, 16):
-            col = Columna(str(n), 1, widgetDientes, self)
+            col = Columna(str(n), 1, self)
             col.setSpacing(0)
             layoutColumnas.addLayout(col)
 
         layoutCuadro1.addLayout(layoutColumnas)
 
-        datos = Datos(layoutColumnas)
-        self.ppd = CuadroColores(datos.profundidades, 5)
-        self.cal = CuadroColores(datos.margenes, 4)
-        self.sangrado = BarraPorcentajes(datos.sangrados, 1)
-        self.placa = BarraPorcentajes(datos.placas, 2)
-        self.supuracion = BarraPorcentajes(datos.supuraciones, 3)
+        self.datos = Datos(layoutColumnas)
+        self.ppd = CuadroColores(self.datos.profundidades, 5)
+        self.cal = CuadroColores(self.datos.margenes, 4)
+        self.sangrado = BarraPorcentajes(self.datos.sangrados, 1)
+        self.placa = BarraPorcentajes(self.datos.placas, 2)
+        self.supuracion = BarraPorcentajes(self.datos.supuraciones, 3)
 
         layoutCuadro1.setContentsMargins(10, 5, 10, 10)
         layoutCuadro1.setSpacing(5)
@@ -667,10 +689,10 @@ class MainWindow(QMainWindow):
         # Dientes
         layoutDientes = QHBoxLayout()
         layoutDientes.addWidget(QLabel("Vestibular"))
-        layoutDientes.addWidget(widgetDientes)
+        layoutDientes.addWidget(self.widgetDientes)
         layoutDientes.setAlignment(Qt.AlignCenter)
 
-        # Datos
+        # Datos medios
         layoutDatos = QHBoxLayout()
         layoutDatos.addWidget(self.ppd)
         layoutDatos.addWidget(self.cal)
