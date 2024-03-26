@@ -286,12 +286,12 @@ class InputSiNo3(QHBoxLayout):
             boton.setStyleSheet("QPushButton { " + style + colorBoton + "}" +
                                 "QPushButton:hover { background-color: #AAAAAA; }")
             boton.setDefault(True)
-            boton.clicked.connect(lambda *args, ind=n, t=tipo: self.pulsar_boton(color, ind, padre, numDiente, t))
+            boton.clicked.connect(lambda *args, ind=n-1, t=tipo: self.pulsar_boton(color, ind, padre, numDiente, t))
             self.addWidget(boton)
             self.botones.append(boton)
 
     def pulsar_boton(self, color, ind, padre, numDiente, tipo):
-        boton = self.botones[ind - 1]
+        boton = self.botones[ind]
         cambiar_color(boton, color)
         if tipo == 1:
             padre.sangrado.actualizarPorcentajes(int(numDiente) * 3 + ind, boton.isChecked())
@@ -353,7 +353,7 @@ class Input3(QHBoxLayout):
 class BarraPorcentajes(QWidget):
     def __init__(self, datos, n):
         super().__init__()
-        self.setGeometry(QRect(0, 0, 300, 100))
+        self.setGeometry(QRect(0, 0, 220, 81))
         self.porcentaje = 0
         self.datos = datos
         self.tipo = n
@@ -367,41 +367,49 @@ class BarraPorcentajes(QWidget):
         self.update()
 
     def paintEvent(self, event):
-        self.setMinimumSize(300, 100)
+        self.setMinimumSize(220, 100)
         # Pintamos un rectángulo con un % pintado
         qp = QPainter(self)
         qp.setRenderHint(QPainter.Antialiasing, True)
         width = 220
         w_coloreado = int(width * self.porcentaje)
-        qp.setBrush(QBrush(Qt.gray, Qt.SolidPattern))
+
+        qp.setBrush(QBrush(QColor(220, 220, 220), Qt.SolidPattern))
         if self.tipo == 1:
             # Sangrado
-            qp.setPen(QPen(Qt.red, 2, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
-            # Rectángulo vacío
-            qp.drawRect(0, 30, width, 20)
-            qp.setBrush(QBrush(Qt.red, Qt.SolidPattern))
+            tit = "BOP"
+            color = Qt.red
         elif self.tipo == 2:
             # Placa
-            qp.setPen(QPen(QColor(88, 96, 255), 2, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
-            # Rectángulo vacío
-            qp.drawRect(0, 30, width, 20)
-            qp.setBrush(QBrush(QColor(88, 96, 255), Qt.SolidPattern))
-        elif self.tipo == 3:
+            tit = "BPL"
+            color = QColor(88, 96, 255)
+        else:  # tipo = 3
             # Supuración
-            qp.setPen(QPen(QColor(124, 235, 160), 2, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
-            # Rectángulo vacío
-            qp.drawRect(0, 30, width, 20)
-            qp.setBrush(QBrush(QColor(124, 235, 160), Qt.SolidPattern))
+            tit = "SUP"
+            color = QColor(124, 235, 160)
+
+        qp.setPen(QPen(color, 2, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
+        # Rectángulo vacío
+        qp.drawRect(0, 20, width, 20)
+        qp.setBrush(QBrush(color, Qt.SolidPattern))
 
         # Rectángulo coloreado
         if w_coloreado > 0:
-            qp.drawRect(0, 30, w_coloreado, 20)
+            qp.drawRect(0, 20, w_coloreado, 20)
+
+        # Porcentajes
+        txt = "Nº sites = " + str(sum(self.datos)) + "; % = " + str(round(self.porcentaje * 100, 2)) + "%"
+
+        # Título y porcentajes
+        qp.setPen(QPen(Qt.black, 5, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
+        qp.drawText(QPoint((self.width() - qp.fontMetrics().horizontalAdvance(tit)) / 2, 14), tit)
+        qp.drawText(QPoint((self.width() - qp.fontMetrics().horizontalAdvance(txt)) / 2, qp.fontMetrics().height() + 45), txt)
 
 
 class CuadroColores(QWidget):
     def __init__(self, datos, n):
         super().__init__()
-        self.setGeometry(QRect(0, 0, 300, 100))
+        self.setGeometry(QRect(0, 0, 265, 81))
 
         self.n = n
         self.listadatos = datos
@@ -419,7 +427,7 @@ class CuadroColores(QWidget):
         self.update()
 
     def paintEvent(self, event):
-        self.setMinimumSize(300, 80)
+        self.setMinimumSize(265, 81)
 
         qp = QPainter(self)
         qp.setRenderHint(QPainter.Antialiasing, True)
@@ -439,7 +447,7 @@ class CuadroColores(QWidget):
 
         # Título del cuadro
         qp.setPen(QPen(Qt.black, 5, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
-        qp.drawText(QPoint((self.width() - qp.fontMetrics().horizontalAdvance(text))/2, 0), text)
+        qp.drawText(QPoint((self.width() - qp.fontMetrics().horizontalAdvance(text))/2, 14), text)
 
         etiqs = ["mm", "Nº sites", "%"]
 
@@ -580,7 +588,7 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle("Periostage")
         self.screen = QScreen().geometry()
-        self.setStyleSheet("background-color: #DCDCDC")
+        self.setStyleSheet("background-color: #ECECEC ")
         self.setMinimumSize(QSize(1000, 500))
         # self.setWindowState(Qt.WindowMaximized)
         self.ppd = None
