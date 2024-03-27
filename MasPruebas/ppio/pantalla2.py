@@ -282,7 +282,7 @@ def cambiar_color(boton, color):
 
 
 class InputSiNo3(QHBoxLayout):
-    def __init__(self, color, numDiente, padre, tipo):
+    def __init__(self, numDiente, tipo):
         super(InputSiNo3, self).__init__()
 
         self.botones = []
@@ -292,19 +292,25 @@ class InputSiNo3(QHBoxLayout):
             boton.setStyleSheet("QPushButton { " + style + colorBoton + "}" +
                                 "QPushButton:hover { background-color: #AAAAAA; }")
             boton.setDefault(True)
-            boton.clicked.connect(lambda *args, ind=n-1, t=tipo: self.pulsar_boton(color, ind, padre, numDiente, t))
+            boton.clicked.connect(lambda *args, ind=n - 1, t=tipo: self.pulsar_boton(ind, numDiente, t))
             self.addWidget(boton)
             self.botones.append(boton)
 
-    def pulsar_boton(self, color, ind, padre, numDiente, tipo):
+    def pulsar_boton(self, ind, numDiente, tipo):
         boton = self.botones[ind]
-        cambiar_color(boton, color)
+
         if tipo == 1:
-            padre.sangrado.actualizarPorcentajes(int(numDiente) * 3 + ind, boton.isChecked())
+            cambiar_color(boton, "#FF2B32")
+            window.sangrado.actualizarPorcentajes(int(numDiente) * 3 + ind, boton.isChecked())
+            window.datos.actualizar_sangrado(int(numDiente) * 3 + ind, boton.isChecked())
         elif tipo == 2:
-            padre.placa.actualizarPorcentajes(int(numDiente) * 3 + ind, boton.isChecked())
+            cambiar_color(boton, "#5860FF")
+            window.placa.actualizarPorcentajes(int(numDiente) * 3 + ind, boton.isChecked())
+            window.datos.actualizar_placa(int(numDiente) * 3 + ind, boton.isChecked())
         elif tipo == 3:
-            padre.supuracion.actualizarPorcentajes(int(numDiente) * 3 + ind, boton.isChecked())
+            cambiar_color(boton, "#7CEBA0")
+            window.supuracion.actualizarPorcentajes(int(numDiente) * 3 + ind, boton.isChecked())
+            window.datos.actualizar_supuracion(int(numDiente) * 3 + ind, boton.isChecked())
 
 
 def es_numero(texto):
@@ -316,7 +322,7 @@ def es_numero(texto):
 
 
 class Input3(QHBoxLayout):
-    def __init__(self, ndiente, tipo, padre):
+    def __init__(self, ndiente, tipo):
         super(Input3, self).__init__()
         self.validator = QRegularExpressionValidator(QRegularExpression(r"^[+-]?\d{1,2}$"))
 
@@ -328,18 +334,19 @@ class Input3(QHBoxLayout):
             inpt.setStyleSheet(
                 "QLineEdit { " + style + "font-size: 10px; } QLineEdit:focus { border: 1px solid #C3C3C3; }")
             inpt.setPlaceholderText("0")
-            inpt.editingFinished.connect(lambda ind=i-1: self.texto(ndiente, tipo, ind, padre))
+            inpt.editingFinished.connect(lambda ind=i - 1: self.texto(ndiente, tipo, ind))
             self.addWidget(inpt)
             self.inpts.append(inpt)
 
-    def texto(self, ndiente, tipo, num, padre):
+    def texto(self, ndiente, tipo, num):
         inpt = self.inpts[num]
         if tipo == 1 and es_numero(inpt.text()):  # Margen gingival
             if -21 < int(inpt.text()) < 21:
                 altura_rojo[int(ndiente)][num] = int(inpt.text())
                 window.widgetDientes.actualizar_alturas(int(ndiente), tipo, num)
                 window.widgetDientes.update()
-                padre.cal.actualizarDatos(int(ndiente) * 3 + num, abs(int(inpt.text())))
+                window.cal.actualizarDatos(int(ndiente) * 3 + num, abs(int(inpt.text())))
+                window.datos.actualizar_margen(int(ndiente), num, abs(int(inpt.text())))
             else:
                 inpt.setText("0")
         elif tipo == 2 and es_numero(inpt.text()):  # Profundidad de sondaje
@@ -351,7 +358,8 @@ class Input3(QHBoxLayout):
                 altura_azul[int(ndiente)][num] = int(inpt.text())
                 window.widgetDientes.actualizar_alturas(int(ndiente), tipo, num)
                 window.widgetDientes.update()
-                padre.ppd.actualizarDatos(int(ndiente) * 3 + num, abs(int(inpt.text())))
+                window.ppd.actualizarDatos(int(ndiente) * 3 + num, abs(int(inpt.text())))
+                window.datos.actualizar_profundidad(int(ndiente), num, abs(int(inpt.text())))
             else:
                 inpt.setText("0")
 
@@ -409,7 +417,8 @@ class BarraPorcentajes(QWidget):
         # Título y porcentajes
         qp.setPen(QPen(Qt.black, 5, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
         qp.drawText(QPoint((self.width() - qp.fontMetrics().horizontalAdvance(tit)) / 2, 14), tit)
-        qp.drawText(QPoint((self.width() - qp.fontMetrics().horizontalAdvance(txt)) / 2, qp.fontMetrics().height() + 45), txt)
+        qp.drawText(
+            QPoint((self.width() - qp.fontMetrics().horizontalAdvance(txt)) / 2, qp.fontMetrics().height() + 45), txt)
 
 
 class CuadroColores(QWidget):
@@ -453,7 +462,7 @@ class CuadroColores(QWidget):
 
         # Título del cuadro
         qp.setPen(QPen(Qt.black, 5, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
-        qp.drawText(QPoint((self.width() - qp.fontMetrics().horizontalAdvance(text))/2, 14), text)
+        qp.drawText(QPoint((self.width() - qp.fontMetrics().horizontalAdvance(text)) / 2, 14), text)
 
         etiqs = ["mm", "Nº sites", "%"]
 
@@ -462,7 +471,7 @@ class CuadroColores(QWidget):
         total_h = first_h
         ancho_etq = qp.fontMetrics().horizontalAdvance("Nº sites")
         for t in etiqs:
-            qp.drawText((ancho_etq - qp.fontMetrics().horizontalAdvance(t))/2, total_h, t)
+            qp.drawText((ancho_etq - qp.fontMetrics().horizontalAdvance(t)) / 2, total_h, t)
             total_h += qp.fontMetrics().height() + 7
 
         colores = [Qt.green, Qt.yellow, QColor(255, 136, 30), Qt.red, QColor(200, 0, 0)]
@@ -478,17 +487,18 @@ class CuadroColores(QWidget):
             qp.drawRect(total_w, 20, widthcuadro, 20)
             # Las etiquetas de las colummnas
             qp.setPen(QPen(Qt.black, 5, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
-            qp.drawText(total_w + widthcuadro/2 - qp.fontMetrics().horizontalAdvance(d[i])/2, total_h, d[i])
+            qp.drawText(total_w + widthcuadro / 2 - qp.fontMetrics().horizontalAdvance(d[i]) / 2, total_h, d[i])
             total_h += qp.fontMetrics().height() + 7
             # Cantidades
-            qp.drawText(total_w + widthcuadro/2 - qp.fontMetrics().horizontalAdvance(nsites[i])/2, total_h, nsites[i])
+            qp.drawText(total_w + widthcuadro / 2 - qp.fontMetrics().horizontalAdvance(nsites[i]) / 2, total_h,
+                        nsites[i])
             total_h += qp.fontMetrics().height() + 7
             # Porcentajes
             if total != 0:
                 pct = str(round(int(nsites[i]) / total * 100, 1))
             else:
                 pct = "0.0"
-            qp.drawText(total_w + widthcuadro/2 - qp.fontMetrics().horizontalAdvance(pct)/2, total_h, pct)
+            qp.drawText(total_w + widthcuadro / 2 - qp.fontMetrics().horizontalAdvance(pct) / 2, total_h, pct)
             total_w += widthcuadro
 
 
@@ -506,28 +516,28 @@ class Datos():
         self.layout = layoutDientes
 
     def actualizar_movilidad(self, diente, valor):
-        self.movilidad[diente] = abs(int(valor))
+        self.movilidad[int(diente)] = abs(int(valor))
 
     def actualizar_implante(self, diente, valor):
-        self.implantes[diente] = valor
+        self.implantes[int(diente)] = valor
 
     def actualizar_defecto_furca(self, diente, valor):
-        self.defectosfurca[diente] = abs(int(valor))
+        self.defectosfurca[int(diente)] = abs(int(valor))
 
     def actualizar_sangrado(self, diente, valores):
-        self.sangrados[diente] = valores
+        self.sangrados[int(diente)] = valores
 
     def actualizar_placa(self, diente, valores):
-        self.placas[diente] = valores
+        self.placas[int(diente)] = valores
 
     def actualizar_supuracion(self, diente, valores):
-        self.supuraciones[diente] = valores
+        self.supuraciones[int(diente)] = valores
 
     def actualizar_margen(self, diente, i, valor):
-        self.margenes[diente][i] = abs(int(valor))
+        self.margenes[int(diente) * 3 + i] = abs(int(valor))
 
     def actualizar_profundidad(self, diente, i, valor):
-        self.profundidades[diente][i] = abs(int(valor))
+        self.profundidades[int(diente) * 3 + i] = abs(int(valor))
 
     def actualizar_desactivados(self, diente):
         if diente in self.desactivados:
@@ -537,7 +547,7 @@ class Datos():
 
 
 class Columna(QVBoxLayout):
-    def     __init__(self, numDiente, defFurca, padre):
+    def __init__(self, numDiente, defFurca):
         super(Columna, self).__init__()
 
         botonNumeroDiente = QPushButton(str(dientes[int(numDiente)]))
@@ -547,11 +557,11 @@ class Columna(QVBoxLayout):
         self.addWidget(botonNumeroDiente)
 
         # MOVILIDAD
-        movilidad = Input03(False, dientes[int(numDiente)])
+        movilidad = Input03(False, numDiente)
 
         # DEFECTO DE FURCA
         if defFurca == 1:
-            defFurca = Input03(True, dientes[int(numDiente)])
+            defFurca = Input03(True, numDiente)
         else:
             defFurca = QLabel("")
             defFurca.setFixedSize(76, 22)
@@ -565,19 +575,19 @@ class Columna(QVBoxLayout):
         boton.clicked.connect(lambda: self.diente_implante(numDiente, boton, defFurca))
 
         # SANGRADO AL SONDAJE
-        sangrado = InputSiNo3("#FF2B32", numDiente, padre, 1)
+        sangrado = InputSiNo3(numDiente, 1)
 
         # PLACA
-        placa = InputSiNo3("#5860FF", numDiente, padre, 2)
+        placa = InputSiNo3(numDiente, 2)
 
         # SUPURACION
-        supuracion = InputSiNo3("#7CEBA0", numDiente, padre, 3)
+        supuracion = InputSiNo3(numDiente, 3)
 
         # MARGEN GINGIVAL
-        margenGingival = Input3(numDiente, 1, padre)
+        margenGingival = Input3(numDiente, 1)
 
         # PROFUNDIDAD DE SONDAJE
-        profSondaje = Input3(numDiente, 2, padre)
+        profSondaje = Input3(numDiente, 2)
 
         # añadimos los elementos
         self.addWidget(movilidad)
@@ -598,10 +608,12 @@ class Columna(QVBoxLayout):
         window.widgetDientes.actualizar_imagen()
         window.widgetDientes.def_furca(dientes[int(numDiente)], -1, deffurca.text())
         window.widgetDientes.update()
+        window.datos.actualizar_implante(int(numDiente), boton.isChecked())
 
     def desactivar_diente(self, numDiente):
         window.widgetDientes.desactivar_activar_diente(int(numDiente))
         window.widgetDientes.update()
+        window.datos.actualizar_desactivados(int(numDiente))
 
 
 class MainWindow(QMainWindow):
@@ -643,7 +655,8 @@ class MainWindow(QMainWindow):
 
         layoutCuadro1.addWidget(frameEtiquetas)
 
-        frameEtiquetas.setGeometry(QRect(0, 0, self.fontMetrics().horizontalAdvance("Profundidad de sondaje"), len(etiquetas) * self.fontMetrics().height()))
+        frameEtiquetas.setGeometry(QRect(0, 0, self.fontMetrics().horizontalAdvance("Profundidad de sondaje"),
+                                         len(etiquetas) * self.fontMetrics().height()))
         frameEtiquetas.setLayout(layoutEtiquetas)
 
         # Creamos antes la imagen de los dientes para poder pasar el objeto y actualizarlo
@@ -653,24 +666,24 @@ class MainWindow(QMainWindow):
         layoutColumnas.setAlignment(Qt.AlignLeft)
 
         for n in range(0, 3):
-            col = Columna(str(n), 1, self)
+            col = Columna(str(n), 1)
             col.setSpacing(0)
             layoutColumnas.addLayout(col)
 
         for n in range(3, 8):
-            col = Columna(str(n), 0, self)
+            col = Columna(str(n), 0)
             col.setSpacing(0)
             layoutColumnas.addLayout(col)
 
         layoutColumnas.addSpacerItem(QSpacerItem(20, frameEtiquetas.height()))
 
         for n in range(8, 13):
-            col = Columna(str(n), 0, self)
+            col = Columna(str(n), 0)
             col.setSpacing(0)
             layoutColumnas.addLayout(col)
 
         for n in range(13, 16):
-            col = Columna(str(n), 1, self)
+            col = Columna(str(n), 1)
             col.setSpacing(0)
             layoutColumnas.addLayout(col)
 
