@@ -190,12 +190,12 @@ class LineasSobreDientes(QWidget):
             aux.setY(int(self.altura + 5.6 * (altura_rojo[numeroDiente][indice] - altura_azul[numeroDiente][indice])))
             self.points2[numeroDiente * 3 + indice] = aux
 
-    def def_furca(self, numDiente, valor, txt=''):
+    def def_furca(self, numDiente, valor, valorfurca=0):
         if valor == -1:
             if numDiente in self.dientes_furca.keys():
                 del self.dientes_furca[numDiente]
-            elif txt != '':
-                self.dientes_furca[numDiente] = int(txt)
+            else:
+                self.dientes_furca[numDiente] = int(valorfurca)
         elif valor != 0:
             self.dientes_furca[numDiente] = valor
         elif numDiente in self.dientes_furca.keys():  # si val = 0 y diente en dientes_Furca
@@ -263,7 +263,7 @@ class Input03(QLineEdit):
     def texto_cambiado(self, numDiente, furca):
         if furca:
             # Actualizar dibujo dientes
-            window.widgetDientes.def_furca(numDiente, self.text())
+            window.widgetDientes.def_furca(dientes[int(numDiente)], self.text())
             # actualizar datos
             window.datos.actualizar_defecto_furca(numDiente, self.text())
         else:
@@ -503,7 +503,7 @@ class CuadroColores(QWidget):
 
 
 class Datos():
-    def __init__(self, layoutDientes):
+    def __init__(self):
         self.sangrados = [False] * 3 * 16
         self.placas = [False] * 3 * 16
         self.supuraciones = [False] * 3 * 16
@@ -513,31 +513,47 @@ class Datos():
         self.implantes = [False] * 16
         self.movilidad = [0] * 16
         self.desactivados = []
-        self.layout = layoutDientes
+        self.inicializados = []
 
     def actualizar_movilidad(self, diente, valor):
         self.movilidad[int(diente)] = abs(int(valor))
+        if int(diente) not in self.inicializados:
+            self.inicializados.append(int(diente))
 
     def actualizar_implante(self, diente, valor):
         self.implantes[int(diente)] = valor
+        if int(diente) not in self.inicializados:
+            self.inicializados.append(int(diente))
 
     def actualizar_defecto_furca(self, diente, valor):
         self.defectosfurca[int(diente)] = abs(int(valor))
+        if int(diente) not in self.inicializados:
+            self.inicializados.append(int(diente))
 
     def actualizar_sangrado(self, diente, valores):
         self.sangrados[int(diente)] = valores
+        if int(diente) not in self.inicializados:
+            self.inicializados.append(int(diente))
 
     def actualizar_placa(self, diente, valores):
         self.placas[int(diente)] = valores
+        if int(diente) not in self.inicializados:
+            self.inicializados.append(int(diente))
 
     def actualizar_supuracion(self, diente, valores):
         self.supuraciones[int(diente)] = valores
+        if int(diente) not in self.inicializados:
+            self.inicializados.append(int(diente))
 
     def actualizar_margen(self, diente, i, valor):
         self.margenes[int(diente) * 3 + i] = abs(int(valor))
+        if int(diente) not in self.inicializados:
+            self.inicializados.append(int(diente))
 
     def actualizar_profundidad(self, diente, i, valor):
         self.profundidades[int(diente) * 3 + i] = abs(int(valor))
+        if int(diente) not in self.inicializados:
+            self.inicializados.append(int(diente))
 
     def actualizar_desactivados(self, diente):
         if diente in self.desactivados:
@@ -553,18 +569,21 @@ class Columna(QVBoxLayout):
         botonNumeroDiente = QPushButton(str(dientes[int(numDiente)]))
         botonNumeroDiente.setCheckable(True)
         botonNumeroDiente.setStyleSheet(style + "background-color: #BEBEBE; font-weight: bold; font-size: 12px;")
-        botonNumeroDiente.clicked.connect(lambda: self.desactivar_diente(numDiente))
+        botonNumeroDiente.clicked.connect(lambda: self.desactivar_diente(numDiente, defFurca))
         self.addWidget(botonNumeroDiente)
 
+        self.anhadir_elementos(numDiente, defFurca)
+
+    def anhadir_elementos(self, numDiente, defFurca):
         # MOVILIDAD
         movilidad = Input03(False, numDiente)
 
         # DEFECTO DE FURCA
-        if defFurca == 1:
-            defFurca = Input03(True, numDiente)
+        if defFurca:
+            furca = Input03(True, numDiente)
         else:
-            defFurca = QLabel("")
-            defFurca.setFixedSize(76, 22)
+            furca = QLabel("")
+            furca.setFixedSize(76, 22)
 
         # IMPLANTE
         boton = QPushButton("")
@@ -572,7 +591,7 @@ class Columna(QVBoxLayout):
         boton.setStyleSheet(
             "QPushButton { " + style + " background-color: #BEBEBE; } QPushButton:hover { background-color: #AAAAAA; }")
         boton.setDefault(True)
-        boton.clicked.connect(lambda: self.diente_implante(numDiente, boton, defFurca))
+        boton.clicked.connect(lambda: self.diente_implante(numDiente, defFurca))
 
         # SANGRADO AL SONDAJE
         sangrado = InputSiNo3(numDiente, 1)
@@ -589,31 +608,107 @@ class Columna(QVBoxLayout):
         # PROFUNDIDAD DE SONDAJE
         profSondaje = Input3(numDiente, 2)
 
+        numDiente = int(numDiente)
+
+        if window and numDiente in window.datos.inicializados:
+            movilidad.setText(str(window.datos.movilidad[numDiente]))
+            if window.datos.implantes[numDiente]:
+                boton.setChecked(True)
+                cambiar_color(boton, "#333333")
+            furca.setText(str(window.datos.defectosfurca[numDiente]))
+            for i in range(0, 3):
+                if window.datos.sangrados[numDiente + i]:
+                    sangrado.layout().itemAt(i).widget().setChecked(True)
+                    cambiar_color(sangrado.layout().itemAt(i).widget(),"#FF2B32")
+                if window.datos.placas[numDiente + i]:
+                    placa.layout().itemAt(i).widget().setChecked(True)
+                    cambiar_color(placa.layout().itemAt(i).widget(), "#5860FF")
+                if window.datos.supuraciones[numDiente + i]:
+                    supuracion.layout().itemAt(i).widget().setChecked(True)
+                    cambiar_color(supuracion.layout().itemAt(i).widget(), "#7CEBA0")
+                margenGingival.layout().itemAt(i).widget().setText(str(window.datos.margenes[numDiente + i]))
+                profSondaje.layout().itemAt(i).widget().setText(str(window.datos.profundidades[numDiente + i]))
+
+
         # añadimos los elementos
         self.addWidget(movilidad)
         self.addWidget(boton)
-        self.addWidget(defFurca)
+        self.addWidget(furca)
         self.addLayout(sangrado)
         self.addLayout(placa)
         self.addLayout(supuracion)
         self.addLayout(margenGingival)
         self.addLayout(profSondaje)
 
-    def diente_implante(self, numDiente, boton, deffurca):
+    def diente_implante(self, numDiente, deffurca):
+        boton = self.layout().itemAt(2).widget()
         cambiar_color(boton, "#333333")
+        # Marcamos el implante
         if boton.isChecked():
             implantes.append(dientes[int(numDiente)])
         else:
             implantes.remove(dientes[int(numDiente)])
+        # Actualizamos la imagen
         window.widgetDientes.actualizar_imagen()
-        window.widgetDientes.def_furca(dientes[int(numDiente)], -1, deffurca.text())
+        window.widgetDientes.def_furca(dientes[int(numDiente)], -1, window.datos.defectosfurca[int(numDiente)])
         window.widgetDientes.update()
+        # Actualizamos los datos
         window.datos.actualizar_implante(int(numDiente), boton.isChecked())
+        # Desactivamos el input de la furca
+        if deffurca == 1:
+            inptfurca = self.layout().itemAt(3).widget()
+            self.layout().removeWidget(inptfurca)
+            inptfurca.deleteLater()
+            if boton.isChecked():
+                new = QLabel("")
+                new.setFixedSize(76, 22)
+            else:
+                if deffurca == 1:
+                    new = Input03(True, numDiente)
+                else:
+                    new = QLabel("")
+                    new.setFixedSize(76, 22)
+            self.layout().insertWidget(3, new)
 
-    def desactivar_diente(self, numDiente):
+    def eliminar_elementos(self, layout, ini):
+        while layout.count() > ini:
+            item = layout.takeAt(ini)
+            if item:
+                if isinstance(item, QHBoxLayout):
+                    self.eliminar_elementos(item.layout(), 0)
+                else:
+                    widget = item.widget()
+                    if widget:
+                        layout.removeWidget(widget)
+                        widget.deleteLater()
+                    else:
+                        layout.removeItem(item)
+
+    def desactivar_diente(self, numDiente, defFurca):
         window.widgetDientes.desactivar_activar_diente(int(numDiente))
         window.widgetDientes.update()
         window.datos.actualizar_desactivados(int(numDiente))
+        # Si el botón de diente está pulsado, es decir, el diente está desactivado
+        if self.itemAt(0).widget().isChecked():
+            # Cogemos el tamaño de la columna
+            geom = self.geometry()
+            geom.setHeight(geom.height() - self.itemAt(0).geometry().height())
+            # Quitamos todos los elementos del layout excepto el primero
+            self.eliminar_elementos(self.layout(), 1)
+
+            # Añadimos elementos no interaccionables
+            label = QLabel("")
+            # label.setFrameStyle(QLabel.Panel | QLabel.Sunken)
+            # label.setFocusPolicy(Qt.NoFocus)
+            label.setGeometry(geom)
+            self.addWidget(label)
+        else:
+            while self.layout().count() > 1:
+                child = self.layout().takeAt(1)
+                if child.widget():
+                    self.layout().removeWidget(child.widget())
+                    child.widget().deleteLater()
+            self.anhadir_elementos(numDiente, defFurca)
 
 
 class MainWindow(QMainWindow):
@@ -630,6 +725,7 @@ class MainWindow(QMainWindow):
         self.sangrado = None
         self.placa = None
         self.supuracion = None
+        self.datos = Datos()
         self.elementos_pantalla()
 
     def elementos_pantalla(self):
@@ -666,30 +762,29 @@ class MainWindow(QMainWindow):
         layoutColumnas.setAlignment(Qt.AlignLeft)
 
         for n in range(0, 3):
-            col = Columna(str(n), 1)
+            col = Columna(str(n), True)
             col.setSpacing(0)
             layoutColumnas.addLayout(col)
 
         for n in range(3, 8):
-            col = Columna(str(n), 0)
+            col = Columna(str(n), False)
             col.setSpacing(0)
             layoutColumnas.addLayout(col)
 
         layoutColumnas.addSpacerItem(QSpacerItem(20, frameEtiquetas.height()))
 
         for n in range(8, 13):
-            col = Columna(str(n), 0)
+            col = Columna(str(n), False)
             col.setSpacing(0)
             layoutColumnas.addLayout(col)
 
         for n in range(13, 16):
-            col = Columna(str(n), 1)
+            col = Columna(str(n), True)
             col.setSpacing(0)
             layoutColumnas.addLayout(col)
 
         layoutCuadro1.addLayout(layoutColumnas)
 
-        self.datos = Datos(layoutColumnas)
         self.ppd = CuadroColores(self.datos.profundidades, 5)
         self.cal = CuadroColores(self.datos.margenes, 4)
         self.sangrado = BarraPorcentajes(self.datos.sangrados, 1)
@@ -726,6 +821,7 @@ class MainWindow(QMainWindow):
 
 
 app = QApplication(sys.argv)
+window = None
 window = MainWindow()
 window.showMaximized()
 window.show()
