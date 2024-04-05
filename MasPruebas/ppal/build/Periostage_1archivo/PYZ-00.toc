@@ -1,4 +1,4 @@
-('C:\\Users\\Uxi\\Documents\\TFG\\MasPruebas\\ppio\\build\\Periostage_1archivo\\PYZ-00.pyz',
+('C:\\Users\\Uxi\\Documents\\TFG\\MasPruebas\\ppal\\build\\Periostage_1archivo\\PYZ-00.pyz',
  [('PIL',
    'C:\\Users\\Uxi\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\\LocalCache\\local-packages\\Python312\\site-packages\\PIL\\__init__.py',
    'PYMODULE'),
