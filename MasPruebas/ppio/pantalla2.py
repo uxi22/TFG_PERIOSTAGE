@@ -1,7 +1,8 @@
-import sys
+import sys, os
 from collections import defaultdict
 
 from PIL import Image
+from PySide6 import QtGui
 from PySide6.QtCore import Qt, QRegularExpression, QRect, QSize, QPoint
 from PySide6.QtGui import QScreen, QRegularExpressionValidator, QImage, QPolygon, QBrush, QColor, QPainter, QPen, \
     QFontMetricsF
@@ -12,6 +13,17 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget, QHBoxLayout, QSpacerItem, QLineEdit, QPushButton, QPointList, QFrame
 )
+
+# Obtenemos la ruta al directorio del script
+basedir = os.path.dirname(__file__)
+# basedir = os.path.join(basedir, os.pardir)
+
+try:
+    from ctypes import windll
+    myappid = 'mycompany.myproduct.subproduct.version'
+    windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+except ImportError:
+    pass
 
 arriba1 = [[1, 5], [5, 6], [4, 8], [9, 8], [9, 8], [7, 7], [6, 8], [10, 6]]  # del 18 al 11
 arriba2 = [[7, 11], [6, 6], [7, 8], [8, 9], [8, 10], [7, 5], [5, 5], [2, 1]]  # del 21 al 28
@@ -142,7 +154,7 @@ class LineasSobreDientes(QWidget):
                 auxpuntos.clear()
 
                 # defectos de furca
-                if len(self.dientes_furca) > 0 and dientes[i] in self.dientes_furca.keys():
+                if len(self.dientes_furca) > 0 and dientes[i] in self.dientes_furca.kfeys():
                     valor = self.dientes_furca[dientes[i]]
                     qp.setPen(QPen(QColor(165, 10, 135, 210), 1.5, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
                     auxpuntos = [self.puntos_furca[self.furcas.index(dientes[i])].x(),
@@ -194,7 +206,7 @@ class LineasSobreDientes(QWidget):
         if valor == -1:
             if numDiente in self.dientes_furca.keys():
                 del self.dientes_furca[numDiente]
-            else:
+            elif numDiente in self.furcas:
                 self.dientes_furca[numDiente] = int(valorfurca)
         elif valor != 0:
             self.dientes_furca[numDiente] = valor
@@ -214,11 +226,11 @@ class ImagenDiente(QImage):
         for i in range(pos1, pos2, d1):
             if i in implantes:
                 self.dientes1.append(
-                    Image.open(f"C:/Users/Uxi/Documents/TFG/MasPruebas/DIENTES/periodontograma-i{i}.png"))
+                    Image.open(os.path.join(basedir, "DIENTES", f"periodontograma-i{i}.png")))
                 self.dientes1[-1] = self.dientes1[-1].convert("RGBA")
             else:
                 self.dientes1.append(
-                    Image.open(f"C:/Users/Uxi/Documents/TFG/MasPruebas/DIENTES/periodontograma-{i}.png"))
+                    Image.open(os.path.join(basedir, "DIENTES", f"periodontograma-{i}.png")))
                 self.dientes1[-1] = self.dientes1[-1].convert("RGBA")
             width += self.dientes1[-1].width
 
@@ -227,11 +239,11 @@ class ImagenDiente(QImage):
         for i in range(pos3, pos4, d2):
             if i in implantes:
                 self.dientes2.append(
-                    Image.open(f"C:/Users/Uxi/Documents/TFG/MasPruebas/DIENTES/periodontograma-i{i}.png"))
+                    Image.open(os.path.join(basedir, "DIENTES", f"periodontograma-i{i}.png")))
                 # self.dientes2[-1] = self.dientes2[-1].convert("RGBA")
             else:
                 self.dientes2.append(
-                    Image.open(f"C:/Users/Uxi/Documents/TFG/MasPruebas/DIENTES/periodontograma-{i}.png"))
+                    Image.open(os.path.join(basedir, "DIENTES", f"periodontograma-{i}.png")))
                 # self.dientes2[-1] = self.dientes2[-1].convert("RGBA")
             width += self.dientes2[-1].width
 
@@ -483,6 +495,7 @@ class CuadroColores(QWidget):
             total_h = first_h
             # Dibujamos los rectángulos de colores
             qp.setPen(QPen(Qt.transparent, 2, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
+            qp.setBrush(QBrush(colores[i], Qt.SolidPattern))
             qp.setBrush(QBrush(colores[i], Qt.SolidPattern))
             qp.drawRect(total_w, 20, widthcuadro, 20)
             # Las etiquetas de las colummnas
@@ -760,7 +773,6 @@ class MainWindow(QMainWindow):
 
         layoutColumnas = QHBoxLayout()
         layoutColumnas.setAlignment(Qt.AlignLeft)
-
         for n in range(0, 3):
             col = Columna(str(n), True)
             col.setSpacing(0)
@@ -821,6 +833,8 @@ class MainWindow(QMainWindow):
 
 
 app = QApplication(sys.argv)
+# app.setWindowIcon(QtGui.QIcon(f"C:/Users/Uxi/Documents/TFG/MasPruebas/diente.ico"))
+app.setWindowIcon(QtGui.QIcon(os.path.join(basedir, 'diente.ico')))
 window = None
 window = MainWindow()
 window.showMaximized()
