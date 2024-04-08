@@ -1,6 +1,8 @@
+import datetime
 import sys, os
 from collections import defaultdict
 
+import pandas as pd
 from PIL import Image
 from PySide6 import QtGui
 from PySide6.QtCore import Qt, QRegularExpression, QRect, QSize, QPoint
@@ -528,6 +530,19 @@ class Datos():
         self.desactivados = []
         self.inicializados = []
 
+    def extraerDatos(self):
+        data = {}
+        for i in range(len(dientes)):
+            diente = dientes[i]
+            if diente not in self.desactivados:
+                data[int(diente)] = [self.movilidad[i], self.implantes[i], self.defectosfurca[i], self.sangrados[i],
+                                     self.placas[i], self.supuraciones[i], self.margenes[i], self.profundidades[i]]
+        df = pd.DataFrame(data)
+        df.index = ["Movilidad", "Implante", "Defecto de furca", "Sangrado al sondaje", "Placa", "Supuración",
+                    "Margen gingival", "Profundidad de sondaje"]
+        print("extraído")
+        df.to_excel(os.path.join(basedir, "./excel/datos" + datetime.datetime.now().strftime("%y%m%d%H%M%S") + ".xlsx"))
+
     def actualizar_movilidad(self, diente, valor):
         self.movilidad[int(diente)] = abs(int(valor))
         if int(diente) not in self.inicializados:
@@ -724,6 +739,12 @@ class Columna(QVBoxLayout):
             self.anhadir_elementos(numDiente, defFurca)
 
 
+class ExtraerInformacion(QPushButton):
+    def __init__(self):
+        super(ExtraerInformacion, self).__init__()
+
+
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
@@ -812,6 +833,15 @@ class MainWindow(QMainWindow):
         layoutDientes.addWidget(self.widgetDientes)
         layoutDientes.setAlignment(Qt.AlignCenter)
 
+        # Botón extraer información
+        boton = QPushButton()
+        boton.setGeometry(QRect(self.screen.width() - 150, self.screen.height() - 70, 120, 50))
+        boton.setText("Extraer datos")
+        boton.setCheckable(True)
+        boton.setStyleSheet(
+            "QPushButton { background-color: #9747FF; font-size: 12px; border-radius: 50;} QPushButton:hover { background-color: #623897; }")
+        boton.clicked.connect(lambda: self.datos.extraerDatos())
+
         # Datos medios
         layoutDatos = QHBoxLayout()
         layoutDatos.addWidget(self.ppd)
@@ -819,6 +849,7 @@ class MainWindow(QMainWindow):
         layoutDatos.addWidget(self.sangrado)
         layoutDatos.addWidget(self.placa)
         layoutDatos.addWidget(self.supuracion)
+        layoutDatos.addWidget(boton)
         layoutDatos.setAlignment(Qt.AlignCenter)
 
         total = QVBoxLayout()
