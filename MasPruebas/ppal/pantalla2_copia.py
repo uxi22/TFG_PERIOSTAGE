@@ -22,6 +22,7 @@ basedir = os.path.join(basedir, os.pardir)
 
 try:
     from ctypes import windll
+
     myappid = 'mycompany.myproduct.subproduct.version'
     windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 except ImportError:
@@ -38,6 +39,16 @@ altura_azul = [[0, 0, 0] for _ in range(16)]
 style = "margin: 0.5px; border: 1px solid grey; border-radius: 3px;"
 
 implantes = []
+
+
+def aplanar_lista(lista):
+    salida = []
+    for i in lista:
+        if isinstance(i, list):
+            salida.extend(i)
+        else:
+            salida.append(i)
+    return salida
 
 
 class LineasSobreDientes(QWidget):
@@ -156,7 +167,7 @@ class LineasSobreDientes(QWidget):
                 auxpuntos.clear()
 
                 # defectos de furca
-                if len(self.dientes_furca) > 0 and dientes[i] in self.dientes_furca.kfeys():
+                if len(self.dientes_furca) > 0 and dientes[i] in self.dientes_furca.keys():
                     valor = self.dientes_furca[dientes[i]]
                     qp.setPen(QPen(QColor(165, 10, 135, 210), 1.5, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
                     auxpuntos = [self.puntos_furca[self.furcas.index(dientes[i])].x(),
@@ -316,15 +327,15 @@ class InputSiNo3(QHBoxLayout):
         if tipo == 1:
             cambiar_color(boton, "#FF2B32")
             window.sangrado.actualizarPorcentajes(int(numDiente) * 3 + ind, boton.isChecked())
-            window.datos.actualizar_sangrado(int(numDiente) * 3 + ind, boton.isChecked())
+            window.datos.actualizar_sangrado(int(numDiente), ind, boton.isChecked())
         elif tipo == 2:
             cambiar_color(boton, "#5860FF")
             window.placa.actualizarPorcentajes(int(numDiente) * 3 + ind, boton.isChecked())
-            window.datos.actualizar_placa(int(numDiente) * 3 + ind, boton.isChecked())
+            window.datos.actualizar_placa(int(numDiente), ind, boton.isChecked())
         elif tipo == 3:
             cambiar_color(boton, "#7CEBA0")
             window.supuracion.actualizarPorcentajes(int(numDiente) * 3 + ind, boton.isChecked())
-            window.datos.actualizar_supuracion(int(numDiente) * 3 + ind, boton.isChecked())
+            window.datos.actualizar_supuracion(int(numDiente), ind, boton.isChecked())
 
 
 def es_numero(texto):
@@ -383,7 +394,7 @@ class BarraPorcentajes(QWidget):
         super().__init__()
         self.setGeometry(QRect(0, 0, 220, 81))
         self.porcentaje = 0
-        self.datos = datos
+        self.datos = aplanar_lista(datos)
         self.tipo = n
 
     def minimumSizeHint(self):
@@ -391,7 +402,7 @@ class BarraPorcentajes(QWidget):
 
     def actualizarPorcentajes(self, indice, nuevo):
         self.datos[indice] = nuevo
-        self.porcentaje = (sum(self.datos) / len(self.datos))
+        self.porcentaje = (sum(self.datos)) / len(self.datos)
         self.update()
 
     def paintEvent(self, event):
@@ -426,7 +437,8 @@ class BarraPorcentajes(QWidget):
             qp.drawRect(0, 20, w_coloreado, 20)
 
         # Porcentajes
-        txt = "Nº sites = " + str(sum(self.datos)) + "; % = " + str(round(self.porcentaje * 100, 2)) + "%"
+        txt = "Nº sites = " + str(sum(aplanar_lista(self.datos))) + "; % = " + str(
+            round(self.porcentaje * 100, 2)) + "%"
 
         # Título y porcentajes
         qp.setPen(QPen(Qt.black, 5, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
@@ -441,10 +453,10 @@ class CuadroColores(QWidget):
         self.setGeometry(QRect(0, 0, 265, 81))
 
         self.n = n
-        self.listadatos = datos
+        self.listadatos = aplanar_lista(datos)
         self.datos = defaultdict(int)
-        for i in datos:
-            self.datos[i] += 1
+        for i in self.listadatos:
+            self.datos[int(i)] += 1
 
     def minimumSizeHint(self):
         return QSize(1, 1)
@@ -519,11 +531,11 @@ class CuadroColores(QWidget):
 
 class Datos():
     def __init__(self):
-        self.sangrados = [False] * 3 * 16
-        self.placas = [False] * 3 * 16
-        self.supuraciones = [False] * 3 * 16
-        self.margenes = [0] * 3 * 16
-        self.profundidades = [0] * 3 * 16
+        self.sangrados = [[False, False, False] for _ in range(16)]
+        self.placas = [[False, False, False] for _ in range(16)]
+        self.supuraciones = [[False, False, False] for _ in range(16)]
+        self.margenes = [[0, 0, 0] for _ in range(16)]
+        self.profundidades = [[0, 0, 0] for _ in range(16)]
         self.defectosfurca = [0] * 16
         self.implantes = [False] * 16
         self.movilidad = [0] * 16
@@ -540,7 +552,6 @@ class Datos():
         df = pd.DataFrame(data)
         df.index = ["Movilidad", "Implante", "Defecto de furca", "Sangrado al sondaje", "Placa", "Supuración",
                     "Margen gingival", "Profundidad de sondaje"]
-        print("extraído")
         df.to_excel(os.path.join(basedir, "./excel/datos" + datetime.datetime.now().strftime("%y%m%d%H%M%S") + ".xlsx"))
 
     def actualizar_movilidad(self, diente, valor):
@@ -558,28 +569,28 @@ class Datos():
         if int(diente) not in self.inicializados:
             self.inicializados.append(int(diente))
 
-    def actualizar_sangrado(self, diente, valores):
-        self.sangrados[int(diente)] = valores
+    def actualizar_sangrado(self, diente, i, valor):
+        self.sangrados[int(diente)][i] = valor
         if int(diente) not in self.inicializados:
             self.inicializados.append(int(diente))
 
-    def actualizar_placa(self, diente, valores):
-        self.placas[int(diente)] = valores
+    def actualizar_placa(self, diente, i, valor):
+        self.placas[int(diente)][i] = valor
         if int(diente) not in self.inicializados:
             self.inicializados.append(int(diente))
 
-    def actualizar_supuracion(self, diente, valores):
-        self.supuraciones[int(diente)] = valores
+    def actualizar_supuracion(self, diente, i, valor):
+        self.supuraciones[int(diente)][i] = valor
         if int(diente) not in self.inicializados:
             self.inicializados.append(int(diente))
 
     def actualizar_margen(self, diente, i, valor):
-        self.margenes[int(diente) * 3 + i] = abs(int(valor))
+        self.margenes[int(diente)][i] = abs(int(valor))
         if int(diente) not in self.inicializados:
             self.inicializados.append(int(diente))
 
     def actualizar_profundidad(self, diente, i, valor):
-        self.profundidades[int(diente) * 3 + i] = abs(int(valor))
+        self.profundidades[int(diente)][i] = abs(int(valor))
         if int(diente) not in self.inicializados:
             self.inicializados.append(int(diente))
 
@@ -647,7 +658,7 @@ class Columna(QVBoxLayout):
             for i in range(0, 3):
                 if window.datos.sangrados[numDiente + i]:
                     sangrado.layout().itemAt(i).widget().setChecked(True)
-                    cambiar_color(sangrado.layout().itemAt(i).widget(),"#FF2B32")
+                    cambiar_color(sangrado.layout().itemAt(i).widget(), "#FF2B32")
                 if window.datos.placas[numDiente + i]:
                     placa.layout().itemAt(i).widget().setChecked(True)
                     cambiar_color(placa.layout().itemAt(i).widget(), "#5860FF")
@@ -656,7 +667,6 @@ class Columna(QVBoxLayout):
                     cambiar_color(supuracion.layout().itemAt(i).widget(), "#7CEBA0")
                 margenGingival.layout().itemAt(i).widget().setText(str(window.datos.margenes[numDiente + i]))
                 profSondaje.layout().itemAt(i).widget().setText(str(window.datos.profundidades[numDiente + i]))
-
 
         # añadimos los elementos
         self.addWidget(movilidad)
@@ -744,7 +754,6 @@ class ExtraerInformacion(QPushButton):
         super(ExtraerInformacion, self).__init__()
 
 
-
 class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
@@ -761,6 +770,7 @@ class MainWindow(QMainWindow):
         self.supuracion = None
         self.datos = Datos()
         self.elementos_pantalla()
+        self.widgetDientes = None
 
     def elementos_pantalla(self):
         tit = QHBoxLayout()
@@ -836,10 +846,10 @@ class MainWindow(QMainWindow):
         # Botón extraer información
         boton = QPushButton()
         boton.setGeometry(QRect(self.screen.width() - 150, self.screen.height() - 70, 120, 50))
-        boton.setText("Extraer datos")
+        boton.setText("Exportar")
         boton.setCheckable(True)
         boton.setStyleSheet(
-            "QPushButton { background-color: #9747FF; font-size: 12px; border-radius: 50;} QPushButton:hover { background-color: #623897; }")
+            "QPushButton { background-color: #9747FF; font-size: 12px; border-radius: 10px; padding: 3px 7px;} QPushButton:hover { background-color: #623897; }")
         boton.clicked.connect(lambda: self.datos.extraerDatos())
 
         # Datos medios
