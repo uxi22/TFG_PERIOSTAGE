@@ -49,6 +49,16 @@ def aplanar_lista(lista):
     return salida
 
 
+def aplanar_abs_lista(lista):
+    salida = []
+    for i in lista:
+        if isinstance(i, list):
+            salida.extend(aplanar_abs_lista(i))
+        else:
+            salida.append(abs(i))
+    return salida
+
+
 class LineasSobreDientes(QWidget):
     def __init__(self, datos, *a):
         super().__init__(*a)
@@ -163,7 +173,8 @@ class LineasSobreDientes(QWidget):
                 auxpuntos.clear()
 
                 # defectos de furca
-                if not window.datos.implantes[i] and dientes[i] in self.furcas and window.datos.defectosfurca[self.furcas.index(dientes[i])] > 0:
+                if not window.datos.implantes[i] and dientes[i] in self.furcas and window.datos.defectosfurca[
+                    self.furcas.index(dientes[i])] > 0:
                     auxindice = self.furcas.index(dientes[i])
                     valor = window.datos.defectosfurca[auxindice]
                     qp.setPen(QPen(QColor(165, 10, 135, 210), 1.5, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
@@ -555,6 +566,7 @@ class Datos():
         self.sangrados[int(diente)][i] = valor
         if int(diente) not in self.inicializados:
             self.inicializados.append(int(diente))
+        window.clasificacion.actualizar()
 
     def actualizar_placa(self, diente, i, valor):
         self.placas[int(diente)][i] = valor
@@ -570,11 +582,13 @@ class Datos():
         self.margenes[int(diente)][i] = abs(int(valor))
         if int(diente) not in self.inicializados:
             self.inicializados.append(int(diente))
+        window.clasificacion.actualizar()
 
     def actualizar_profundidad(self, diente, i, valor):
         self.profundidades[int(diente)][i] = abs(int(valor))
         if int(diente) not in self.inicializados:
             self.inicializados.append(int(diente))
+        window.clasificacion.actualizar()
 
     def actualizar_desactivados(self, diente):
         if diente in self.desactivados:
@@ -725,9 +739,65 @@ class Columna(QVBoxLayout):
             self.anhadir_elementos(numDiente, defFurca)
 
 
-class ExtraerInformacion(QPushButton):
-    def __init__(self):
-        super(ExtraerInformacion, self).__init__()
+def clasificacion_esquema1(datos):
+    # Calcular sangrado medio
+    pd = int(sum(aplanar_abs_lista(datos.profundidades)) / len(aplanar_abs_lista(datos.profundidades)))
+    bop = sum(aplanar_lista(datos.sangrados)) / len(aplanar_lista(datos.sangrados))
+    margen = sum(aplanar_abs_lista(datos.margenes)) / len(aplanar_abs_lista(datos.margenes))
+    # calcular rbl/cal
+    cal = int((pd + margen) - 2)
+    print(pd)
+    print(cal)
+
+    if pd <= 3:
+        if bop < 0.1:
+            return "SANO"
+        if cal == 0:
+            return "Gingivitis"
+        #if tratamiento periodontal -> "Gingivitis en periodonto reducido"
+        #if not tratamiento periodontal
+        return calcular_estadio(cal, datos)
+    if bop < 0.1:
+        if cal == 0:
+            return "SANO"
+        # if tratamiento periodontal -> "Sano en periodonto reducido"
+        if pd == 4:
+            return "Sano en periodonto reducido"
+        return calcular_estadio(cal, datos)
+    if cal == 0:
+        return "Gingivitis"
+    return calcular_estadio(cal, datos)
+
+# if periodontitis
+def calcular_estadio(cal, datos):
+    # No se consideran dientes perdidos
+    maxpd = max(aplanar_abs_lista(datos.profundidades))
+    # if len(datos.desactivados) == 0:
+    if 1 <= cal <= 2:
+        if maxpd <= 4:
+            return "Stage I"
+    elif 3 <= cal <= 4:
+        if maxpd <= 5:
+            return "Stage II"
+    else:  # >= 5
+        if maxpd >= 6:
+            n_afectacionfurca = sum(1 for elemento in datos.furcas if elemento > 1)
+            if n_afectacionfurca >= 1:
+                if len(datos.desactivados) < 2: # Cantidad de dientes totales >= 20
+                    # if no colapso de mordida / disfuncion masticatoria
+                    return "Stage III"
+                # if colapso de mordida / disfuncion masticatoria
+                return "Stage IV"
+    return "??"
+
+class Clasificacion(QLabel):
+    def __init__(self, datos):
+        super(Clasificacion, self).__init__()
+        self.setStyleSheet("font-weight: bold; font-size: 16px; margin-right: 20px;")
+        self.setText(clasificacion_esquema1(datos))
+
+    def actualizar(self):
+        self.setText(clasificacion_esquema1(window.datos))
 
 
 class MainWindow(QMainWindow):
@@ -745,6 +815,7 @@ class MainWindow(QMainWindow):
         self.placa = None
         self.supuracion = None
         self.widgetDientes = None
+        self.clasificacion = None
         self.datos = Datos()
         self.elementos_pantalla()
 
@@ -804,6 +875,8 @@ class MainWindow(QMainWindow):
 
         layoutCuadro1.addLayout(layoutColumnas)
 
+        self.clasificacion = Clasificacion(self.datos)
+        self.clasificacion.setStyleSheet("font-weight: bold; font-size: 16px; margin-right: 20px;")
         self.ppd = CuadroColores(self.datos.profundidades, 5)
         self.cal = CuadroColores(self.datos.margenes, 4)
         self.sangrado = BarraPorcentajes(self.datos.sangrados, 1)
@@ -830,6 +903,7 @@ class MainWindow(QMainWindow):
 
         # Datos medios
         layoutDatos = QHBoxLayout()
+        layoutDatos.addWidget(self.clasificacion)
         layoutDatos.addWidget(self.ppd)
         layoutDatos.addWidget(self.cal)
         layoutDatos.addWidget(self.sangrado)
