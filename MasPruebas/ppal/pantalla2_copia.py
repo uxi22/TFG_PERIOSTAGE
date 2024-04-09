@@ -725,11 +725,6 @@ class Columna(QVBoxLayout):
             self.anhadir_elementos(numDiente, defFurca)
 
 
-class ExtraerInformacion(QPushButton):
-    def __init__(self):
-        super(ExtraerInformacion, self).__init__()
-
-
 class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
