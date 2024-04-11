@@ -59,10 +59,17 @@ def aplanar_abs_lista(lista):
     return salida
 
 
+def calcular_cal(i):
+    print((sum(window.datos.profundidades[i]) / 3))
+    print(sum(window.datos.margenes[i]) / 3)
+    print((sum(window.datos.profundidades[i]) / 3 + sum(window.datos.margenes[i]) / 3) - 2)
+    return (sum(window.datos.profundidades[i]) / 3 + sum(window.datos.margenes[i]) / 3) - 2
+
+
 class LineasSobreDientes(QWidget):
     def __init__(self, datos, *a):
         super().__init__(*a)
-        self.imagen = ImagenDiente(18, 10, -1, 21, 29, 1, datos)  # imagen de los dientes con sus atributos
+        self.imagen = ImagenDiente(18, 10, -1, 21, 29, 1, datos)
 
         # inicializamos las listas de los puntos de las líneas
         self.points = QPointList()
@@ -114,6 +121,7 @@ class LineasSobreDientes(QWidget):
         imagen = QImage(self.imagen)
         tam = QRect(0, 0, imagen.width(), imagen.height())
         self.setMinimumSize(imagen.width(), imagen.height())
+        imagen = imagen.scaled(tam.width(), tam.height())
         qp.drawImage(tam, imagen)
 
         pen = qp.pen()
@@ -182,10 +190,10 @@ class LineasSobreDientes(QWidget):
                                  self.puntos_furca[auxindice].y()]
                     (poligono << QPoint(auxpuntos[0] - 8, auxpuntos[1]) <<
                      QPoint(auxpuntos[0], auxpuntos[1] + 11) << QPoint(auxpuntos[0] + 8, auxpuntos[1]))
-                    if valor == "1":
+                    if valor == 1:
                         qp.drawPolyline(poligono)  # triángulo sin cerrar y sin rellenar
                     else:
-                        if valor == "3":
+                        if valor == 3:
                             qp.setBrush(QBrush(QColor(165, 10, 135, 120), Qt.SolidPattern))
                         qp.drawPolygon(poligono)
                     poligono.clear()
@@ -363,8 +371,8 @@ class Input3(QHBoxLayout):
                 altura_rojo[int(ndiente)][num] = int(inpt.text())
                 window.widgetDientes.actualizar_alturas(int(ndiente), tipo, num)
                 window.widgetDientes.update()
-                window.cal.actualizarDatos(int(ndiente) * 3 + num, abs(int(inpt.text())))
                 window.datos.actualizar_margen(int(ndiente), num, abs(int(inpt.text())))
+                window.cal.actualizarDatos(int(ndiente), calcular_cal(int(ndiente)))
             else:
                 inpt.setText("0")
         elif tipo == 2 and es_numero(inpt.text()):  # Profundidad de sondaje
@@ -377,6 +385,7 @@ class Input3(QHBoxLayout):
                 window.widgetDientes.actualizar_alturas(int(ndiente), tipo, num)
                 window.widgetDientes.update()
                 window.ppd.actualizarDatos(int(ndiente) * 3 + num, abs(int(inpt.text())))
+                window.cal.actualizarDatos(int(ndiente), calcular_cal(int(ndiente)))
                 window.datos.actualizar_profundidad(int(ndiente), num, abs(int(inpt.text())))
             else:
                 inpt.setText("0")
@@ -441,12 +450,20 @@ class BarraPorcentajes(QWidget):
 
 
 class CuadroColores(QWidget):
-    def __init__(self, datos, n):
+    def __init__(self, profundidades, margenes, n):
         super().__init__()
         self.setGeometry(QRect(0, 0, 265, 81))
 
         self.n = n
-        self.listadatos = aplanar_lista(datos)
+        if margenes != None:
+            self.margenes = margenes
+            self.profundidades = profundidades
+            self.listadatos = [0] * 16
+            # for i in range(0, 16):
+            #    self.listadatos[i] = calcular_cal(i)
+        else:
+            self.listadatos = aplanar_lista(profundidades)
+
         self.datos = defaultdict(int)
         for i in self.listadatos:
             self.datos[int(i)] += 1
@@ -675,6 +692,7 @@ class Columna(QVBoxLayout):
         self.addLayout(profSondaje)
 
     def diente_implante(self, numDiente, deffurca):
+        print(self.geometry())
         boton = self.layout().itemAt(2).widget()
         cambiar_color(boton, "#333333")
         # Actualizamos los datos
@@ -746,16 +764,14 @@ def clasificacion_esquema1(datos):
     margen = sum(aplanar_abs_lista(datos.margenes)) / len(aplanar_abs_lista(datos.margenes))
     # calcular rbl/cal
     cal = int((pd + margen) - 2)
-    print(pd)
-    print(cal)
 
     if pd <= 3:
         if bop < 0.1:
             return "SANO"
         if cal == 0:
             return "Gingivitis"
-        #if tratamiento periodontal -> "Gingivitis en periodonto reducido"
-        #if not tratamiento periodontal
+        # if tratamiento periodontal -> "Gingivitis en periodonto reducido"
+        # if not tratamiento periodontal
         return calcular_estadio(cal, datos)
     if bop < 0.1:
         if cal == 0:
@@ -767,6 +783,7 @@ def clasificacion_esquema1(datos):
     if cal == 0:
         return "Gingivitis"
     return calcular_estadio(cal, datos)
+
 
 # if periodontitis
 def calcular_estadio(cal, datos):
@@ -783,12 +800,13 @@ def calcular_estadio(cal, datos):
         if maxpd >= 6:
             n_afectacionfurca = sum(1 for elemento in datos.furcas if elemento > 1)
             if n_afectacionfurca >= 1:
-                if len(datos.desactivados) < 2: # Cantidad de dientes totales >= 20
+                if len(datos.desactivados) < 2:  # Cantidad de dientes totales >= 20
                     # if no colapso de mordida / disfuncion masticatoria
                     return "Stage III"
                 # if colapso de mordida / disfuncion masticatoria
                 return "Stage IV"
     return "??"
+
 
 class Clasificacion(QLabel):
     def __init__(self, datos):
@@ -877,8 +895,8 @@ class MainWindow(QMainWindow):
 
         self.clasificacion = Clasificacion(self.datos)
         self.clasificacion.setStyleSheet("font-weight: bold; font-size: 16px; margin-right: 20px;")
-        self.ppd = CuadroColores(self.datos.profundidades, 5)
-        self.cal = CuadroColores(self.datos.margenes, 4)
+        self.ppd = CuadroColores(self.datos.profundidades, None, 5)
+        self.cal = CuadroColores(self.datos.profundidades, self.datos.margenes, 4)
         self.sangrado = BarraPorcentajes(self.datos.sangrados, 1)
         self.placa = BarraPorcentajes(self.datos.placas, 2)
         # self.supuracion = BarraPorcentajes(self.datos.supuraciones, 3)
