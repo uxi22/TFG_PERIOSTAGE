@@ -123,6 +123,7 @@ class LineasSobreDientes(QWidget):
         self.setMinimumSize(imagen.width(), imagen.height())
         imagen = imagen.scaled(tam.width(), tam.height())
         qp.drawImage(tam, imagen)
+        print(self.geometry())
 
         pen = qp.pen()
         pen.setWidth(1.5)
@@ -318,7 +319,7 @@ class InputSiNo3(QHBoxLayout):
             boton.setStyleSheet("QPushButton { " + style + colorBoton + "}" +
                                 "QPushButton:hover { background-color: #AAAAAA; }")
             boton.setDefault(True)
-            boton.clicked.connect(lambda *args, ind=n - 1, t=tipo: self.pulsar_boton(ind, numDiente, t))
+            boton.clicked.connect(lambda ind=n - 1, t=tipo: self.pulsar_boton(ind, numDiente, t))
             self.addWidget(boton)
             self.botones.append(boton)
 
@@ -692,7 +693,6 @@ class Columna(QVBoxLayout):
         self.addLayout(profSondaje)
 
     def diente_implante(self, numDiente, deffurca):
-        print(self.geometry())
         boton = self.layout().itemAt(2).widget()
         cambiar_color(boton, "#333333")
         # Actualizamos los datos
@@ -732,8 +732,9 @@ class Columna(QVBoxLayout):
                         layout.removeItem(item)
 
     def desactivar_diente(self, numDiente, defFurca):
-        window.widgetDientes.update()
         window.datos.actualizar_desactivados(int(numDiente))
+        window.widgetDientes.update()
+
         # Si el botón de diente está pulsado, es decir, el diente está desactivado
         if self.itemAt(0).widget().isChecked():
             # Cogemos el tamaño de la columna
@@ -862,6 +863,7 @@ class MainWindow(QMainWindow):
 
         frameEtiquetas.setGeometry(QRect(0, 0, self.fontMetrics().horizontalAdvance("Profundidad de sondaje"),
                                          len(etiquetas) * self.fontMetrics().height()))
+        print(frameEtiquetas.geometry())
         frameEtiquetas.setLayout(layoutEtiquetas)
 
         # Creamos antes la imagen de los dientes para poder pasar el objeto y actualizarlo
