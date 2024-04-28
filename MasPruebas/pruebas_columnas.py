@@ -7,14 +7,12 @@ import pandas as pd
 from PIL import Image
 from PySide6 import QtGui
 from PySide6.QtCore import Qt, QRegularExpression, QRect, QSize, QPoint
-from PySide6.QtGui import QScreen, QRegularExpressionValidator, QImage, QPolygon, QBrush, QColor, QPainter, QPen, \
-    QFontMetricsF, QPixmap
+from PySide6.QtGui import QRegularExpressionValidator, QImage, QPolygon, QBrush, QColor, QPainter, QPen
 from PySide6.QtWidgets import (
     QApplication,
     QLabel,
     QMainWindow,
-    QVBoxLayout,
-    QWidget, QHBoxLayout, QSpacerItem, QLineEdit, QPushButton, QPointList, QFrame
+    QWidget, QHBoxLayout, QLineEdit, QPushButton, QPointList, QFrame
 )
 from ctypes import windll
 
@@ -44,6 +42,7 @@ style = "margin: 0.5px; border: 1px solid grey; border-radius: 3px;"
 colorBoton = "background-color: #BEBEBE;"
 colorClasificacion = "black"
 
+
 def cambiar_color(boton, color):
     if boton.isChecked():
         boton.setStyleSheet(style + f"background-color: {color}")
@@ -60,7 +59,7 @@ def es_numero(texto):
 
 
 def calcular_cal(i, t):
-    if dientes[i] not in window.datos.desactivados:
+    if i not in window.datos.desactivados:
         return (window.datos.profundidades[i][t] + window.datos.margenes[i][t]) - 2
     else:
         return -1
@@ -131,7 +130,8 @@ class LineasSobreDientesAbajo(QWidget):
 
         # Puntos medios de la línea superior de los puntso de furca
         # 2 puntos por diente
-        triangulos_abajo = [[0, 0], [0, 0], [73, 11], [78, 42], [63, 10], [67, 40], [60, 10], [68, 42], [68, 9], [77, 41], [0, 0], [0, 0]]
+        triangulos_abajo = [[0, 0], [0, 0], [73, 11], [78, 42], [63, 10], [67, 40], [60, 10], [68, 42], [68, 9],
+                            [77, 41], [0, 0], [0, 0]]
 
         dist = 0
         self.altura = 57
@@ -230,7 +230,7 @@ class LineasSobreDientesAbajo(QWidget):
                     qp.setPen(QPen(QColor(165, 10, 135, 210), 1.5, Qt.SolidLine, Qt.SquareCap))
                     for j in range(2):
                         auxpuntos = [self.puntos_furca[auxindice * 2 + j].x(),
-                                    self.puntos_furca[auxindice * 2 + j].y()]
+                                     self.puntos_furca[auxindice * 2 + j].y()]
                         (poligono << QPoint(auxpuntos[0] - 8, auxpuntos[1]) <<
                          QPoint(auxpuntos[0], auxpuntos[1] + 11) << QPoint(auxpuntos[0] + 8, auxpuntos[1]))
                         if valor == 1:
@@ -272,10 +272,6 @@ class LineasSobreDientesAbajo(QWidget):
         self.update()
 
 
-
-
-
-
 class LineasSobreDientes(QWidget):
     def __init__(self, datos, parent):
         super().__init__(parent)
@@ -313,10 +309,6 @@ class LineasSobreDientes(QWidget):
         # Imagen de los dientes
         imagen = QImage(self.imagen)
 
-        # pixmap = QPixmap(self.imagen)
-        # pixmap = pixmap.scaled(self.imagen.width() * 0.92, self.imagen.height() * 0.92, Qt.KeepAspectRatio)
-
-        # tam = QRect(0, 0, pixmap.width(), pixmap.height())
         tam = QRect(0, 0, imagen.width(), imagen.height())
         self.setMinimumSize(imagen.width(), imagen.height())
         qp.drawImage(tam, imagen)
@@ -734,6 +726,7 @@ class Columna(QFrame):
     def desactivar_diente(self, numDiente):
         window.datos.actualizar_desactivados(int(numDiente))
         window.widgetDientes.update()
+        window.widgetDientesAbajo.update()
 
         if self.hijos[0].isChecked():
             # Label para la columna superior
@@ -834,7 +827,7 @@ class CuadroColores(QWidget):
 
         # Título del cuadro
         qp.setPen(QPen(Qt.black, 5, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
-        #CAMBIAR
+        # CAMBIAR
         qp.drawText(QPoint((self.width() - qp.fontMetrics().horizontalAdvance(text)) / 2, 14), text)
 
         etiqs = ["mm", "Nº sites", "%"]
@@ -949,20 +942,28 @@ class Datos:
         self.inicializados = []
 
     def extraerDatos(self):
-        data = {}
+        dfs = []
         for i in range(len(dientes)):
             diente = dientes[i]
-            if diente not in self.desactivados:
-                data[str(diente) + ".1"] = [self.movilidad[i], self.implantes[i], self.defectosfurca[i], self.sangrados[i][0],
-                            self.placas[i][0], self.supuraciones[i][0], self.margenes[i][0], self.profundidades[i][0]]
-                for j in range(2, 4):
-                    data[str(diente) + "." + str(j)] = ["", "", "", self.sangrados[i][j-1], self.placas[i][j-1],
-                                                        self.supuraciones[i][j-1], self.margenes[i][j-1], self.profundidades[i][j-1]]
-        df = pd.DataFrame(data)
+            if i not in self.desactivados:
+                dfs.append(pd.DataFrame(
+                    data=[self.movilidad[i], self.implantes[i], self.defectosfurca[i], self.sangrados[i][0],
+                          self.placas[i][0], self.supuraciones[i][0], self.margenes[i][0], self.profundidades[i][0]],
+                    columns=[diente]))
+                for j in range(1, 3):
+                    dfs.append(pd.DataFrame(data=["", "", "", self.sangrados[i][j], self.placas[i][j],
+                                                  self.supuraciones[i][j], self.margenes[i][j],
+                                                  self.profundidades[i][j]], columns=[""]))
+        df = pd.concat(dfs, axis=1)
         df.index = ["Movilidad", "Implante", "Defecto de furca", "Sangrado al sondaje", "Placa", "Supuración",
                     "Margen gingival", "Profundidad de sondaje"]
-        df.to_excel(os.path.join(basedir, "./excel/datos" + datetime.datetime.now().strftime("%y%m%d%H%M%S") + ".xlsx"))
-        data.clear()
+        df2 = pd.DataFrame(data=[datetime.datetime.now().strftime("%d-%m-%y"), "Mateo García Rodriguez", "Juan Carlos ÁLvarez", "12-05-1984", True, False, False])
+        df2.index = ["Fecha", "Odontólogo", "Paciente", "Fecha de nacimiento", "Tratamiento previo", "Colapso de mordida", "Tabaquismo"]
+        with pd.ExcelWriter(os.path.join(basedir, "./excel/datos" + datetime.datetime.now().strftime(
+                "%y%m%d%H%M%S") + ".xlsx")) as writer:
+            df2.to_excel(writer, sheet_name="Datos paciente")
+            df.to_excel(writer, sheet_name="Datos periodontograma")
+            # df3.to_excel(writer, sheet_name="Datos calculados")
 
     def actualizar_movilidad(self, diente, valor):
         self.movilidad[int(diente)] = abs(int(valor))
@@ -1043,9 +1044,12 @@ def calcular_estadio(cal, datos):
 
 def clasificacion_esquema1():
     # Calcular sangrado medio
-    pd = int(sum(aplanar_abs_lista(window.datos.profundidades)) / (len(aplanar_abs_lista(window.datos.profundidades)) - (len(window.datos.desactivados) * 6)))
-    bop = sum(aplanar_lista(window.datos.sangrados)) / (len(aplanar_lista(window.datos.sangrados)) - (len(window.datos.desactivados) * 6))
-    margen = sum(aplanar_abs_lista(window.datos.margenes)) / (len(aplanar_abs_lista(window.datos.margenes)) - (len(window.datos.desactivados) * 6))
+    pd = int(sum(aplanar_abs_lista(window.datos.profundidades)) / (
+                len(aplanar_abs_lista(window.datos.profundidades)) - (len(window.datos.desactivados) * 6)))
+    bop = sum(aplanar_lista(window.datos.sangrados)) / (
+                len(aplanar_lista(window.datos.sangrados)) - (len(window.datos.desactivados) * 6))
+    margen = sum(aplanar_abs_lista(window.datos.margenes)) / (
+                len(aplanar_abs_lista(window.datos.margenes)) - (len(window.datos.desactivados) * 6))
     # calcular rbl/cal
     # TODO: cambiar este cálculo
     cal = int((pd + margen) - 2)
@@ -1165,7 +1169,7 @@ class MainWindow(QMainWindow):
         self.frameDatosMedios.setLayout(layoutDatosMedios)
 
         etiquetas2 = ["Sangrado al sondaje", "Placa", "Supuración",
-                     "Margen Gingival", "Profundidad de sondaje"]
+                      "Margen Gingival", "Profundidad de sondaje"]
 
         incrementoHeight = 515
         for n in etiquetas2:
@@ -1191,8 +1195,6 @@ class MainWindow(QMainWindow):
 
         for columna in self.frameColumnas.findChildren(Columna):
             columna.newsize(self.height())
-
-
 
 
 app = QApplication(sys.argv)
