@@ -28,12 +28,11 @@ basedir = os.path.join(basedir, os.pardir)
 
 arriba = [[1, 5], [5, 6], [4, 8], [9, 8], [9, 8], [7, 7], [6, 8], [10, 6], [7, 11], [6, 6], [7, 8], [8, 9], [8, 10],
           [7, 5], [5, 5], [2, 1]]
-
-dientes = [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28]
-
 separaciones = [8, 6, 9, 11, 10, 12, 10, 29, 9, 8, 13, 7, 4, 7, 5, 3]
 
+dientes = [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28]
 furcas = [18, 17, 16, 26, 27, 28]
+
 
 style = "margin: 0.5px; border: 1px solid grey; border-radius: 3px;"
 colorBoton = "background-color: #BEBEBE;"
@@ -122,13 +121,13 @@ class LineasSobreDientesAbajo(QWidget):
         # Inicializamos las listas de los puntos de las líneas
         self.points = QPointList()
         self.points2 = QPointList()
-        # DE 32 elementos en lugar de 16
+        # De 32 elementos en lugar de 16
         self.puntos_furca = QPointList()
 
         # Puntos medios de la línea superior de los puntso de furca
         # 2 puntos por diente
-        triangulos_abajo = [[0, 0], [0, 0], [73, 11], [78, 42], [63, 10], [67, 40], [60, 10], [68, 42], [68, 9],
-                            [77, 41], [0, 0], [0, 0]]
+        triangulos_abajo = [[0, 0], [0, 0], [72, 10], [75, 32], [71, 9], [73, 33],
+                            [69, 10], [72, 34], [77, 12], [78, 26], [0, 0], [0, 0]]
 
         dist = 0
         self.altura = 57
@@ -281,7 +280,7 @@ class LineasSobreDientes(QWidget):
         self.points2 = QPointList()
         self.puntos_furca = QPointList()
 
-        triangulos_arriba = [[62, 25], [64, 24], [66, 21], [64, 28], [63, 27], [60, 25]]
+        triangulos_arriba = [[55, 23], [58, 21], [61, 19], [60, 25], [58, 24], [54, 23]]
 
         dist = 0
         self.altura = 80
