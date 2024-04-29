@@ -35,9 +35,6 @@ separaciones = [8, 6, 9, 11, 10, 12, 10, 29, 9, 8, 13, 7, 4, 7, 5, 3]
 
 furcas = [18, 17, 16, 26, 27, 28]
 
-altura_rojo = [[0, 0, 0] for _ in range(16)]
-altura_azul = [[0, 0, 0] for _ in range(16)]
-
 style = "margin: 0.5px; border: 1px solid grey; border-radius: 3px;"
 colorBoton = "background-color: #BEBEBE;"
 colorClasificacion = "black"
@@ -138,6 +135,7 @@ class LineasSobreDientesAbajo(QWidget):
         # Valores iniciales de los puntos de los dientes
         for i, diente_imagen in enumerate(self.imagen.dientes):
             if dientes[i] in furcas:
+                # Hay 2 puntos de furca en la cara que aparece abajo
                 self.puntos_furca.append(QPoint(dist + triangulos_abajo[furcas.index(dientes[i]) * 2][1],
                                                 triangulos_abajo[furcas.index(dientes[i]) * 2][0]))
                 self.puntos_furca.append(QPoint(dist + triangulos_abajo[furcas.index(dientes[i]) * 2 + 1][1],
@@ -258,13 +256,13 @@ class LineasSobreDientesAbajo(QWidget):
     def actualizar_alturas(self, numeroDiente, tipo, indice):
         if tipo == 1:  # Margen gingival
             aux = self.points[numeroDiente * 3 + indice]
-            aux.setY(int(self.altura - 5 * altura_rojo[numeroDiente][indice]))
+            aux.setY(int(self.altura - 5 * window.datos.margenes[numeroDiente][indice + 3]))
             self.points[numeroDiente * 3 + indice] = aux
-            aux.setY(int(self.points[numeroDiente * 3 + indice].y() + 5 * altura_azul[numeroDiente][indice]))
+            aux.setY(int(self.points[numeroDiente * 3 + indice].y() + 5 * window.datos.profundidades[numeroDiente][indice + 3]))
             self.points2[numeroDiente * 3 + indice] = aux
         elif tipo == 2:  # Profundidad de sondaje
             aux = self.points[numeroDiente * 3 + indice]
-            aux.setY(int(self.altura - 5 * (altura_rojo[numeroDiente][indice] - altura_azul[numeroDiente][indice])))
+            aux.setY(int(self.altura + 5 * (abs(window.datos.margenes[numeroDiente][indice + 3]) + abs(window.datos.profundidades[numeroDiente][indice + 3]))))
             self.points2[numeroDiente * 3 + indice] = aux
         self.update()
 
@@ -286,7 +284,7 @@ class LineasSobreDientes(QWidget):
         triangulos_arriba = [[62, 25], [64, 24], [66, 21], [64, 28], [63, 27], [60, 25]]
 
         dist = 0
-        self.altura = 85
+        self.altura = 80
         # Valores iniciales de los puntos de los dientes
         for i, diente_imagen in enumerate(self.imagen.dientes):
             if dientes[i] in furcas:
@@ -403,13 +401,13 @@ class LineasSobreDientes(QWidget):
     def actualizar_alturas(self, numeroDiente, tipo, indice):
         if tipo == 1:  # Margen gingival
             aux = self.points[numeroDiente * 3 + indice]
-            aux.setY(int(self.altura + 5 * altura_rojo[numeroDiente][indice]))
+            aux.setY(int(self.altura + 5 * window.datos.margenes[numeroDiente][indice]))
             self.points[numeroDiente * 3 + indice] = aux
-            aux.setY(int(self.points[numeroDiente * 3 + indice].y() - 5 * altura_azul[numeroDiente][indice]))
+            aux.setY(int(self.points[numeroDiente * 3 + indice].y() - 5 * window.datos.profundidades[numeroDiente][indice]))
             self.points2[numeroDiente * 3 + indice] = aux
         elif tipo == 2:  # Profundidad de sondaje
             aux = self.points[numeroDiente * 3 + indice]
-            aux.setY(int(self.altura + 5 * (altura_rojo[numeroDiente][indice] - altura_azul[numeroDiente][indice])))
+            aux.setY(int(self.altura + 5 * (window.datos.margenes[numeroDiente][indice] - window.datos.profundidades[numeroDiente][indice])))
             self.points2[numeroDiente * 3 + indice] = aux
         self.update()
 
@@ -499,14 +497,12 @@ class Input3(QFrame):
         if tipo == 1 and es_numero(inpt.text()):
             if -21 < int(inpt.text()) < 21:
                 if arriba:
-                    altura_rojo[int(ndiente)][num] = int(inpt.text())
-                    window.widgetDientes.actualizar_alturas(int(ndiente), tipo, num)
                     window.datos.actualizar_margen(int(ndiente), num, int(inpt.text()))
+                    window.widgetDientes.actualizar_alturas(int(ndiente), tipo, num)
                     window.cal.actualizarDatos(int(ndiente) * 6 + num, calcular_cal(int(ndiente), num))
                 else:
-                    # TODO: altura líneas abajo
-                    window.widgetDientesAbajo.actualizar_alturas(int(ndiente), tipo, num)
                     window.datos.actualizar_margen(int(ndiente), num + 3, int(inpt.text()))
+                    window.widgetDientesAbajo.actualizar_alturas(int(ndiente), tipo, num)
                     window.cal.actualizarDatos(int(ndiente) * 6 + num, calcular_cal(int(ndiente), num))
             else:
                 inpt.setText("0")
@@ -517,15 +513,13 @@ class Input3(QFrame):
                 else:
                     self.inpts[num].setStyleSheet("QLineEdit { " + style + "color: black; font-size: 12px; }")
                 if arriba:
-                    altura_azul[int(ndiente)][num] = int(inpt.text())
-                    window.widgetDientes.actualizar_alturas(int(ndiente), tipo, num)
                     window.datos.actualizar_profundidad(int(ndiente), num, int(inpt.text()))
+                    window.widgetDientes.actualizar_alturas(int(ndiente), tipo, num)
                     window.ppd.actualizarDatos(int(ndiente) * 6 + num, int(inpt.text()))
                     window.cal.actualizarDatos(int(ndiente) * 6 + num, calcular_cal(int(ndiente), num))
                 else:
-                    # TODO: cambiar alturas linea azul cara inferior
-                    window.widgetDientesAbajo.actualizar_alturas(int(ndiente), tipo, num)
                     window.datos.actualizar_profundidad(int(ndiente), num + 3, int(inpt.text()))
+                    window.widgetDientesAbajo.actualizar_alturas(int(ndiente), tipo, num)
                     window.ppd.actualizarDatos(int(ndiente) * 6 + num, int(inpt.text()))
                     window.cal.actualizarDatos(int(ndiente) * 6 + num, calcular_cal(int(ndiente), num))
             else:
@@ -604,13 +598,13 @@ class Columna(QFrame):
         self.hijos.append(supuracion)
 
         # MARGEN GINGIVAL
-        margenGingival = Input3(numDiente, 1, self.incrementoHeight, self)
+        margenGingival = Input3(numDiente, 1, self.incrementoHeight, self, arriba=True)
         margenGingival.show()
         self.incrementoHeight += 18
         self.hijos.append(margenGingival)
 
         # PROFUNDIDAD DE SONDAJE
-        profSondaje = Input3(numDiente, 2, self.incrementoHeight, self)
+        profSondaje = Input3(numDiente, 2, self.incrementoHeight, self, arriba=True)
         profSondaje.show()
         self.incrementoHeight += 18
         self.hijos.append(profSondaje)
@@ -637,13 +631,13 @@ class Columna(QFrame):
         self.hijos.append(supuracion2)
 
         # MARGEN GINGIVAL
-        margenGingival2 = Input3(numDiente, 1, self.incrementoHeight, self)
+        margenGingival2 = Input3(numDiente, 1, self.incrementoHeight, self, arriba=False)
         margenGingival2.show()
         self.incrementoHeight += 18
         self.hijos.append(margenGingival2)
 
         # PROFUNDIDAD DE SONDAJE
-        profSondaje2 = Input3(numDiente, 2, self.incrementoHeight, self)
+        profSondaje2 = Input3(numDiente, 2, self.incrementoHeight, self, arriba=False)
         profSondaje2.show()
         self.incrementoHeight += 18
         self.hijos.append(profSondaje2)
@@ -997,7 +991,7 @@ class Datos:
             self.inicializados.append(int(diente))
 
     def actualizar_margen(self, diente, i, valor):
-        self.margenes[int(diente)][i] = abs(int(valor))
+        self.margenes[int(diente)][i] = int(valor)
         if int(diente) not in self.inicializados:
             self.inicializados.append(int(diente))
         window.clasificacion.actualizar()
