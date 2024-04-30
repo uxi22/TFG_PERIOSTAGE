@@ -438,7 +438,7 @@ class Input03(QLineEdit):
 
 
 class InputSiNo3(QFrame):
-    def __init__(self, numDiente, tipo, parent, height):
+    def __init__(self, numDiente, tipo, parent, height, abajo=False):
         super().__init__(parent)
         self.setGeometry(QRect(0, height, 45, 18))
         self.botones = []
@@ -451,11 +451,13 @@ class InputSiNo3(QFrame):
             boton.setDefault(True)
             boton.setGeometry(QRect(left, 0, 15, 18))
             left += 15
-            boton.clicked.connect(lambda *args, ind=n - 1, t=tipo: self.pulsar_boton(ind, numDiente, t))
+            boton.clicked.connect(lambda *args, ind=n - 1, t=tipo: self.pulsar_boton(ind, numDiente, t, abajo))
             self.botones.append(boton)
 
-    def pulsar_boton(self, ind, numDiente, tipo):
+    def pulsar_boton(self, ind, numDiente, tipo, abajo):
         boton = self.botones[ind]
+        if abajo:
+            ind = ind + 3
 
         if tipo == 1:
             cambiar_color(boton, "#FF2B32")
@@ -612,19 +614,19 @@ class Columna(QFrame):
 
         # COLUMNAS INFERIORES
         # SANGRADO
-        sangrado2 = InputSiNo3(numDiente, 1, self, self.incrementoHeight)
+        sangrado2 = InputSiNo3(numDiente, 1, self, self.incrementoHeight, abajo=True)
         sangrado2.show()
         self.incrementoHeight += 18
         self.hijos.append(sangrado2)
 
         # PLACA
-        placa2 = InputSiNo3(numDiente, 2, self, self.incrementoHeight)
+        placa2 = InputSiNo3(numDiente, 2, self, self.incrementoHeight, abajo=True)
         placa2.show()
         self.incrementoHeight += 18
         self.hijos.append(placa2)
 
         # SUPURACIÓN
-        supuracion2 = InputSiNo3(numDiente, 3, self, self.incrementoHeight)
+        supuracion2 = InputSiNo3(numDiente, 3, self, self.incrementoHeight, abajo=True)
         supuracion2.show()
         self.incrementoHeight += 18
         self.hijos.append(supuracion2)
@@ -736,19 +738,10 @@ class Columna(QFrame):
             label2.show()
 
             # Quitamos los datos del diente de los datos medios
-            for i in range(3):
-                window.cal.actualizarDatos(numDiente * 6 + i, -1)
-                window.ppd.actualizarDatos(numDiente * 6 + i, -1)
-                window.sangrado.actualizarPorcentajes(numDiente * 6 + i, -1)
-                window.placa.actualizarPorcentajes(numDiente * 6 + i, -1)
-                window.clasificacion.actualizar()
-
-                # Quitamos los dientes de la columna de abajo
-                window.cal.actualizarDatos(numDiente * 6 + i, -1)
-                window.ppd.actualizarDatos(numDiente * 6 + i, -1)
-                window.sangrado.actualizarPorcentajes(numDiente * 6 + i, -1)
-                window.placa.actualizarPorcentajes(numDiente * 6 + i, -1)
-                window.clasificacion.actualizar()
+            window.cal.quitarDiente(numDiente)
+            window.ppd.quitarDiente(numDiente)
+            window.sangrado.quitarDiente(numDiente)
+            window.placa.quitarDiente(numDiente)
 
         else:
             # Volver a introducir los elementos, con los datos anteriores si estaban inicializados
@@ -758,12 +751,11 @@ class Columna(QFrame):
                 if isinstance(hijo, QWidget):
                     hijo.deleteLater()
             self.anhadir_elementos(numDiente)
-            for i in range(3):
-                window.cal.actualizarDatos(numDiente * 6 + i, calcular_cal(numDiente, i))
-                window.ppd.actualizarDatos(numDiente * 6 + i, calcular_cal(numDiente, i))
+            window.cal.anhadirDiente(numDiente)
+            window.ppd.anhadirDiente(numDiente)
+            for i in range(6):
                 window.sangrado.actualizarPorcentajes(numDiente * 6 + i, window.datos.sangrados[numDiente][i])
                 window.placa.actualizarPorcentajes(numDiente * 6 + i, window.datos.placas[numDiente][i])
-                window.clasificacion.actualizar()
 
 
 class CuadroColores(QWidget):
@@ -782,18 +774,25 @@ class CuadroColores(QWidget):
             self.listadatos = aplanar_lista(profundidades)
 
         self.datos = defaultdict(int)
+        # Para cada valor que hay en la lista de los datos, contamos el número de veces que aparece
         for i in self.listadatos:
             self.datos[int(i)] += 1
 
     def minimumSizeHint(self):
         return QSize(1, 1)
 
-    def actualizarDatos(self, indice, nuevo):
-        if nuevo == -1:
-            # Diente desactivado, se quita de la cuenta
-            # Nunca van a llegar números negativos en una ejecución normal, porque se mandan los números absolutos
-            self.datos[self.listadatos[indice]] -= 1
+    def quitarDiente(self, indice):
+        # Restamos las aparición de los valores de los inputs que tenía diente desactivado
+        for i in range(6):
+            self.datos[self.listadatos[indice * 6 + i]] -= 1
+        self.update()
 
+    def anhadirDiente(self, indice):
+        for i in range(6):
+            self.datos[self.listadatos[indice * 6 + i]] += 1
+        self.update()
+
+    def actualizarDatos(self, indice, nuevo):
         self.datos[self.listadatos[indice]] -= 1
         self.datos[nuevo] += 1
         self.listadatos[indice] = nuevo
@@ -871,16 +870,22 @@ class BarraPorcentajes(QWidget):
     def minimumSizeHint(self):
         return QSize(1, 1)
 
-    def actualizarPorcentajes(self, indice, nuevo):
-        if nuevo == -1:
-            self.datos[indice] = 0
+    def quitarDiente(self, indice):
+        for i in range(6):
+            self.datos[indice * 6 + i] = 0
+        if len(window.datos.desactivados) == 16:
+            self.porcentaje = 0
         else:
-            self.datos[indice] = nuevo
+            self.porcentaje = (sum(self.datos)) / (len(self.datos) - (len(window.datos.desactivados) * 6))
+        self.update()
+
+    def actualizarPorcentajes(self, indice, nuevo):
+        self.datos[indice] = nuevo
         self.porcentaje = (sum(self.datos)) / (len(self.datos) - (len(window.datos.desactivados) * 6))
         self.update()
 
     def paintEvent(self, event):
-        self.setMinimumSize(170, 80)
+        self.setMinimumSize(150, 80)
         # Pintamos un rectángulo con un % pintado
         qp = QPainter(self)
         qp.setRenderHint(QPainter.Antialiasing, True)
@@ -977,7 +982,7 @@ class Datos:
         self.sangrados[int(diente)][i] = valor
         if int(diente) not in self.inicializados:
             self.inicializados.append(int(diente))
-        window.clasificacion.actualizar()
+
 
     def actualizar_placa(self, diente, i, valor):
         self.placas[int(diente)][i] = valor
@@ -993,13 +998,11 @@ class Datos:
         self.margenes[int(diente)][i] = int(valor)
         if int(diente) not in self.inicializados:
             self.inicializados.append(int(diente))
-        window.clasificacion.actualizar()
 
     def actualizar_profundidad(self, diente, i, valor):
         self.profundidades[int(diente)][i] = abs(int(valor))
         if int(diente) not in self.inicializados:
             self.inicializados.append(int(diente))
-        window.clasificacion.actualizar()
 
     def actualizar_desactivados(self, diente):
         if diente in self.desactivados:
@@ -1135,11 +1138,11 @@ class MainWindow(QMainWindow):
             incrementoLeft += 45 + 4
 
         self.frameDatosMedios = QFrame(self)
-        self.frameDatosMedios.setGeometry(10, 347, 970, 90)
+        self.frameDatosMedios.setGeometry(150, 347, 970, 90)
         layoutDatosMedios = QHBoxLayout(self.frameDatosMedios)
         self.frameDatosMedios.setStyleSheet("background:none;")
 
-        self.clasificacion = Clasificacion(self.datos)
+        #self.clasificacion = Clasificacion(self.datos)
         self.ppd = CuadroColores(self.datos.profundidades, None, 5, self.frameDatosMedios)
         self.cal = CuadroColores(self.datos.profundidades, self.datos.margenes, 4, self.frameDatosMedios)
         self.sangrado = BarraPorcentajes(self.datos.sangrados, 1, self.frameDatosMedios)
@@ -1152,7 +1155,7 @@ class MainWindow(QMainWindow):
             "QPushButton { background-color: #9747FF; font-size: 12px; border: none; border-radius: 20%; padding: 2px 5px;} QPushButton:hover { background-color: #623897; }")
         self.boton.clicked.connect(lambda: self.datos.extraerDatos())
 
-        layoutDatosMedios.addWidget(self.clasificacion)
+        # layoutDatosMedios.addWidget(self.clasificacion)
         layoutDatosMedios.addWidget(self.ppd)
         layoutDatosMedios.addWidget(self.cal)
         layoutDatosMedios.addWidget(self.sangrado)
