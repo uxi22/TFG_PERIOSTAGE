@@ -1204,7 +1204,6 @@ class MainWindow(QMainWindow):
 
 
 app = QApplication(sys.argv)
-# app.setWindowIcon(QtGui.QIcon(f"C:/Users/Uxi/Documents/TFG/MasPruebas/diente.ico"))
 app.setWindowIcon(QtGui.QIcon(os.path.join(basedir, 'diente.ico')))
 window = None
 window = MainWindow()
