@@ -12,7 +12,7 @@ from PySide6.QtWidgets import (
     QApplication,
     QLabel,
     QMainWindow,
-    QWidget, QHBoxLayout, QLineEdit, QPushButton, QPointList, QFrame
+    QWidget, QHBoxLayout, QLineEdit, QPushButton, QPointList, QFrame, QFileDialog
 )
 from ctypes import windll
 
@@ -940,28 +940,38 @@ class Datos:
         self.inicializados = []
 
     def extraerDatos(self):
-        dfs = []
-        for i in range(len(dientes)):
-            diente = dientes[i]
-            if i not in self.desactivados:
-                dfs.append(pd.DataFrame(
-                    data=[self.movilidad[i], self.implantes[i], self.defectosfurca[i], self.sangrados[i][0],
-                          self.placas[i][0], self.supuraciones[i][0], self.margenes[i][0], self.profundidades[i][0]],
-                    columns=[diente]))
-                for j in range(1, 3):
-                    dfs.append(pd.DataFrame(data=["", "", "", self.sangrados[i][j], self.placas[i][j],
-                                                  self.supuraciones[i][j], self.margenes[i][j],
-                                                  self.profundidades[i][j]], columns=[""]))
-        df = pd.concat(dfs, axis=1)
-        df.index = ["Movilidad", "Implante", "Defecto de furca", "Sangrado al sondaje", "Placa", "Supuración",
-                    "Margen gingival", "Profundidad de sondaje"]
-        df2 = pd.DataFrame(data=[datetime.datetime.now().strftime("%d-%m-%y"), "Mateo García Rodriguez", "Juan Carlos ÁLvarez", "12-05-1984", True, False, False])
-        df2.index = ["Fecha", "Odontólogo", "Paciente", "Fecha de nacimiento", "Tratamiento previo", "Colapso de mordida", "Tabaquismo"]
-        with pd.ExcelWriter(os.path.join(basedir, "./excel/datos" + datetime.datetime.now().strftime(
-                "%y%m%d%H%M%S") + ".xlsx")) as writer:
-            df2.to_excel(writer, sheet_name="Datos paciente")
-            df.to_excel(writer, sheet_name="Datos periodontograma")
-            # df3.to_excel(writer, sheet_name="Datos calculados")
+        dir = os.path.join(basedir, "./excel/datos" + datetime.datetime.now().strftime(
+                "%y%m%d%H%M%S") + ".xlsx")
+        ruta, _ = QFileDialog.getSaveFileName(window, "Guardar como", dir, "Libro de excel (*.xlsx)")
+        if ruta != "":
+            dfs = []
+            for i in range(len(dientes)):
+                diente = dientes[i]
+                if i not in self.desactivados:
+                    dfs.append(pd.DataFrame(
+                        data=[self.movilidad[i], self.implantes[i], self.defectosfurca[i], self.sangrados[i][0],
+                              self.placas[i][0], self.supuraciones[i][0], self.margenes[i][0], self.profundidades[i][0],
+                              self.sangrados[i][3], self.placas[i][3], self.supuraciones[i][3], self.margenes[i][3], self.profundidades[i][3]],
+                        columns=[diente]))
+                    for j in range(1, 3):
+                        dfs.append(pd.DataFrame(data=["", "", "", self.sangrados[i][j], self.placas[i][j],
+                                                      self.supuraciones[i][j], self.margenes[i][j],
+                                                      self.profundidades[i][j], self.sangrados[i][j + 3], self.placas[i][j + 3],
+                                                      self.supuraciones[i][j + 3], self.margenes[i][j + 3], self.profundidades[i][j + 3]], columns=[""]))
+            df = pd.concat(dfs, axis=1)
+            df.index = ["Movilidad", "Implante", "Defecto de furca", "Sangrado al sondaje", "Placa", "Supuración",
+                        "Margen gingival", "Profundidad de sondaje", "Sangrado al sondaje", "Placa", "Supuración", "Margen gingival",
+                        "Profundidad de sondaje"]
+            df2 = pd.DataFrame(data=[datetime.datetime.now().strftime("%d-%m-%y"), "Mateo García Rodriguez", "Juan Carlos ÁLvarez", "12-05-1984", True, False, False])
+            df2.index = ["Fecha", "Odontólogo", "Paciente", "Fecha de nacimiento", "Tratamiento previo", "Colapso de mordida", "Tabaquismo"]
+            df3 = pd.DataFrame(data=[])
+
+            with pd.ExcelWriter(ruta) as writer:
+                df2.to_excel(writer, sheet_name="Datos paciente")
+                df.to_excel(writer, sheet_name="Datos periodontograma")
+                df3.to_excel(writer, sheet_name="Datos calculados")
+        else:
+            print("Acción cancelada")
 
     def actualizar_movilidad(self, diente, valor):
         self.movilidad[int(diente)] = abs(int(valor))

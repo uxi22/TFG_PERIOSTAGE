@@ -1,21 +1,14 @@
-import pandas as pd
+import sys
+from PySide6.QtWidgets import QApplication, QFileDialog
 
-lista = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-lista2 = [9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
-lista3 = [12, 23, 34, 2, 1, 34 ,2, 4, 5, 23]
-data = {}
-dfs = []
+app = QApplication(sys.argv)
 
-#data["primera"] = lista
-dfs.append(pd.DataFrame(data=lista, columns=["primera"]))
-#data.clear()
-dfs.append(pd.DataFrame(data=lista2, columns=[""]))
+string, filtro = QFileDialog.getSaveFileName(None, "Guardar como", "/", "Python (*.py);;Todos los archivos (*.*)")
 
-dfs.append(pd.DataFrame(data=lista3, columns=[""]))
+if string!= '':
+    print("No se ha seleccionado ningún nombre de archivo")
+else:
+    print("Hola, aqui guardamos el archivo en la ruta: ", string)
+    print("Filtro de archivo?: ", filtro)
 
-df = pd.concat(dfs, axis=1)
-print(df)
-df.index = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"]
-
-df.to_excel("output.xlsx")
-
+sys.exit(app.exec())
