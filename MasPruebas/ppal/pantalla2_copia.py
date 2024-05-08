@@ -889,7 +889,7 @@ class BarraPorcentajes(QWidget):
         # Pintamos un rectángulo con un % pintado
         qp = QPainter(self)
         qp.setRenderHint(QPainter.Antialiasing, True)
-        width = 170
+        width = 150
         w_coloreado = int(width * self.porcentaje)
 
         qp.setBrush(QBrush(QColor(220, 220, 220), Qt.SolidPattern))
@@ -921,9 +921,9 @@ class BarraPorcentajes(QWidget):
 
         # Título y porcentajes
         qp.setPen(QPen(Qt.black, 5, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
-        qp.drawText(QPoint((self.width() - qp.fontMetrics().horizontalAdvance(tit)) / 2, 14), tit)
+        qp.drawText(QPoint((width - qp.fontMetrics().horizontalAdvance(tit)) / 2, 14), tit)
         qp.drawText(
-            QPoint((self.width() - qp.fontMetrics().horizontalAdvance(txt)) / 2, qp.fontMetrics().height() + 45), txt)
+            QPoint((width - qp.fontMetrics().horizontalAdvance(txt)) / 2, qp.fontMetrics().height() + 45), txt)
 
 
 class Datos:
@@ -1115,8 +1115,10 @@ class MainWindow(QMainWindow):
         self.titulo.setGeometry(
             QRect((self.width() - self.titulo.width()) // 2, 10, self.titulo.width(), self.titulo.height()))
 
-        self.frameColumnas = QFrame(self)
-        self.frameColumnas.setGeometry(QRect(0, 50, self.width(), self.height()))
+        self.frameTodo = QFrame(self)
+
+        self.frameColumnas = QFrame(self.frameTodo)
+        self.frameColumnas.setGeometry(QRect(0, 0, self.width(), self.height()))
 
         self.frameEtiquetas = QFrame(self.frameColumnas)
         tam = QRect(25, 18, 125, self.height())
@@ -1131,8 +1133,8 @@ class MainWindow(QMainWindow):
             label.setAlignment(Qt.AlignRight)
             label.setGeometry(QRect(0, incrementoHeight, 125, 18))
             incrementoHeight += 18
-        self.frameDibujoDientes = QFrame(self)
-        self.frameDibujoDientes.setGeometry(QRect(170, 220, self.width() - 176, 137))
+        self.frameDibujoDientes = QFrame(self.frameTodo)
+        self.frameDibujoDientes.setGeometry(QRect(170, 170, self.width() - 176, 137))
         self.widgetDientes = LineasSobreDientes(datos, self.frameDibujoDientes)
 
         incrementoLeft = 170
@@ -1146,10 +1148,11 @@ class MainWindow(QMainWindow):
             Columna(n, incrementoLeft, parent=self.frameColumnas)
             incrementoLeft += 45 + 4
 
-        self.frameDatosMedios = QFrame(self)
-        self.frameDatosMedios.setGeometry(150, 347, 970, 90)
+        self.frameDatosMedios = QFrame(self.frameTodo)
+        self.frameDatosMedios.setGeometry(200, 297, 970, 90)
         layoutDatosMedios = QHBoxLayout(self.frameDatosMedios)
-        self.frameDatosMedios.setStyleSheet("background:none;")
+        self.frameDatosMedios.setStyleSheet("background: none;")
+        layoutDatosMedios.setSpacing(20)
 
         #self.clasificacion = Clasificacion(datos)
         self.ppd = CuadroColores(datos.profundidades, None, 5, self.frameDatosMedios)
@@ -1157,46 +1160,49 @@ class MainWindow(QMainWindow):
         self.sangrado = BarraPorcentajes(datos.sangrados, 1, self.frameDatosMedios)
         self.placa = BarraPorcentajes(datos.placas, 2, self.frameDatosMedios)
 
-        self.boton = QPushButton("Exportar")
-        self.boton.setGeometry(QRect(self.width() - 150, 17, 120, 50))
+        """self.boton = QPushButton("Exportar")
+        self.boton.setGeometry(QRect(0, 0, 120, 50))
         self.boton.setCheckable(True)
         self.boton.setStyleSheet(
             "QPushButton { background-color: #9747FF; font-size: 12px; border: none; border-radius: 20%; padding: 2px 5px;} QPushButton:hover { background-color: #623897; }")
-        self.boton.clicked.connect(lambda: datos.extraerDatos())
+        self.boton.clicked.connect(lambda: datos.extraerDatos())"""
 
         # layoutDatosMedios.addWidget(self.clasificacion)
         layoutDatosMedios.addWidget(self.ppd)
         layoutDatosMedios.addWidget(self.cal)
         layoutDatosMedios.addWidget(self.sangrado)
         layoutDatosMedios.addWidget(self.placa)
-        layoutDatosMedios.addWidget(self.boton)
+        # layoutDatosMedios.addWidget(self.boton)
 
         self.frameDatosMedios.setLayout(layoutDatosMedios)
 
         etiquetas2 = ["Sangrado al sondaje", "Placa", "Supuración",
                       "Margen Gingival", "Profundidad de sondaje"]
 
-        incrementoHeight = 515
+        incrementoHeight = 520
         for n in etiquetas2:
             label = QLabel(n, self.frameEtiquetas)
             label.setAlignment(Qt.AlignRight)
             label.setGeometry(QRect(0, incrementoHeight, 125, 18))
             incrementoHeight += 18
 
-        self.frameDibujoDientesAbajo = QFrame(self)
-        self.frameDibujoDientesAbajo.setGeometry(QRect(170, 445, self.width() - 176, 137))
+        self.frameDibujoDientesAbajo = QFrame(self.frameTodo)
+        self.frameDibujoDientesAbajo.setGeometry(QRect(170, 395, self.width() - 176, 137))
 
         self.widgetDientesAbajo = LineasSobreDientesAbajo(datos, self.frameDibujoDientesAbajo)
+        self.frameTodo.adjustSize()
+        self.frameTodo.setGeometry(QRect(150, 50, self.frameTodo.width(), self.frameTodo.height()))
 
     def actualizar_tam(self, event):
         self.frameTitulo.setGeometry(QRect(0, 0, self.width(), 60))
         self.titulo.setGeometry(
             QRect((self.width() - self.titulo.width()) // 2, 10, self.titulo.width(), self.titulo.height()))
-        self.frameColumnas.setGeometry(QRect(0, 50, self.width(), self.height()))
+        self.frameColumnas.setGeometry(QRect(0, 0, self.width(), self.height()))
         self.frameEtiquetas.setGeometry(QRect(25, 18, 125, self.height()))
-        self.frameDibujoDientes.setGeometry(QRect(170, 220, self.width() - 176, 137))
-        self.frameDatosMedios.setGeometry(QRect(10, 347, 970, 90))
-        self.frameDibujoDientesAbajo.setGeometry(QRect(170, 445, self.width() - 176, 137))
+        self.frameDibujoDientes.setGeometry(QRect(170, 170, self.width() - 176, 137))
+        self.frameDatosMedios.setGeometry(QRect(150, 297, 820, 90))
+        self.frameDibujoDientesAbajo.setGeometry(QRect(170, 395, self.width() - 176, 137))
+        self.frameTodo.setGeometry(QRect(150, 50, self.frameTodo.width(), self.height()))
 
         for columna in self.frameColumnas.findChildren(Columna):
             columna.newsize(self.height())
