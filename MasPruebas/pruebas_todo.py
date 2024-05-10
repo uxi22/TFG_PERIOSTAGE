@@ -36,12 +36,9 @@ dientes = [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28, 48, 4
            32, 33, 34, 35, 36, 37, 38]
 furcas = [18, 17, 16, 26, 27, 28, 48, 47, 46, 36, 37, 38]
 
-style = "margin: 0.5px; border: 1px solid grey; border-radius: 3px;"
 colorBoton = "background-color: #BEBEBE;"
 colorClasificacion = "black"
-
 style = "margin: 0.5px; border: 1px solid grey; border-radius: 3px;"
-
 
 
 class Fumador(QFrame):
@@ -63,9 +60,11 @@ class Fumador(QFrame):
         self.frameMesesFum = PreguntaInput(self.frameSubpreguntaSi, "Meses fumando:",
                                            [0, 0, int((wtotal - 10) / 3) - 20, 50], 60, 10, "0", 16)
         self.frameSesDia = PreguntaInput(self.frameSubpreguntaSi, "Cigarros o sesiones/día:",
-                                         [int((wtotal - 10) / 3) - 15, 0, int((wtotal - 10) / 3) + 30, 50], 60, 10, "0", 16)
+                                         [int((wtotal - 10) / 3) - 15, 0, int((wtotal - 10) / 3) + 30, 50], 60, 10, "0",
+                                         16)
         self.frameDuracionSesion = PreguntaInput(self.frameSubpreguntaSi, "Minutos/sesión:",
-                                                 [int(2 * (wtotal - 10) / 3) - 5, 0, int((wtotal - 10) / 3) - 15, 50], 60,
+                                                 [int(2 * (wtotal - 10) / 3) - 5, 0, int((wtotal - 10) / 3) - 15, 50],
+                                                 60,
                                                  10, "0", 16)
 
         self.frameSubpreguntaSi.hide()
@@ -753,7 +752,7 @@ class LineasSobreDientes(QWidget):
         elif tipo == 2:  # Profundidad de sondaje
             aux = self.points[numeroDiente * 3 + indice]
             aux.setY(int(self.altura + 5 * (
-                        datos.margenes[numeroDiente][indice] - datos.profundidades[numeroDiente][indice])))
+                    datos.margenes[numeroDiente][indice] - datos.profundidades[numeroDiente][indice])))
             self.points2[numeroDiente * 3 + indice] = aux
         self.update()
 
@@ -1470,6 +1469,75 @@ class Clasificacion(QLabel):
         self.setText(clasificacion_esquema1())
 
 
+class Circulo(QWidget):
+    def __init__(self, parent, dimensiones):
+        super().__init__(parent)
+        self.setMinimumSize(20, 20)
+        self.dimensiones = dimensiones
+        self.setGeometry(QRect(dimensiones[0], dimensiones[1], dimensiones[2], dimensiones[3]))
+
+    def paintEvent(self, event):
+        qp = QPainter(self)
+        qp.setBrush(QBrush(Qt.gray))
+        qp.setPen(Qt.NoPen)
+        qp.drawEllipse(QRect(self.dimensiones[0], self.dimensiones[1], self.dimensiones[2], self.dimensiones[3]))
+
+    def mousePressEvent(self, event):
+        siguientePantalla()
+        # or anterior pantalla si estamos en la arcada inferior
+
+
+class FlechaAlante(QWidget):
+    def __init__(self, parent, dimensiones):
+        super().__init__(parent)
+        self.minimumSize(20, 20)
+        self.dimensiones = dimensiones
+        self.setGeometry(QRect(dimensiones[0], dimensiones[1], dimensiones[2], dimensiones[3]))
+
+    def paintEvent(self, event):
+        qp = QPainter(self)
+        qp.setPen(QPen(QColor(25, 0, 97, 1), 2, Qt.SolidLine, Qt.SquareCap, Qt.MitterJoin))
+        qp.setBrush(Qt.NoBrush)
+        puntos = QPolygon()
+        (puntos << QPoint(self.dimensiones[0], self.dimensiones[1]) <<
+         QPoint(self.dimensiones[0] + self.dimensiones[2], self.dimensiones[1] + self.dimensiones[3] / 2) <<
+            QPoint(self.dimensiones[0], self.dimensiones[1] + self.dimensiones[3]))
+        qp.drawPolyline(puntos)
+
+    def mousePressEvent(self, event):
+        siguientePantalla()
+
+class FlechaAtras(QWidget):
+    def __init__(self, parent, dimensiones):
+        super().__init__(parent)
+        self.minimumSize(20, 20)
+        self.dimensiones = dimensiones
+        self.setGeometry(QRect(dimensiones[0], dimensiones[1], dimensiones[2], dimensiones[3]))
+
+    def paintEvent(self, event):
+        qp = QPainter(self)
+        qp.setPen(QPen(QColor(25, 0, 97, 1), 2, Qt.SolidLine, Qt.SquareCap, Qt.MitterJoin))
+        qp.setBrush(Qt.NoBrush)
+        puntos = QPolygon()
+        (puntos << QPoint(self.dimensiones[0] + self.dimensiones[2], self.dimensiones[1]) <<
+         QPoint(self.dimensiones[0], self.dimensiones[1] + self.dimensiones[3] / 2) <<
+         QPoint(self.dimensiones[0] + self.dimensiones[2], self.dimensiones[1] + self.dimensiones[3]))
+        qp.drawPolyline(puntos)
+
+    def mousePressEvent(self, event):
+        anteriorPantalla()
+
+
+class Superior(QFrame):
+    def __init__(self, parent, w):
+        super().__init__(parent)
+        self.setGeometry(QRect(0, 0, w, 50))
+        self.titulo = QLabel("Arcada superior", self)
+        self.titulo.setStyleSheet("font-size: 16pt; font-weight: 350; color: black;")
+        self.titulo.setGeometry(
+            QRect((self.width() - self.titulo.width()) // 2, 10, self.titulo.width(), self.titulo.height()))
+
+
 class WindowDientes(QMainWindow):
     def __init__(self, arc):
         super().__init__()
@@ -1577,7 +1645,6 @@ class WindowDientes(QMainWindow):
         labelPalatal.setStyleSheet("font-weight: bold; font-size: 16px;")
         labelPalatal.setGeometry(QRect(70, 420, 125, 18))
 
-
         self.widgetDientesAbajo = LineasSobreDientesAbajo(datos, self.frameDibujoDientesAbajo)
         self.frameTodo.adjustSize()
         self.frameTodo.setGeometry(QRect(150, 50, self.frameTodo.width(), self.frameTodo.height()))
@@ -1596,14 +1663,30 @@ class WindowDientes(QMainWindow):
         for columna in self.frameColumnas.findChildren(Columna):
             columna.newsize(self.height())
 
+
 window = None
+
+pantallaAct = -1
 
 
 def siguientePantalla():
     global pantallaAct
     global window
     window.deleteLater()
-    window = WindowDientes()
+    pantallaAct += 1
+    window = WindowDientes(pantallaAct)
+    window.showMaximized()
+
+
+def anteriorPantalla():
+    global pantallaAct
+    global window
+    window.deleteLater()
+    pantallaAct -= 1
+    if pantallaAct >= 0:
+        window = WindowDientes(pantallaAct)
+    else:
+        window = Window1()
     window.showMaximized()
 
 
@@ -1611,6 +1694,6 @@ app = QApplication(sys.argv)
 app.setWindowIcon(QtGui.QIcon(os.path.join(basedir, 'diente.ico')))
 datos = Datos()
 # window = Window1()
-window = WindowDientes()
+window = WindowDientes(0)
 window.showMaximized()
 app.exec()
