@@ -415,7 +415,7 @@ class LineasSobreDientes(QWidget):
 
 
 class Input03(QLineEdit):
-    def __init__(self, height, furca=False, numDiente=0, parent=None):
+    def __init__(self, height, furca=False, numDiente=0, parent=None, w=45, left=0):
         super().__init__(parent)
 
         regex = QRegularExpression("[0-3]")
@@ -424,7 +424,7 @@ class Input03(QLineEdit):
         self.setPlaceholderText("0")
         self.editingFinished.connect(lambda: self.guardartexto(numDiente, furca))
         self.setStyleSheet("QLineEdit { " + style + "font-size: 10px;} QLineEdit:focus { border: 1px solid #C3C3C3; }")
-        self.setGeometry(QRect(0, height, 45, 18))
+        self.setGeometry(QRect(left, height, w, 18))
 
     def guardartexto(self, numDiente, furca):
         if furca:

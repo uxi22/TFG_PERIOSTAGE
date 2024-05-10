@@ -761,7 +761,7 @@ class LineasSobreDientes(QWidget):
 
 
 class Input03(QLineEdit):
-    def __init__(self, height, furca=False, numDiente=0, parent=None):
+    def __init__(self, height, furca=False, numDiente=0, parent=None, w=45, left=0):
         super().__init__(parent)
 
         regex = QRegularExpression("[0-3]")
@@ -770,7 +770,7 @@ class Input03(QLineEdit):
         self.setPlaceholderText("0")
         self.editingFinished.connect(lambda: self.guardartexto(numDiente, furca))
         self.setStyleSheet("QLineEdit { " + style + "font-size: 10px;} QLineEdit:focus { border: 1px solid #C3C3C3; }")
-        self.setGeometry(QRect(0, height, 45, 18))
+        self.setGeometry(QRect(left, height, w, 18))
 
     def guardartexto(self, numDiente, furca):
         if furca:
@@ -781,6 +781,15 @@ class Input03(QLineEdit):
         else:
             # actualizar datos
             datos.actualizar_movilidad(numDiente, self.text())
+
+
+class Input2Furcas(QFrame):
+    def __init__(self, parent, height, numDiente):
+        super().__init__(parent)
+        self.setGeometry(QRect(0, height, 45, 18))
+        self.inputs = []
+        self.inputs.append(Input03(0, True, numDiente, self, 22, 0))
+        self.inputs.append(Input03(0, True, numDiente, self, 22, 23))
 
 
 class InputSiNo3(QFrame):
@@ -956,7 +965,7 @@ class Columna(QFrame):
         self.incrementoHeight += 18
         self.hijos.append(profSondaje)
 
-        self.incrementoHeight += 137 + 90 + 137 + 10
+        self.incrementoHeight += 137 + 85 + 137
 
         # COLUMNAS INFERIORES
         # SANGRADO
@@ -988,6 +997,16 @@ class Columna(QFrame):
         profSondaje2.show()
         self.incrementoHeight += 18
         self.hijos.append(profSondaje2)
+
+        # FURCAS
+        if dientes[numDiente] in furcas:
+            furca2 = Input2Furcas(self, self.incrementoHeight, numDiente)
+        else:
+            furca2 = QLabel("", self)
+            furca2.setGeometry(QRect(0, self.incrementoHeight, 45, 18))
+        furca2.show()
+        self.incrementoHeight += 18
+        self.hijos.append(furca2)
 
         if window and numDiente in datos.inicializados:
             movilidad.setText(str(datos.movilidad[numDiente]))
@@ -1450,7 +1469,7 @@ class Clasificacion(QLabel):
         self.setText(clasificacion_esquema1())
 
 
-class MainWindow(QMainWindow):
+class WindowDientes(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Periostage")
@@ -1490,6 +1509,9 @@ class MainWindow(QMainWindow):
         self.frameDibujoDientes = QFrame(self.frameTodo)
         self.frameDibujoDientes.setGeometry(QRect(170, 170, self.width() - 176, 137))
         self.widgetDientes = LineasSobreDientes(datos, self.frameDibujoDientes)
+        labelBucal = QLabel("Bucal", self.frameEtiquetas)
+        labelBucal.setStyleSheet("font-weight: bold; font-size: 16px;")
+        labelBucal.setGeometry(QRect(70, 205, 125, 18))
 
         incrementoLeft = 170
         for n in range(0, 8):
@@ -1531,9 +1553,9 @@ class MainWindow(QMainWindow):
         self.frameDatosMedios.setLayout(layoutDatosMedios)
 
         etiquetas2 = ["Sangrado al sondaje", "Placa", "Supuración",
-                      "Margen Gingival", "Profundidad de sondaje"]
+                      "Margen Gingival", "Profundidad de sondaje", "Defectos de furca"]
 
-        incrementoHeight = 520
+        incrementoHeight = 505
         for n in etiquetas2:
             label = QLabel(n, self.frameEtiquetas)
             label.setAlignment(Qt.AlignRight)
@@ -1541,7 +1563,11 @@ class MainWindow(QMainWindow):
             incrementoHeight += 18
 
         self.frameDibujoDientesAbajo = QFrame(self.frameTodo)
-        self.frameDibujoDientesAbajo.setGeometry(QRect(170, 395, self.width() - 176, 137))
+        self.frameDibujoDientesAbajo.setGeometry(QRect(170, 385, self.width() - 176, 137))
+        labelPalatal = QLabel("Palatal", self.frameEtiquetas)
+        labelPalatal.setStyleSheet("font-weight: bold; font-size: 16px;")
+        labelPalatal.setGeometry(QRect(70, 420, 125, 18))
+
 
         self.widgetDientesAbajo = LineasSobreDientesAbajo(datos, self.frameDibujoDientesAbajo)
         self.frameTodo.adjustSize()
@@ -1555,7 +1581,7 @@ class MainWindow(QMainWindow):
         self.frameEtiquetas.setGeometry(QRect(25, 18, 125, self.height()))
         self.frameDibujoDientes.setGeometry(QRect(170, 170, self.width() - 176, 137))
         self.frameDatosMedios.setGeometry(QRect(150, 297, 820, 90))
-        self.frameDibujoDientesAbajo.setGeometry(QRect(170, 395, self.width() - 176, 137))
+        self.frameDibujoDientesAbajo.setGeometry(QRect(170, 380, self.width() - 176, 137))
         self.frameTodo.setGeometry(QRect(150, 50, self.frameTodo.width(), self.height()))
 
         for columna in self.frameColumnas.findChildren(Columna):
@@ -1568,14 +1594,14 @@ def siguientePantalla():
     global pantallaAct
     global window
     window.deleteLater()
-    window = MainWindow()
+    window = WindowDientes()
     window.showMaximized()
 
 
 app = QApplication(sys.argv)
 app.setWindowIcon(QtGui.QIcon(os.path.join(basedir, 'diente.ico')))
 datos = Datos()
-window = Window1()
-# window = MainWindow()
+# window = Window1()
+window = WindowDientes()
 window.showMaximized()
 app.exec()
