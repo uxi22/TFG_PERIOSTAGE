@@ -32,8 +32,9 @@ arriba = [[1, 5], [5, 6], [4, 8], [9, 8], [9, 8], [7, 7], [6, 8], [10, 6], [7, 1
           [7, 5], [5, 5], [2, 1]]
 separaciones = [8, 6, 9, 11, 10, 12, 10, 29, 9, 8, 13, 7, 4, 7, 5, 3]
 
-dientes = [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28]
-furcas = [18, 17, 16, 26, 27, 28]
+dientes = [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28, 48, 47, 46, 45, 44, 43, 42, 41, 31,
+           32, 33, 34, 35, 36, 37, 38]
+furcas = [18, 17, 16, 26, 27, 28, 48, 47, 46, 36, 37, 38]
 
 style = "margin: 0.5px; border: 1px solid grey; border-radius: 3px;"
 colorBoton = "background-color: #BEBEBE;"
@@ -1470,7 +1471,7 @@ class Clasificacion(QLabel):
 
 
 class WindowDientes(QMainWindow):
-    def __init__(self):
+    def __init__(self, arc):
         super().__init__()
         self.setWindowTitle("Periostage")
         self.setStyleSheet("background-color: #ECECEC ")
@@ -1481,8 +1482,10 @@ class WindowDientes(QMainWindow):
         self.frameTitulo.setStyleSheet("text-align: center;")
         self.frameTitulo.setGeometry(QRect(0, 0, self.width(), 50))
 
+        arcadas = ["Arcada superior", "Arcada inferior"]
+
         self.titulo = QLabel(self.frameTitulo)
-        self.titulo.setText("Arcada superior")
+        self.titulo.setText(arcadas[arc])
         self.titulo.setStyleSheet("font-size: 16pt; font-weight: 350; color: black;")
         self.titulo.adjustSize()
         self.titulo.setGeometry(
@@ -1515,13 +1518,19 @@ class WindowDientes(QMainWindow):
 
         incrementoLeft = 170
         for n in range(0, 8):
-            Columna(n, incrementoLeft, parent=self.frameColumnas)
+            if arc == 0:
+                Columna(n, incrementoLeft, parent=self.frameColumnas)
+            elif arc == 1:
+                Columna(n + 8, incrementoLeft, parent=self.frameColumnas)
             incrementoLeft += 45 + 4
 
         incrementoLeft += 16
 
         for n in range(8, 16):
-            Columna(n, incrementoLeft, parent=self.frameColumnas)
+            if arc == 0:
+                Columna(n, incrementoLeft, parent=self.frameColumnas)
+            elif arc == 1:
+                Columna(n + 8, incrementoLeft, parent=self.frameColumnas)
             incrementoLeft += 45 + 4
 
         self.frameDatosMedios = QFrame(self.frameTodo)
