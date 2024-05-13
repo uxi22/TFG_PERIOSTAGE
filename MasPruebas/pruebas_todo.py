@@ -15,7 +15,7 @@ from PySide6.QtWidgets import (
     QDateEdit,
     QRadioButton,
     QMainWindow,
-    QWidget, QHBoxLayout, QLineEdit, QPushButton, QPointList, QFrame, QFileDialog
+    QWidget, QHBoxLayout, QLineEdit, QPushButton, QPointList, QFrame, QFileDialog, QCheckBox
 )
 from ctypes import windll
 
@@ -846,7 +846,6 @@ class InputSiNo3(QFrame):
         elif tipo == 3:
             cambiar_color(boton, "#7CEBA0")
             # window.supuracion.actualizarPorcentajes(int(numDiente) * 6 + ind, boton.isChecked())
-            datos.extraerDatos()
             datos.actualizar_supuracion(int(numDiente + 16*pantallaAct), ind, boton.isChecked())
 
 
@@ -1154,12 +1153,12 @@ class CuadroColores(QWidget):
         if margenes is not None:
             # Para los cuadrados de CAL
             # Un site por cada medida del diente (6 por diente, 192 con todos los dientes en la final, 96 con una arcada)
-            self.margenes = margenes[16*pantallaAct:(16 + 16*pantallaAct)]
-            self.profundidades = profundidades[16*pantallaAct:(16 + 16*pantallaAct)]
+            self.margenes = margenes
+            self.profundidades = profundidades
             # Se inicializa con todo a 0
             self.listadatos = [0] * 6 * 16
         else:
-            self.listadatos = aplanar_lista(profundidades[16*pantallaAct:16 + 16*pantallaAct])
+            self.listadatos = aplanar_lista(profundidades)
 
         self.datoscolores = defaultdict(int)
         # Para cada valor que hay en la lista de los datos, contamos el número de veces que aparece
@@ -1339,6 +1338,8 @@ class Datos:
         self.desactivados = []
         self.inicializados = []
 
+        self.puntosMuestreo = []
+
     def extraerDatos(self):
         dir = os.path.join(basedir, "./excel/datos" + datetime.datetime.now().strftime(
             "%y%m%d%H%M%S") + ".xlsx")
@@ -1455,6 +1456,13 @@ class Datos:
             self.desactivados.remove(diente)
         else:
             self.desactivados.append(diente)
+
+    def actualizar_muestreo(self, diente, valor):
+        if valor:
+            self.puntosMuestreo.append(diente)
+        else:
+            if diente in self.puntosMuestreo:
+                self.puntosMuestreo.remove(diente)
 
 
 # if periodontitis
@@ -1610,7 +1618,6 @@ class WindowDientes(QMainWindow):
         self.resizeEvent = self.actualizar_tam
 
         self.frameTitulo = QFrame(self)
-        self.frameTitulo.setStyleSheet("text-align: center;")
         self.frameTitulo.setGeometry(QRect(0, 0, self.width(), 50))
 
         arcadas = ["Arcada superior", "Arcada inferior"]
@@ -1665,8 +1672,8 @@ class WindowDientes(QMainWindow):
         layoutDatosMedios.setSpacing(20)
 
         #self.clasificacion = Clasificacion(datos)
-        self.ppd = CuadroColores(datos.profundidades, None, 5, self.frameDatosMedios)
-        self.cal = CuadroColores(datos.profundidades, datos.margenes, 4, self.frameDatosMedios)
+        self.ppd = CuadroColores(datos.profundidades[16*pantallaAct:16+16*pantallaAct], None, 5, self.frameDatosMedios)
+        self.cal = CuadroColores(datos.profundidades[16*pantallaAct:16+16*pantallaAct], datos.margenes[16*pantallaAct:16+16*pantallaAct], 4, self.frameDatosMedios)
         self.sangrado = BarraPorcentajes(datos.sangrados[16*pantallaAct:16+16*pantallaAct], 1, self.frameDatosMedios)
         self.placa = BarraPorcentajes(datos.placas[16*pantallaAct:16+16*pantallaAct], 2, self.frameDatosMedios)
 
@@ -1721,6 +1728,160 @@ class WindowDientes(QMainWindow):
             columna.newsize(self.height())
 
 
+class ColumnaFinal(QFrame):
+    def __init__(self, numDiente, left, parent=None):
+        super().__init__(parent)
+        self.setGeometry(QRect(left, 0, 45, parent.height()))
+
+        self.ndiente = numDiente
+
+        botonNumeroDiente = QPushButton(str(dientes[numDiente]), self)
+        botonNumeroDiente.setCheckable(False)
+        botonNumeroDiente.setStyleSheet(style + colorBoton + "font-weight: bold; font-size: 12px;")
+        botonNumeroDiente.setGeometry(QRect(0, 0, 45, 18))
+
+        # Sitio de muestreo
+        if dientes[numDiente] not in datos.desactivados:
+            self.muestreo = QCheckBox(self)
+            self.muestreo.setChecked(True)
+            self.muestreo.setCheckable(True)
+            self.muestreo.clicked.connect(self.actmuestreo1)
+        else:
+            self.muestreo = QLabel(self)
+        self.muestreo.setGeometry(QRect(0, 18, 45, 18))
+
+        # Columna abajo
+        if dientes[numDiente + 16] not in datos.desactivados:
+            self.muestreo2 = QCheckBox(self)
+            self.muestreo2.setChecked(True)
+            self.muestreo2.setCheckable(True)
+            self.muestreo2.toggled.connect(self.actmuestreo2)
+        else:
+            self.muestreo2 = QLabel(self)
+        self.muestreo2.setGeometry(QRect(0, 400, 45, 18))
+
+        botonNumeroDienteAbajo = QPushButton(str(dientes[numDiente + 16]), self)
+        botonNumeroDienteAbajo.setCheckable(False)
+        botonNumeroDienteAbajo.setStyleSheet(style + colorBoton + "font-weight: bold; font-size: 12px;")
+        botonNumeroDienteAbajo.setGeometry(QRect(0, 418, 45, 18))
+
+
+    def actmuestreo1(self):
+        datos.actualizar_muestreo(dientes[self.ndiente], self.muestreo.isChecked())
+
+    def actmuestreo2(self):
+        datos.actualizar_muestreo(dientes[self.ndiente + 16], self.muestreo2.isChecked())
+
+
+class WindowFinal(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Periostage")
+        self.setStyleSheet("background-color: #ECECEC ")
+        self.setMinimumSize(QSize(1000, 500))
+        self.resizeEvent = self.actualizar_tam
+
+        self.frameTitulo = QFrame(self)
+        self.frameTitulo.setGeometry(QRect(0, 0, self.width(), 50))
+
+        self.titulo = QLabel("Vista general", self.frameTitulo)
+        self.titulo.setStyleSheet("font-size: 16pt; font-weight: 350; color: black;")
+        self.titulo.adjustSize()
+        self.titulo.setGeometry(
+            QRect((self.width() - self.titulo.width()) // 2, 10, self.titulo.width(), self.titulo.height())
+        )
+
+        self.frameClasificacion = QFrame(self)
+        self.frameClasificacion.setGeometry(QRect(0, 50, self.width(), 50))
+
+        self.clasificacion = Clasificacion(datos)
+        self.clasificacion.setParent(self.frameClasificacion)
+        self.clasificacion.setStyleSheet("font-size: 16pt; font-weight: 350; color:" + colorClasificacion +";")
+        self.clasificacion.setGeometry(QRect((self.width() - self.clasificacion.width()) // 2, 10, self.clasificacion.width(), self.clasificacion.height()))
+
+        self.frameTodo = QFrame(self)
+        self.frameTodo.setGeometry(0, 90, self.width(), self.height()-100)
+
+        self.frameColumnas = QFrame(self.frameTodo)
+        self.frameColumnas.setGeometry(QRect(0, 0, self.width(), self.height() - 100))
+
+        self.frameEtiquetas = QFrame(self.frameColumnas)
+        horizontalAdvanceEt = QFontMetrics(QFont("Alata", 16)).horizontalAdvance("Sitio de muestreo")
+
+        self.frameEtiquetas.setGeometry(QRect(10, 18, horizontalAdvanceEt + 10, self.height()))
+        labEt = QLabel("Sitios de muestreo", self.frameEtiquetas)
+        labEt.setAlignment(Qt.AlignRight)
+        labEt.setGeometry(QRect(0, 0, horizontalAdvanceEt, 18))
+        self.frameDibujosDientesSuperior = QFrame(self.frameTodo)
+        self.frameDibujosDientesSuperior.setGeometry(QRect(horizontalAdvanceEt + 35, 42, self.width() - 150*2, 275))
+        self.widgetDientesSuperiorArriba = LineasSobreDientes(datos, self.frameDibujosDientesSuperior)
+        self.widgetDientesSuperiorAbajo = LineasSobreDientesAbajo(datos, self.frameDibujosDientesSuperior)
+        self.widgetDientesSuperiorAbajo.setGeometry(QRect(0, 120, self.widgetDientesSuperiorAbajo.width(), self.widgetDientesSuperiorAbajo.height()))
+
+        # Labels bucal y palatal
+        incrementoLeft = horizontalAdvanceEt + 30
+        for n in range(0, 8):
+            ColumnaFinal(n, incrementoLeft, parent=self.frameColumnas)
+            incrementoLeft += 45 + 4
+
+        incrementoLeft += 16
+
+        for n in range(8, 16):
+            ColumnaFinal(n, incrementoLeft, parent=self.frameColumnas)
+            incrementoLeft += 45 + 4
+
+        self.frameDatosMedios = QFrame(self.frameTodo)
+        self.frameDatosMedios.setGeometry(180, 312, 920, 90)
+        layoutDatosMedios = QHBoxLayout(self.frameDatosMedios)
+        self.frameDatosMedios.setStyleSheet("background: none;")
+        layoutDatosMedios.setSpacing(20)
+
+        self.ppd = CuadroColores(datos.profundidades, None, 5, self.frameDatosMedios)
+        self.cal = CuadroColores(datos.profundidades, datos.margenes, 4, self.frameDatosMedios)
+        self.sangrado = BarraPorcentajes(datos.sangrados, 1,
+                                         self.frameDatosMedios)
+        self.placa = BarraPorcentajes(datos.placas, 2, self.frameDatosMedios)
+        self.boton = QPushButton("Exportar")
+        self.boton.setGeometry(QRect(0, 0, 120, 50))
+        self.boton.setCheckable(True)
+        self.boton.setStyleSheet(
+            "QPushButton { background-color: #9747FF; font-size: 12px; border: none; border-radius: 20%; padding: 2px 5px;} QPushButton:hover { background-color: #623897; }")
+        self.boton.clicked.connect(lambda: datos.extraerDatos())
+        layoutDatosMedios.addWidget(self.ppd)
+        layoutDatosMedios.addWidget(self.cal)
+        layoutDatosMedios.addWidget(self.sangrado)
+        layoutDatosMedios.addWidget(self.placa)
+        layoutDatosMedios.addWidget(self.boton)
+        self.frameDatosMedios.setLayout(layoutDatosMedios)
+
+        self.frameDibujosDientesInferior = QFrame(self.frameTodo)
+        self.frameDibujosDientesInferior.setGeometry(QRect(150, 400, self.width() - 150*2, 275))
+        self.wDInferiorArriba = LineasSobreDientes(datos, self.frameDibujosDientesInferior)
+        self.wDInferiorAbajo = LineasSobreDientesAbajo(datos, self.frameDibujosDientesInferior)
+        self.wDInferiorAbajo.setGeometry(0, 120, self.wDInferiorAbajo.width(), self.wDInferiorAbajo.height())
+
+
+        self.frameTodo.adjustSize()
+        self.frameTodo.setGeometry(QRect(150, 50, self.frameTodo.width(), self.frameTodo.height()))
+
+
+    def actualizar_tam(self, event):
+        self.frameTitulo.setGeometry(QRect(0, 0, self.width(), 50))
+        self.titulo.setGeometry(
+            QRect((self.width() - self.titulo.width()) // 2, 10, self.titulo.width(), self.titulo.height())
+        )
+        self.frameClasificacion.setGeometry(QRect(0, 50, self.width(), 50))
+        self.clasificacion.setGeometry(QRect((self.width() - self.clasificacion.width()) // 2, 10, self.clasificacion.width(), self.clasificacion.height()))
+        self.frameTodo.setGeometry(0, 100, self.width(), self.height()-100)
+        self.frameColumnas.setGeometry(QRect(0, 0, self.width(), self.height() - 100))
+        horizontalAdvanceEt = QFontMetrics(QFont("Alata", 16)).horizontalAdvance("Sitio de muestreo")
+        self.frameEtiquetas.setGeometry(QRect(25, 18, horizontalAdvanceEt, self.height()))
+        self.frameDibujosDientesSuperior.setGeometry(QRect(horizontalAdvanceEt + 35, 42, self.width() - 150*2, 275))
+        self.frameDibujosDientesInferior.setGeometry(QRect(horizontalAdvanceEt + 35, 400, self.width() - 150*2, 275))
+
+
+
+
 window = None
 
 pantallaAct = -1
@@ -1731,7 +1892,10 @@ def siguientePantalla():
     global window
     window.deleteLater()
     pantallaAct += 1
-    window = WindowDientes(pantallaAct)
+    if pantallaAct < 2:
+        window = WindowDientes(pantallaAct)
+    elif pantallaAct == 2:
+        window = WindowFinal()
     window.showMaximized()
 
 
@@ -1750,7 +1914,7 @@ def anteriorPantalla():
 app = QApplication(sys.argv)
 app.setWindowIcon(QtGui.QIcon(os.path.join(basedir, 'diente.ico')))
 datos = Datos()
-window = Window1()
+window = WindowFinal()
 # window = WindowDientes(pantallaAct)
 window.showMaximized()
 app.exec()
