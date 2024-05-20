@@ -37,7 +37,7 @@ dientes = [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28, 48, 4
 furcas = [18, 17, 16, 26, 27, 28, 48, 47, 46, 36, 37, 38]
 
 colorBoton = "background-color: #BEBEBE;"
-colorClasificacion = "black"
+colorClasificacion = "green"
 style = "margin: 0.5px; border: 1px solid grey; border-radius: 3px;"
 
 
@@ -1506,6 +1506,7 @@ def calcular_estadio(cal, datos):
 
 
 def clasificacion_esquema1():
+    global colorClasificacion
     # Calcular sangrado medio
     pd = int(sum(aplanar_abs_lista(datos.profundidades)) / (
             len(aplanar_abs_lista(datos.profundidades)) - (len(datos.desactivados) * 6)))
@@ -1543,14 +1544,16 @@ def clasificacion_esquema1():
 
 
 class Clasificacion(QLabel):
-    def __init__(self, datos):
-        super().__init__()
-        colorClasificacion = "green"
+    def __init__(self, parent):
+        global colorClasificacion
+        super().__init__(parent)
         self.setStyleSheet("font-weight: bold; font-size: 16px; margin: 5px;" "text-color: " + colorClasificacion)
         self.setText("SANO")
 
     def actualizar(self):
+        global colorClasificacion
         self.setText(clasificacion_esquema1())
+        self.setStyleSheet("font-weight: bold; font-size: 16px; margin: 5px;" "text-color: " + colorClasificacion)
 
 
 class Circulo(QWidget):
@@ -1796,11 +1799,11 @@ class WindowFinal(QMainWindow):
         self.resizeEvent = self.actualizar_tam
 
         self.frameTodo = QFrame()
-        self.frameTodo.setGeometry(0, 0, self.width(), 805)
+        self.frameTodo.setGeometry(0, 0, self.width() - 10, 805)
 
         self.scroll_area = QScrollArea(self)
         self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
 
         self.frameTitulo = QFrame(self.frameTodo)
         self.frameTitulo.setGeometry(QRect(0, 0, self.width(), 50))
@@ -1815,12 +1818,9 @@ class WindowFinal(QMainWindow):
         self.frameClasificacion = QFrame(self.frameTodo)
         self.frameClasificacion.setGeometry(QRect(0, 50, self.width(), 50))
 
-        self.clasificacion = Clasificacion(datos)
+        self.clasificacion = Clasificacion(self.frameClasificacion)
         self.clasificacion.actualizar()
-        self.clasificacion.setParent(self.frameClasificacion)
-        self.clasificacion.setStyleSheet("font-size: 16px; font-weight: 350; color:" + colorClasificacion +";")
         self.clasificacion.setGeometry(QRect((self.width() - self.clasificacion.width()) // 2, 0, self.clasificacion.width(), self.clasificacion.height()))
-        self.clasificacion = QLabel("SANO", self.frameClasificacion)
 
         self.frameCosas = QFrame(self.frameTodo)
 
@@ -1838,12 +1838,12 @@ class WindowFinal(QMainWindow):
         lBuc = QLabel("Vestibular", self.frameEtiquetas)
         lBuc.setAlignment(Qt.AlignRight)
         lBuc.setGeometry(QRect(0, 75, horizontalAdvanceEt, 18))
-        lBuc.setStyleSheet("font-family: Alata; font-size: 20; font-weight: 400;")
+        lBuc.setStyleSheet("font-family: Alata; font-size: 20; font-weight: bold;")
 
         lPal = QLabel("Palatal", self.frameEtiquetas)
         lPal.setAlignment(Qt.AlignRight)
         lPal.setGeometry(QRect(0, 220, horizontalAdvanceEt, 18))
-        lPal.setStyleSheet("font-family: Alata; font-size: 20; font-weight: 400;")
+        lPal.setStyleSheet("font-family: Alata; font-size: 20; font-weight: bold;")
 
         self.frameDibujosDientesSuperior = QFrame(self.frameCosas)
         self.frameDibujosDientesSuperior.setGeometry(QRect(horizontalAdvanceEt + 35, 42, self.width() - 150*2, 270))
@@ -1896,12 +1896,12 @@ class WindowFinal(QMainWindow):
         lBuc = QLabel("Lingual", self.frameEtiquetas)
         lBuc.setAlignment(Qt.AlignRight)
         lBuc.setGeometry(QRect(0, 425, horizontalAdvanceEt, 18))
-        lBuc.setStyleSheet("font-family: Alata; font-size: 20; font-weight: 400;")
+        lBuc.setStyleSheet("font-family: Alata; font-size: 20; font-weight: bold;")
 
         lPal = QLabel("Vestibular", self.frameEtiquetas)
         lPal.setAlignment(Qt.AlignRight)
         lPal.setGeometry(QRect(0, 555, horizontalAdvanceEt, 18))
-        lPal.setStyleSheet("font-family: Alata; font-size: 20; font-weight: 400;")
+        lPal.setStyleSheet("font-family: Alata; font-size: 20; font-weight: bold;")
 
         self.frameDibujosDientesInferior = QFrame(self.frameCosas)
         self.frameDibujosDientesInferior.setGeometry(QRect(horizontalAdvanceEt + 35, 390, self.width() - 150*2, 260))
@@ -1917,19 +1917,19 @@ class WindowFinal(QMainWindow):
 
         self.scroll_area.setWidget(self.frameTodo)
         self.scroll_area.setMinimumSize(QSize(self.frameTodo.width(), 200))
-        self.scroll_area.setFixedSize(self.width(), self.height())
+        self.scroll_area.setFixedSize(self.frameTodo.width(), self.height())
         self.scroll_area.setWidgetResizable(False)
 
 
     def actualizar_tam(self, event):
-        self.frameTodo.setGeometry(0, 0, self.width(), 815)
+        self.frameTodo.setGeometry(0, 0, self.width() - 18, 815)
         self.frameTitulo.setGeometry(QRect(0, 0, self.width(), 50))
         self.titulo.setGeometry(
             QRect((self.width() - self.titulo.width()) // 2, 10, self.titulo.width(), self.titulo.height())
         )
         self.frameClasificacion.setGeometry(QRect(0, 50, self.width(), 50))
         self.clasificacion.setGeometry(QRect((self.width() - self.clasificacion.width()) // 2, 10, self.clasificacion.width(), self.clasificacion.height()))
-        self.frameCosas.setGeometry(125, 100, self.width() - 250, 705)
+        #self.frameCosas.setGeometry(125, 100, self.width() - 250, 705)
         self.frameColumnas.setGeometry(QRect(0, 0, self.width(), 705))
         horizontalAdvanceEt = QFontMetrics(QFont("Alata", 16)).horizontalAdvance("Sitio de muestreo")
         #self.frameEtiquetas.setGeometry(QRect(10, 18, horizontalAdvanceEt + 10, self.height()))
