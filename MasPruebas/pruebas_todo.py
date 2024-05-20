@@ -1319,11 +1319,11 @@ class BarraPorcentajes(QWidget):
 
 class Datos:
     def __init__(self):
-        self.fecha = None
+        self.fecha = datetime.date.today()
         self.examen_inicial = "Examen inicial"
         self.odontologa = ""
         self.paciente = ""
-        self.nacimiento = None
+        self.nacimiento = datetime.date.today()
         self.dientes_perdidos = "0"
         self.tratamiento_prev = "No"
         self.colapso_mordida = "No"
@@ -1340,7 +1340,9 @@ class Datos:
         self.desactivados = []
         self.inicializados = []
 
-        self.puntosMuestreo = []
+        self.puntosMuestreo = dientes[1:-1]
+        self.puntosMuestreo.remove(28)
+        self.puntosMuestreo.remove(48)
 
     def extraerDatos(self):
         dir = os.path.join(basedir, "./excel/datos" + datetime.datetime.now().strftime(
@@ -1348,15 +1350,18 @@ class Datos:
         ruta, _ = QFileDialog.getSaveFileName(window, "Guardar como", dir, "Libro de excel (*.xlsx)")
         if ruta != "":
             dfs = []
+            # DATOS DE LOS DIENTES
             for i in range(len(dientes)):
                 diente = dientes[i]
-                if i not in self.desactivados:
+                if i not in self.desactivados and diente in self.puntosMuestreo:
+                    # Primera columna con el número del diente
                     dfs.append(pd.DataFrame(
                         data=[self.movilidad[i], self.implantes[i], self.defectosfurca[i], self.sangrados[i][0],
                               self.placas[i][0], self.supuraciones[i][0], self.margenes[i][0], self.profundidades[i][0],
                               self.sangrados[i][3], self.placas[i][3], self.supuraciones[i][3], self.margenes[i][3],
                               self.profundidades[i][3]],
                         columns=[diente]))
+                    # Columnas sin número de diente
                     for j in range(1, 3):
                         dfs.append(pd.DataFrame(data=["", "", "", self.sangrados[i][j], self.placas[i][j],
                                                       self.supuraciones[i][j], self.margenes[i][j],
@@ -1365,27 +1370,45 @@ class Datos:
                                                       self.supuraciones[i][j + 3], self.margenes[i][j + 3],
                                                       self.profundidades[i][j + 3]], columns=[""]))
             df = pd.concat(dfs, axis=1)
-            df.index = ["B.Movilidad", "B.Implante", "B.Defecto de furca", "B.Sangrado al sondaje", "B.Placa", "B.Supuración",
-                        "B.Margen gingival", "B.Profundidad de sondaje", "P.Sangrado al sondaje", "P.Placa", "P.Supuración",
-                        "P.Margen gingival",
-                        "P.Profundidad de sondaje"]
+            # Ext para parte externa (vestibular/bucal)
+            # Int para parte interna (palatino/lingual)
+            df.index = ["Ext.Movilidad", "Ext.Implante", "Ext.Defecto de furca", "Ext.Sangrado al sondaje", "Ext.Placa", "Ext.Supuración",
+                        "Ext.Margen gingival", "Ext.Profundidad de sondaje", "Int.Sangrado al sondaje", "Int.Placa", "Int.Supuración",
+                        "Int.Margen gingival",
+                        "Int.Profundidad de sondaje"]
+
+            # DATOS DEL PACIENTE
             df2 = pd.DataFrame(
-                data=[self.fecha.strftime("%y%m%d%H%M%S"), self.odontologa, self.paciente,
-                      self.nacimiento.strftime("%y%m%d%H%M%S"), self.tratamiento_prev, self.colapso_mordida, self.tabaquismo])
-            df2.index = ["Fecha", "Odontóloga/o", "Paciente", "Fecha de nacimiento", "Tratamiento previo",
-                         "Colapso de mordida", "Tabaquismo"]
-            impl = sum(self.implantes)
-            ppd = sum(aplanar_lista(self.profundidades)) / (32 - sum(self.desactivados))*6
+                data=[self.fecha.strftime("%d/%m/%Y %H:%M"), self.odontologa, self.paciente,
+                      self.nacimiento.strftime("%d/%m/%Y")])
+            df2.index = ["Fecha", "Odontóloga/o", "Paciente", "Fecha de nacimiento"]
+
+            # DATOS CALCULADOS
+            datadf3 = []
+            # Cuantitativos:
+            nimplantes = sum(self.implantes)
+            ppdmedia = sum(aplanar_lista(self.profundidades)) / (32 - sum(self.desactivados))*6
             cal = 0
-            movild = sum(self.movilidad) / 32 - sum(self.desactivados)
-            furcamedia = sum(self.defectosfurca) / (32 - sum(self.desactivados))
-            df3 = pd.DataFrame(data=[impl, 32 - sum(self.desactivados) - impl, ppd, cal, movild, sum(1 for i in self.movilidad if i == 0),
-                                     sum(1 for i in self.movilidad if i == 1), sum(1 for i in self.movilidad if i == 2), sum(1 for i in self.movilidad if i == 3),
-                                     furcamedia, sum(1 for i in self.defectosfurca if i == 0), sum(1 for i in self.defectosfurca if i == 1),
-                                     sum(1 for i in self.defectosfurca if i == 2), sum(1 for i in self.defectosfurca if i == 3)])
+            movilidadmedia = sum(self.movilidad) / 32 - sum(self.desactivados)
+            datadf3 += [nimplantes, 32 - len(self.desactivados) - nimplantes, ppdmedia, cal, movilidadmedia]
+            datadf3 += [sum(1 for i in self.movilidad if i == 0),
+                                     sum(1 for i in self.movilidad if i == 1), sum(1 for i in self.movilidad if i == 2), sum(1 for i in self.movilidad if i == 3)]
+            f_plana = aplanar_lista(self.defectosfurca)
+            furcamedia = sum(f_plana) / (32 - sum(self.desactivados))
+            datadf3 += [furcamedia, sum(1 for i in f_plana if i == 0), sum(1 for i in f_plana if i == 1),
+                                     sum(1 for i in f_plana if i == 2), sum(1 for i in f_plana if i == 3)]
+            # Cualitativos
+            bop = sum(aplanar_lista(self.sangrados)) / (len(aplanar_lista(self.sangrados)) - (len(self.desactivados) * 6))
+            placa = sum(aplanar_lista(self.placas)) / (len(aplanar_lista(self.placas)) - (len(self.desactivados) * 6))
+            supuracion = sum(aplanar_lista(self.supuraciones)) / (len(aplanar_lista(self.supuraciones)) - (len(self.desactivados) * 6))
+            datadf3 += [bop, placa, supuracion]
+            datadf3 += [self.tabaquismo, self.tratamiento_prev, self.colapso_mordida]
+
+            df3 = pd.DataFrame(data=datadf3)
             df3.index = ["Número total implantes", "Número dientes naturales", "PPD media", "CAL media", "Movilidad media", "Dientes movilidad 0", "Dientes movilidad 1",
                 "Dientes movilidad 2", "Dientes movilidad 3", "Afectación de furca media", "Dientes afectación furca 0", "Dientes afectación furca 1", "Dientes afectación furca 2",
-                "Dientes afectación furca 3"]
+                "Dientes afectación furca 3", "BOP %", "Placa %", "Supuración %", "Tabaquismo/vapeo", "Tratamiento previo",
+                         "Colapso de mordida"]
 
             with pd.ExcelWriter(ruta) as writer:
                 df2.to_excel(writer, sheet_name="Datos paciente")
@@ -1432,10 +1455,7 @@ class Datos:
             self.inicializados.append(int(diente))
 
     def actualizar_defecto_furca(self, diente, valor, ind):
-        print(diente)
-        print(ind)
         self.defectosfurca[int(diente)][int(ind)] = abs(int(valor))
-        print(self.defectosfurca)
         if int(diente) not in self.inicializados:
             self.inicializados.append(int(diente))
 
@@ -1471,7 +1491,7 @@ class Datos:
             self.desactivados.append(diente)
 
     def actualizar_muestreo(self, diente, valor):
-        if valor:
+        if valor and diente not in self.puntosMuestreo:
             self.puntosMuestreo.append(diente)
         else:
             if diente in self.puntosMuestreo:
@@ -1759,9 +1779,12 @@ class ColumnaFinal(QFrame):
         # Sitio de muestreo
         if dientes[numDiente] not in datos.desactivados:
             self.muestreo = QCheckBox(self)
-            self.muestreo.setChecked(True)
             self.muestreo.setCheckable(True)
             self.muestreo.clicked.connect(self.actmuestreo1)
+            if dientes[numDiente] % 10 == 8:
+                self.muestreo.setChecked(False)
+            else:
+                self.muestreo.setChecked(True)
         else:
             self.muestreo = QLabel(self)
         self.muestreo.setGeometry(QRect(0, 18, 45, 18))
@@ -1769,9 +1792,12 @@ class ColumnaFinal(QFrame):
         # Columna abajo
         if dientes[numDiente + 16] not in datos.desactivados:
             self.muestreo2 = QCheckBox(self)
-            self.muestreo2.setChecked(True)
             self.muestreo2.setCheckable(True)
-            self.muestreo2.toggled.connect(self.actmuestreo2)
+            self.muestreo2.clicked.connect(self.actmuestreo2)
+            if dientes[numDiente + 16] % 10 == 8:
+                self.muestreo2.setChecked(False)
+            else:
+                self.muestreo2.setChecked(True)
         else:
             self.muestreo2 = QLabel(self)
         self.muestreo2.setGeometry(QRect(0, 650, 45, 18))
