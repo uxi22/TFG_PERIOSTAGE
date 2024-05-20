@@ -1771,12 +1771,12 @@ class ColumnaFinal(QFrame):
             self.muestreo2.toggled.connect(self.actmuestreo2)
         else:
             self.muestreo2 = QLabel(self)
-        self.muestreo2.setGeometry(QRect(0, 400, 45, 18))
+        self.muestreo2.setGeometry(QRect(0, 650, 45, 18))
 
         botonNumeroDienteAbajo = QPushButton(str(dientes[numDiente + 16]), self)
         botonNumeroDienteAbajo.setCheckable(False)
         botonNumeroDienteAbajo.setStyleSheet(style + colorBoton + "font-weight: bold; font-size: 12px;")
-        botonNumeroDienteAbajo.setGeometry(QRect(0, 418, 45, 18))
+        botonNumeroDienteAbajo.setGeometry(QRect(0, 668, 45, 18))
 
 
     def actmuestreo1(self):
@@ -1795,7 +1795,14 @@ class WindowFinal(QMainWindow):
         self.setMinimumSize(QSize(1000, 500))
         self.resizeEvent = self.actualizar_tam
 
-        self.frameTitulo = QFrame(self)
+        self.frameTodo = QFrame()
+        self.frameTodo.setGeometry(0, 0, self.width(), 805)
+
+        self.scroll_area = QScrollArea(self)
+        self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
+        self.frameTitulo = QFrame(self.frameTodo)
         self.frameTitulo.setGeometry(QRect(0, 0, self.width(), 50))
 
         self.titulo = QLabel("Vista general", self.frameTitulo)
@@ -1805,7 +1812,7 @@ class WindowFinal(QMainWindow):
             QRect((self.width() - self.titulo.width()) // 2, 10, self.titulo.width(), self.titulo.height())
         )
 
-        self.frameClasificacion = QFrame(self)
+        self.frameClasificacion = QFrame(self.frameTodo)
         self.frameClasificacion.setGeometry(QRect(0, 50, self.width(), 50))
 
         self.clasificacion = Clasificacion(datos)
@@ -1815,21 +1822,24 @@ class WindowFinal(QMainWindow):
         self.clasificacion.setGeometry(QRect((self.width() - self.clasificacion.width()) // 2, 0, self.clasificacion.width(), self.clasificacion.height()))
         self.clasificacion = QLabel("SANO", self.frameClasificacion)
 
-        self.frameTodo = QFrame(self)
-        #self.frameTodo.setGeometry(0, 90, self.width(), self.height()-100)
+        self.frameCosas = QFrame(self.frameTodo)
 
-        self.frameColumnas = QFrame(self.frameTodo)
-        self.frameColumnas.setGeometry(QRect(0, 0, self.width(), self.height() - 100))
+        self.frameColumnas = QFrame(self.frameCosas)
+        self.frameColumnas.setGeometry(QRect(0, 0, self.width() - 250, 800))
 
         self.frameEtiquetas = QFrame(self.frameColumnas)
         horizontalAdvanceEt = QFontMetrics(QFont("Alata", 16)).horizontalAdvance("Sitio de muestreo")
 
-        self.frameEtiquetas.setGeometry(QRect(0, 18, horizontalAdvanceEt + 10, self.height()))
+        self.frameEtiquetas.setGeometry(QRect(0, 18, horizontalAdvanceEt + 10, 1000))
         labEt = QLabel("Sitios de muestreo", self.frameEtiquetas)
+        labEt2 = QLabel("Sitios de muestreo", self.frameEtiquetas)
         labEt.setAlignment(Qt.AlignRight)
+        labEt2.setAlignment(Qt.AlignRight)
         labEt.setGeometry(QRect(0, 0, horizontalAdvanceEt, 18))
-        self.frameDibujosDientesSuperior = QFrame(self.frameTodo)
-        self.frameDibujosDientesSuperior.setGeometry(QRect(horizontalAdvanceEt + 35, 42, self.width() - 150*2, 275))
+        labEt2.setGeometry(QRect(0, 632, horizontalAdvanceEt, 18))
+
+        self.frameDibujosDientesSuperior = QFrame(self.frameCosas)
+        self.frameDibujosDientesSuperior.setGeometry(QRect(horizontalAdvanceEt + 35, 42, self.width() - 150*2, 270))
         pantallaAct = 0
         self.widgetDientesSuperiorArriba = LineasSobreDientes(datos, self.frameDibujosDientesSuperior)
         self.widgetDientesSuperiorAbajo = LineasSobreDientesAbajo(datos, self.frameDibujosDientesSuperior)
@@ -1848,7 +1858,7 @@ class WindowFinal(QMainWindow):
             ColumnaFinal(n, incrementoLeft, parent=self.frameColumnas)
             incrementoLeft += 45 + 4
 
-        self.frameDatosMedios = QFrame(self.frameTodo)
+        self.frameDatosMedios = QFrame(self.frameCosas)
         self.frameDatosMedios.setGeometry(180, 300, 920, 90)
         layoutDatosMedios = QHBoxLayout(self.frameDatosMedios)
         self.frameDatosMedios.setStyleSheet("background: none;")
@@ -1872,34 +1882,40 @@ class WindowFinal(QMainWindow):
         layoutDatosMedios.addWidget(self.boton)
         self.frameDatosMedios.setLayout(layoutDatosMedios)
 
-        self.frameDibujosDientesInferior = QFrame(self.frameTodo)
-        self.frameDibujosDientesInferior.setGeometry(QRect(150, 390, self.width() - 150*2, 275))
+        self.frameDibujosDientesInferior = QFrame(self.frameCosas)
+        self.frameDibujosDientesInferior.setGeometry(QRect(horizontalAdvanceEt + 35, 390, self.width() - 150*2, 260))
         pantallaAct = 1
         self.wDInferiorArriba = LineasSobreDientes(datos, self.frameDibujosDientesInferior)
         self.wDInferiorAbajo = LineasSobreDientesAbajo(datos, self.frameDibujosDientesInferior)
         pantallaAct = 2
         self.wDInferiorAbajo.setGeometry(0, 120, self.wDInferiorAbajo.width(), self.wDInferiorAbajo.height())
 
-        self.frameTodo.adjustSize()
-        self.frameTodo.setGeometry(QRect(125, 50, self.frameTodo.width(), self.frameTodo.height()))
+        self.frameCosas.adjustSize()
+        self.frameCosas.setGeometry(QRect(125, 100, self.frameCosas.width(), 705))
+        self.scroll_area.setStyleSheet("border: None;")
 
+        self.scroll_area.setWidget(self.frameTodo)
+        self.scroll_area.setMinimumSize(QSize(self.frameTodo.width(), 200))
+        self.scroll_area.setFixedSize(self.width(), self.height())
+        self.scroll_area.setWidgetResizable(False)
 
 
     def actualizar_tam(self, event):
+        self.frameTodo.setGeometry(0, 0, self.width(), 815)
         self.frameTitulo.setGeometry(QRect(0, 0, self.width(), 50))
         self.titulo.setGeometry(
             QRect((self.width() - self.titulo.width()) // 2, 10, self.titulo.width(), self.titulo.height())
         )
         self.frameClasificacion.setGeometry(QRect(0, 50, self.width(), 50))
         self.clasificacion.setGeometry(QRect((self.width() - self.clasificacion.width()) // 2, 10, self.clasificacion.width(), self.clasificacion.height()))
-        self.frameTodo.setGeometry(125, 100, self.width(), self.height()-100)
-        self.frameColumnas.setGeometry(QRect(0, 0, self.width(), self.height() - 100))
+        self.frameCosas.setGeometry(125, 100, self.width() - 250, 705)
+        self.frameColumnas.setGeometry(QRect(0, 0, self.width(), 705))
         horizontalAdvanceEt = QFontMetrics(QFont("Alata", 16)).horizontalAdvance("Sitio de muestreo")
-        self.frameEtiquetas.setGeometry(QRect(10, 18, horizontalAdvanceEt, self.height()))
-        self.frameDibujosDientesSuperior.setGeometry(QRect(horizontalAdvanceEt + 35, 42, self.width() - 150*2, 275))
-        self.frameDibujosDientesInferior.setGeometry(QRect(horizontalAdvanceEt + 35, 390, self.width() - 150*2, 275))
-
-
+        #self.frameEtiquetas.setGeometry(QRect(10, 18, horizontalAdvanceEt + 10, self.height()))
+        self.frameDibujosDientesSuperior.setGeometry(QRect(horizontalAdvanceEt + 35, 42, self.width() - 150*2, 270))
+        self.frameDibujosDientesInferior.setGeometry(QRect(horizontalAdvanceEt + 35, 390, self.width() - 150*2, 260))
+        self.scroll_area.setGeometry(0, 0, self.width(), self.height())
+        self.scroll_area.setFixedSize(self.width(), self.height())
 
 
 window = None
