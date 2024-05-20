@@ -151,7 +151,7 @@ class TratPrevio(QFrame):
         self.frameSubpregunta.hide()
 
         # Acciones de los botones
-        self.botones[0].toggled.connect(self.subpregunta)
+        self.botones[0].clicked.connect(self.subpregunta)
         self.botones[-1].setChecked(True)
 
     def actw(self, w):
@@ -175,7 +175,6 @@ class TratPrevio(QFrame):
 
     def pulsadoNo(self):
         datos.set_tratamiento_prev(False)
-
 
 
 class RecuadroPreguntaRadio(QFrame):
@@ -235,7 +234,9 @@ class Window1(QMainWindow):
         self.titu.adjustSize()
         self.titu.setGeometry(QRect((self.width() - self.titu.width()) // 2, 10, self.titu.width(), self.titu.height()))
         self.frameTitulo.show()
-
+        self.siguiente = BotonSiguiente(self.frameTitulo, "Arcada superior")
+        self.siguiente.setGeometry(
+            QRect(((self.width() - self.titu.width()) // 2) + self.titu.width() + 20, 15, 125, 30))
         self.elementos()
 
     def elementos(self):
@@ -357,7 +358,7 @@ class Window1(QMainWindow):
         opc_dientes = ["0", "1-4", ">=5", "Desconocido"]
         self.dientesperdidos = RecuadroPreguntaRadio(self.framePreguntas, [0, 60, self.framePreguntas.width(), 50],
                                                      "Dientes perdidos por periodontitis:",
-                                                    opc_dientes, 30)
+                                                     opc_dientes, 30)
         dientsperdidos = self.dientesperdidos.getOpciones()
         for i in range(len(opc_dientes)):
             dientsperdidos[i].toggled.connect(lambda: datos.set_dientes_perdidos(opc_dientes[i]))
@@ -366,14 +367,12 @@ class Window1(QMainWindow):
         self.fumador = Fumador(self.framePreguntas, [0, 120, self.framePreguntas.width() / 2, 50],
                                self.framePreguntas.width())
 
+        """
         self.botonSiguiente = QPushButton("Siguiente", self)
         self.botonSiguiente.setGeometry(self.width() - 205, self.height() - 125, 100, 40)
         self.botonSiguiente.setStyleSheet(
             "QPushButton { background-color: #9747FF; border-radius: 7px; font-size: 18px; font-family: Alata;} QPushButton:hover { background-color: #7A2ECC; } QPushButton:pressed { background-color: #5F1E9A; }")
-        self.botonSiguiente.clicked.connect(self.siguientePag)
-
-    def siguientePag(self):
-        siguientePantalla()
+        """
 
     def desplazarFrames(self, abierto):
         if abierto:
@@ -402,7 +401,9 @@ class Window1(QMainWindow):
         self.dientesperdidos.widthOpciones(self.framePreguntas.width())
         self.fumador.setGeometry(0, 120, int(self.framePreguntas.width() / 2), 50)
         self.fumador.actualizarw(self.framePreguntas.width() / 2, self.framePreguntas.width())
-        self.botonSiguiente.setGeometry(self.width() - 205, self.height() - 125, 100, 40)
+        # self.botonSiguiente.setGeometry(self.width() - 205, self.height() - 125, 100, 40)
+        self.siguiente.setGeometry(
+            QRect(((self.width() - self.titu.width()) // 2) + self.titu.width() + 20, 15, 125, 30))
 
 
 def cambiar_color(boton, color):
@@ -456,12 +457,14 @@ class ImagenDiente(QImage):
         self.dientes = []
         for i in range(0, 16):
             if datos.implantes[i + 16 * pantallaAct]:
-                im = Image.open(os.path.join(basedir, "DIENTES", f"periodontograma-i{dientes[i + 16 * pantallaAct]}{abajo}.png"))
+                im = Image.open(
+                    os.path.join(basedir, "DIENTES", f"periodontograma-i{dientes[i + 16 * pantallaAct]}{abajo}.png"))
                 im = im.resize((int(im.width * 0.88), int(im.height * 0.88)))
                 self.dientes.append(im)
                 self.dientes[-1] = self.dientes[-1].convert("RGBA")
             else:
-                im = Image.open(os.path.join(basedir, "DIENTES", f"periodontograma-{dientes[i + 16 * pantallaAct]}{abajo}.png"))
+                im = Image.open(
+                    os.path.join(basedir, "DIENTES", f"periodontograma-{dientes[i + 16 * pantallaAct]}{abajo}.png"))
                 im = im.resize((int(im.width * 0.88), int(im.height * 0.88)))
                 self.dientes.append(im)
                 self.dientes[-1] = self.dientes[-1].convert("RGBA")
@@ -498,7 +501,7 @@ class LineasSobreDientesAbajo(QWidget):
         self.altura = 57
         # Valores iniciales de los puntos de los dientes
         for i, diente_imagen in enumerate(self.imagen.dientes):
-            if dientes[i + 16*pantallaAct] in furcas:
+            if dientes[i + 16 * pantallaAct] in furcas:
                 # Hay 2 puntos de furca en la cara que aparece abajo
                 self.puntos_furca.append(QPoint(dist + triangulos_abajo[furcas.index(dientes[i]) * 2][1],
                                                 triangulos_abajo[furcas.index(dientes[i]) * 2][0]))
@@ -547,7 +550,7 @@ class LineasSobreDientesAbajo(QWidget):
 
         # Dibujamos líneas y polígonos sobre los dientes
         for i in range(16):
-            if (i + 16*self.pantalla) not in datos.desactivados:
+            if (i + 16 * self.pantalla) not in datos.desactivados:
                 qp.setBrush(brush)
                 qp.setPen(QPen(Qt.blue, 2, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
                 auxpuntos.append(self.points2[i * 3])
@@ -564,7 +567,7 @@ class LineasSobreDientesAbajo(QWidget):
                 poligono.append(list(reversed(auxpuntos)))
                 qp.setPen(QPen(Qt.NoPen))
                 qp.drawPolygon(poligono)
-                if ((i + 16*self.pantalla) + 1 not in datos.desactivados) and i != 7 and i != 15:
+                if ((i + 16 * self.pantalla) + 1 not in datos.desactivados) and i != 7 and i != 15:
                     poligono.clear()
                     auxpuntos.clear()
                     qp.setPen(QPen(Qt.blue, 2, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
@@ -586,9 +589,10 @@ class LineasSobreDientesAbajo(QWidget):
 
                 # defectos de furca
                 for w in range(1, 3):
-                    if not datos.implantes[i + 16*self.pantalla] and dientes[i + 16*self.pantalla] in furcas and datos.defectosfurca[i + 16*self.pantalla][w] > 0:
+                    if not datos.implantes[i + 16 * self.pantalla] and dientes[i + 16 * self.pantalla] in furcas and \
+                            datos.defectosfurca[i + 16 * self.pantalla][w] > 0:
                         auxindice = furcas.index(dientes[i])
-                        valor = datos.defectosfurca[i + 16*self.pantalla][w]
+                        valor = datos.defectosfurca[i + 16 * self.pantalla][w]
                         qp.setPen(QPen(QColor(165, 10, 135, 210), 1.5, Qt.SolidLine, Qt.SquareCap))
                         auxpuntos = [self.puntos_furca[auxindice * 2 + w - 1].x(),
                                      self.puntos_furca[auxindice * 2 + w - 1].y()]
@@ -653,7 +657,7 @@ class LineasSobreDientes(QWidget):
         self.altura = 80
         # Valores iniciales de los puntos de los dientes
         for i, diente_imagen in enumerate(self.imagen.dientes):
-            if dientes[i + 16*pantallaAct] in furcas:
+            if dientes[i + 16 * pantallaAct] in furcas:
                 self.puntos_furca.append(QPoint(dist + triangulos_arriba[furcas.index(dientes[i])][1],
                                                 triangulos_arriba[furcas.index(dientes[i])][0]))
             dist += arriba[i][0]
@@ -696,7 +700,7 @@ class LineasSobreDientes(QWidget):
         auxpuntos = []
 
         for i in range(16):
-            if (i + 16*self.pantalla) not in datos.desactivados:
+            if (i + 16 * self.pantalla) not in datos.desactivados:
                 qp.setBrush(brush)
                 qp.setPen(QPen(Qt.blue, 2, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
                 auxpuntos.append(self.points2[i * 3])
@@ -713,7 +717,7 @@ class LineasSobreDientes(QWidget):
                 poligono.append(list(reversed(auxpuntos)))
                 qp.setPen(QPen(Qt.NoPen))
                 qp.drawPolygon(poligono)
-                if (i + 16*self.pantalla + 1 not in datos.desactivados) and i != 7 and i != 15:
+                if (i + 16 * self.pantalla + 1 not in datos.desactivados) and i != 7 and i != 15:
                     poligono.clear()
                     auxpuntos.clear()
                     qp.setPen(QPen(Qt.blue, 2, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
@@ -734,9 +738,10 @@ class LineasSobreDientes(QWidget):
                 auxpuntos.clear()
 
                 # defectos de furca
-                if not datos.implantes[i + 16*self.pantalla] and dientes[i + 16*self.pantalla] in furcas and datos.defectosfurca[i + 16*self.pantalla][0] > 0:
+                if not datos.implantes[i + 16 * self.pantalla] and dientes[i + 16 * self.pantalla] in furcas and \
+                        datos.defectosfurca[i + 16 * self.pantalla][0] > 0:
                     auxindice = furcas.index(dientes[i])
-                    valor = datos.defectosfurca[i + 16*self.pantalla][0]
+                    valor = datos.defectosfurca[i + 16 * self.pantalla][0]
                     qp.setPen(QPen(QColor(165, 10, 135, 210), 1.5, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
                     auxpuntos = [self.puntos_furca[auxindice].x(),
                                  self.puntos_furca[auxindice].y()]
@@ -767,14 +772,17 @@ class LineasSobreDientes(QWidget):
     def actualizar_alturas(self, numeroDiente, tipo, indice):
         if tipo == 1:  # Margen gingival
             aux = self.points[numeroDiente * 3 + indice]
-            aux.setY(int(self.altura + 5 * datos.margenes[numeroDiente + 16*pantallaAct][indice]))
+            aux.setY(int(self.altura + 5 * datos.margenes[numeroDiente + 16 * pantallaAct][indice]))
             self.points[numeroDiente * 3 + indice] = aux
-            aux.setY(int(self.points[numeroDiente * 3 + indice].y() - 5 * datos.profundidades[numeroDiente + 16*pantallaAct][indice]))
+            aux.setY(int(
+                self.points[numeroDiente * 3 + indice].y() - 5 * datos.profundidades[numeroDiente + 16 * pantallaAct][
+                    indice]))
             self.points2[numeroDiente * 3 + indice] = aux
         elif tipo == 2:  # Profundidad de sondaje
             aux = self.points[numeroDiente * 3 + indice]
             aux.setY(int(self.altura + 5 * (
-                    datos.margenes[numeroDiente + 16*pantallaAct][indice] - datos.profundidades[numeroDiente + 16*pantallaAct][indice])))
+                    datos.margenes[numeroDiente + 16 * pantallaAct][indice] -
+                    datos.profundidades[numeroDiente + 16 * pantallaAct][indice])))
             self.points2[numeroDiente * 3 + indice] = aux
         self.update()
 
@@ -797,13 +805,13 @@ class Input03(QLineEdit):
     def guardar_texto(self, numDiente, furca, ind):
         if furca:
             # actualizar datos
-            datos.actualizar_defecto_furca(numDiente + 16*pantallaAct, self.text(), ind)
+            datos.actualizar_defecto_furca(numDiente + 16 * pantallaAct, self.text(), ind)
             # Actualizar dibujo dientes
             window.widgetDientes.update()
             window.widgetDientesAbajo.update()
         else:
             # actualizar datos
-            datos.actualizar_movilidad(numDiente + 16*pantallaAct, self.text())
+            datos.actualizar_movilidad(numDiente + 16 * pantallaAct, self.text())
 
 
 class Input2Furcas(QFrame):
@@ -811,7 +819,7 @@ class Input2Furcas(QFrame):
         super().__init__(parent)
         self.setGeometry(QRect(0, height, 45, 18))
         self.inputs = []
-        self.inputs.append(Input03(0,True, numDiente, self, 22, 0, 1))
+        self.inputs.append(Input03(0, True, numDiente, self, 22, 0, 1))
         self.inputs.append(Input03(0, True, numDiente, self, 22, 23, 2))
 
 
@@ -840,15 +848,15 @@ class InputSiNo3(QFrame):
         if tipo == 1:
             cambiar_color(boton, "#FF2B32")
             window.sangrado.actualizarPorcentajes((numDiente) * 6 + ind, boton.isChecked())
-            datos.actualizar_sangrado(int(numDiente + 16*pantallaAct), ind, boton.isChecked())
+            datos.actualizar_sangrado(int(numDiente + 16 * pantallaAct), ind, boton.isChecked())
         elif tipo == 2:
             cambiar_color(boton, "#5860FF")
             window.placa.actualizarPorcentajes(int(numDiente) * 6 + ind, boton.isChecked())
-            datos.actualizar_placa(int(numDiente + 16*pantallaAct), ind, boton.isChecked())
+            datos.actualizar_placa(int(numDiente + 16 * pantallaAct), ind, boton.isChecked())
         elif tipo == 3:
             cambiar_color(boton, "#7CEBA0")
             # window.supuracion.actualizarPorcentajes(int(numDiente) * 6 + ind, boton.isChecked())
-            datos.actualizar_supuracion(int(numDiente + 16*pantallaAct), ind, boton.isChecked())
+            datos.actualizar_supuracion(int(numDiente + 16 * pantallaAct), ind, boton.isChecked())
 
 
 class Input3(QFrame):
@@ -876,13 +884,15 @@ class Input3(QFrame):
         if tipo == 1 and es_numero(inpt.text()):
             if -21 < int(inpt.text()) < 21:
                 if arriba:
-                    datos.actualizar_margen(int(ndiente + 16*pantallaAct), num, int(inpt.text()))
+                    datos.actualizar_margen(int(ndiente + 16 * pantallaAct), num, int(inpt.text()))
                     window.widgetDientes.actualizar_alturas(int(ndiente), tipo, num)
-                    window.cal.actualizarDatos(int(ndiente) * 6 + num, calcular_cal(int(ndiente + 16*pantallaAct), num))
+                    window.cal.actualizarDatos(int(ndiente) * 6 + num,
+                                               calcular_cal(int(ndiente + 16 * pantallaAct), num))
                 else:
-                    datos.actualizar_margen(int(ndiente + 16*pantallaAct), num + 3, int(inpt.text()))
+                    datos.actualizar_margen(int(ndiente + 16 * pantallaAct), num + 3, int(inpt.text()))
                     window.widgetDientesAbajo.actualizar_alturas(int(ndiente), tipo, num)
-                    window.cal.actualizarDatos(int(ndiente) * 6 + num, calcular_cal(int(ndiente + 16*pantallaAct), num))
+                    window.cal.actualizarDatos(int(ndiente) * 6 + num,
+                                               calcular_cal(int(ndiente + 16 * pantallaAct), num))
             else:
                 inpt.setText("0")
         elif tipo == 2 and es_numero(inpt.text()):  # Profundidad de sondaje
@@ -892,15 +902,17 @@ class Input3(QFrame):
                 else:
                     self.inpts[num].setStyleSheet("QLineEdit { " + style + "color: black; font-size: 12px; }")
                 if arriba:
-                    datos.actualizar_profundidad(int(ndiente + 16*pantallaAct), num, int(inpt.text()))
+                    datos.actualizar_profundidad(int(ndiente + 16 * pantallaAct), num, int(inpt.text()))
                     window.widgetDientes.actualizar_alturas(int(ndiente), tipo, num)
                     window.ppd.actualizarDatos(int(ndiente) * 6 + num, int(inpt.text()))
-                    window.cal.actualizarDatos(int(ndiente) * 6 + num, calcular_cal(int(ndiente + 16*pantallaAct), num))
+                    window.cal.actualizarDatos(int(ndiente) * 6 + num,
+                                               calcular_cal(int(ndiente + 16 * pantallaAct), num))
                 else:
-                    datos.actualizar_profundidad(int(ndiente + 16*pantallaAct), num + 3, int(inpt.text()))
+                    datos.actualizar_profundidad(int(ndiente + 16 * pantallaAct), num + 3, int(inpt.text()))
                     window.widgetDientesAbajo.actualizar_alturas(int(ndiente), tipo, num)
                     window.ppd.actualizarDatos(int(ndiente) * 6 + num, int(inpt.text()))
-                    window.cal.actualizarDatos(int(ndiente) * 6 + num, calcular_cal(int(ndiente + 16*pantallaAct), num))
+                    window.cal.actualizarDatos(int(ndiente) * 6 + num,
+                                               calcular_cal(int(ndiente + 16 * pantallaAct), num))
             else:
                 inpt.setText("0")
 
@@ -912,7 +924,7 @@ class Columna(QFrame):
 
         self.incrementoHeight = 0
 
-        botonNumeroDiente = QPushButton(str(dientes[numDiente + 16*pantallaAct]), self)
+        botonNumeroDiente = QPushButton(str(dientes[numDiente + 16 * pantallaAct]), self)
         botonNumeroDiente.setCheckable(True)
         botonNumeroDiente.setDefault(True)
         botonNumeroDiente.setStyleSheet(style + colorBoton + "font-weight: bold; font-size: 12px;")
@@ -1068,13 +1080,13 @@ class Columna(QFrame):
         boton = self.hijos[3]
         cambiar_color(boton, "#333333")
         # Actualizamos los datos
-        datos.actualizar_implante(numDiente + 16*pantallaAct, boton.isChecked())
+        datos.actualizar_implante(numDiente + 16 * pantallaAct, boton.isChecked())
 
         # Actualizamos la imagen
         window.widgetDientes.actualizar_imagen()
         window.widgetDientesAbajo.actualizar_imagen()
         # Cambiamos el input de la furca si corresponde
-        if dientes[numDiente + 16*pantallaAct] in furcas:
+        if dientes[numDiente + 16 * pantallaAct] in furcas:
             inptfurca = self.hijos[2]
             inptfurca.deleteLater()
             self.hijos[2] = None
@@ -1108,7 +1120,7 @@ class Columna(QFrame):
 
     def desactivar_activar_diente(self, numDiente):
         # Actualizamos el objeto datos para desactivar o volver a activar el diente
-        datos.actualizar_desactivados(int(numDiente + 16*pantallaAct))
+        datos.actualizar_desactivados(int(numDiente + 16 * pantallaAct))
         # Actualizamos los dibujos para que aparezca tachado el diente
         window.widgetDientes.update()
         window.widgetDientesAbajo.update()
@@ -1144,8 +1156,9 @@ class Columna(QFrame):
             window.cal.anhadirDiente(numDiente)
             window.ppd.anhadirDiente(numDiente)
             for i in range(6):
-                window.sangrado.actualizarPorcentajes(numDiente * 6 + i, datos.sangrados[numDiente + 16*pantallaAct][i])
-                window.placa.actualizarPorcentajes(numDiente * 6 + i, datos.placas[numDiente + 16*pantallaAct][i])
+                window.sangrado.actualizarPorcentajes(numDiente * 6 + i,
+                                                      datos.sangrados[numDiente + 16 * pantallaAct][i])
+                window.placa.actualizarPorcentajes(numDiente * 6 + i, datos.placas[numDiente + 16 * pantallaAct][i])
 
 
 class CuadroColores(QWidget):
@@ -1178,7 +1191,7 @@ class CuadroColores(QWidget):
 
     def anhadirDiente(self, indice):
         for i in range(6):
-             self.datoscolores[self.listadatos[indice * 6 + i]] += 1
+            self.datoscolores[self.listadatos[indice * 6 + i]] += 1
         self.update()
 
     def actualizarDatos(self, indice, nuevo):
@@ -1372,8 +1385,10 @@ class Datos:
             df = pd.concat(dfs, axis=1)
             # Ext para parte externa (vestibular/bucal)
             # Int para parte interna (palatino/lingual)
-            df.index = ["Ext.Movilidad", "Ext.Implante", "Ext.Defecto de furca", "Ext.Sangrado al sondaje", "Ext.Placa", "Ext.Supuración",
-                        "Ext.Margen gingival", "Ext.Profundidad de sondaje", "Int.Sangrado al sondaje", "Int.Placa", "Int.Supuración",
+            df.index = ["Ext.Movilidad", "Ext.Implante", "Ext.Defecto de furca", "Ext.Sangrado al sondaje", "Ext.Placa",
+                        "Ext.Supuración",
+                        "Ext.Margen gingival", "Ext.Profundidad de sondaje", "Int.Sangrado al sondaje", "Int.Placa",
+                        "Int.Supuración",
                         "Int.Margen gingival",
                         "Int.Profundidad de sondaje"]
 
@@ -1387,27 +1402,33 @@ class Datos:
             datadf3 = []
             # Cuantitativos:
             nimplantes = sum(self.implantes)
-            ppdmedia = sum(aplanar_lista(self.profundidades)) / (32 - sum(self.desactivados))*6
+            ppdmedia = sum(aplanar_lista(self.profundidades)) / (32 - sum(self.desactivados)) * 6
             cal = 0
             movilidadmedia = sum(self.movilidad) / 32 - sum(self.desactivados)
             datadf3 += [nimplantes, 32 - len(self.desactivados) - nimplantes, ppdmedia, cal, movilidadmedia]
             datadf3 += [sum(1 for i in self.movilidad if i == 0),
-                                     sum(1 for i in self.movilidad if i == 1), sum(1 for i in self.movilidad if i == 2), sum(1 for i in self.movilidad if i == 3)]
+                        sum(1 for i in self.movilidad if i == 1), sum(1 for i in self.movilidad if i == 2),
+                        sum(1 for i in self.movilidad if i == 3)]
             f_plana = aplanar_lista(self.defectosfurca)
             furcamedia = sum(f_plana) / (32 - sum(self.desactivados))
             datadf3 += [furcamedia, sum(1 for i in f_plana if i == 0), sum(1 for i in f_plana if i == 1),
-                                     sum(1 for i in f_plana if i == 2), sum(1 for i in f_plana if i == 3)]
+                        sum(1 for i in f_plana if i == 2), sum(1 for i in f_plana if i == 3)]
             # Cualitativos
-            bop = sum(aplanar_lista(self.sangrados)) / (len(aplanar_lista(self.sangrados)) - (len(self.desactivados) * 6))
+            bop = sum(aplanar_lista(self.sangrados)) / (
+                        len(aplanar_lista(self.sangrados)) - (len(self.desactivados) * 6))
             placa = sum(aplanar_lista(self.placas)) / (len(aplanar_lista(self.placas)) - (len(self.desactivados) * 6))
-            supuracion = sum(aplanar_lista(self.supuraciones)) / (len(aplanar_lista(self.supuraciones)) - (len(self.desactivados) * 6))
+            supuracion = sum(aplanar_lista(self.supuraciones)) / (
+                        len(aplanar_lista(self.supuraciones)) - (len(self.desactivados) * 6))
             datadf3 += [bop, placa, supuracion]
             datadf3 += [self.tabaquismo, self.tratamiento_prev, self.colapso_mordida]
 
             df3 = pd.DataFrame(data=datadf3)
-            df3.index = ["Número total implantes", "Número dientes naturales", "PPD media", "CAL media", "Movilidad media", "Dientes movilidad 0", "Dientes movilidad 1",
-                "Dientes movilidad 2", "Dientes movilidad 3", "Afectación de furca media", "Dientes afectación furca 0", "Dientes afectación furca 1", "Dientes afectación furca 2",
-                "Dientes afectación furca 3", "BOP %", "Placa %", "Supuración %", "Tabaquismo/vapeo", "Tratamiento previo",
+            df3.index = ["Número total implantes", "Número dientes naturales", "PPD media", "CAL media",
+                         "Movilidad media", "Dientes movilidad 0", "Dientes movilidad 1",
+                         "Dientes movilidad 2", "Dientes movilidad 3", "Afectación de furca media",
+                         "Dientes afectación furca 0", "Dientes afectación furca 1", "Dientes afectación furca 2",
+                         "Dientes afectación furca 3", "BOP %", "Placa %", "Supuración %", "Tabaquismo/vapeo",
+                         "Tratamiento previo",
                          "Colapso de mordida"]
 
             with pd.ExcelWriter(ruta) as writer:
@@ -1576,87 +1597,50 @@ class Clasificacion(QLabel):
         self.setStyleSheet("font-weight: bold; font-size: 16px; margin: 5px;" "text-color: " + colorClasificacion)
 
 
-class Circulo(QWidget):
-    def __init__(self, parent, dimensiones):
+class BotonAnterior(QPushButton):
+    def __init__(self, parent, texto):
         super().__init__(parent)
-        self.setMinimumSize(20, 20)
-        self.dimensiones = dimensiones
-        self.setGeometry(QRect(dimensiones[0], dimensiones[1], dimensiones[2], dimensiones[3]))
+        self.setText(texto)
+        self.setStyleSheet(
+            "QPushButton { background-color: #DCB5FF; border-radius: 7px; font-size: 15px; font-family: Alata;}"
+            "QPushButton:hover { background-color: #BF98E2; }"
+            "QPushButton:pressed { background-color: #AC92C4; }")
+        self.setCheckable(True)
+        self.clicked.connect(self.funcion_clickado)
 
-    def paintEvent(self, event):
-        qp = QPainter(self)
-        qp.setBrush(QBrush(Qt.gray))
-        qp.setPen(Qt.NoPen)
-        qp.drawEllipse(QRect(self.dimensiones[0], self.dimensiones[1], self.dimensiones[2], self.dimensiones[3]))
-
-    def mousePressEvent(self, event):
-        siguientePantalla()
-        # or anterior pantalla si estamos en la arcada inferior
+    def funcion_clickado(self):
+        if window:
+            anteriorPantalla()
 
 
-class FlechaAlante(QWidget):
-    def __init__(self, parent, dimensiones):
+class BotonSiguiente(QPushButton):
+    def __init__(self, parent, texto):
         super().__init__(parent)
-        self.minimumSize(20, 20)
-        self.dimensiones = dimensiones
-        self.setGeometry(QRect(dimensiones[0], dimensiones[1], dimensiones[2], dimensiones[3]))
+        self.setText(texto)
+        self.setStyleSheet(
+            "QPushButton { background-color: #DCB5FF; border-radius: 7px; font-size: 15px; font-family: Alata;}"
+            "QPushButton:hover { background-color: #BF98E2; }"
+            "QPushButton:pressed { background-color: #AC92C4; }")
+        self.setCheckable(True)
+        self.clicked.connect(self.funcion_clickado)
 
-    def paintEvent(self, event):
-        qp = QPainter(self)
-        qp.setPen(QPen(QColor(25, 0, 97, 1), 2, Qt.SolidLine, Qt.SquareCap, Qt.MitterJoin))
-        qp.setBrush(Qt.NoBrush)
-        puntos = QPolygon()
-        (puntos << QPoint(self.dimensiones[0], self.dimensiones[1]) <<
-         QPoint(self.dimensiones[0] + self.dimensiones[2], self.dimensiones[1] + self.dimensiones[3] / 2) <<
-            QPoint(self.dimensiones[0], self.dimensiones[1] + self.dimensiones[3]))
-        qp.drawPolyline(puntos)
-
-    def mousePressEvent(self, event):
-        siguientePantalla()
-
-class FlechaAtras(QWidget):
-    def __init__(self, parent, dimensiones):
-        super().__init__(parent)
-        self.minimumSize(20, 20)
-        self.dimensiones = dimensiones
-        self.setGeometry(QRect(dimensiones[0], dimensiones[1], dimensiones[2], dimensiones[3]))
-
-    def paintEvent(self, event):
-        qp = QPainter(self)
-        qp.setPen(QPen(QColor(25, 0, 97, 1), 2, Qt.SolidLine, Qt.SquareCap, Qt.MitterJoin))
-        qp.setBrush(Qt.NoBrush)
-        puntos = QPolygon()
-        (puntos << QPoint(self.dimensiones[0] + self.dimensiones[2], self.dimensiones[1]) <<
-         QPoint(self.dimensiones[0], self.dimensiones[1] + self.dimensiones[3] / 2) <<
-         QPoint(self.dimensiones[0] + self.dimensiones[2], self.dimensiones[1] + self.dimensiones[3]))
-        qp.drawPolyline(puntos)
-
-    def mousePressEvent(self, event):
-        anteriorPantalla()
-
-
-class Superior(QFrame):
-    def __init__(self, parent, w):
-        super().__init__(parent)
-        self.setGeometry(QRect(0, 0, w, 50))
-        self.titulo = QLabel("Arcada superior", self)
-        self.titulo.setStyleSheet("font-size: 16pt; font-weight: 350; color: black;")
-        self.titulo.setGeometry(
-            QRect((self.width() - self.titulo.width()) // 2, 10, self.titulo.width(), self.titulo.height()))
+    def funcion_clickado(self):
+        if window:
+            siguientePantalla()
 
 
 class WindowDientes(QMainWindow):
     def __init__(self, arc):
         super().__init__()
         self.setWindowTitle("Periostage")
-        self.setStyleSheet("background-color: #ECECEC ")
+        self.setStyleSheet("background-color: #ECECEC;")
         self.setMinimumSize(QSize(1000, 500))
         self.resizeEvent = self.actualizar_tam
 
         self.frameTitulo = QFrame(self)
         self.frameTitulo.setGeometry(QRect(0, 0, self.width(), 50))
 
-        arcadas = ["Arcada superior", "Arcada inferior"]
+        arcadas = ["Arcada superior", "Arcada inferior", "Pantalla final", "Datos paciente"]
 
         self.titulo = QLabel(self.frameTitulo)
         self.titulo.setText(arcadas[arc])
@@ -1664,6 +1648,13 @@ class WindowDientes(QMainWindow):
         self.titulo.adjustSize()
         self.titulo.setGeometry(
             QRect((self.width() - self.titulo.width()) // 2, 10, self.titulo.width(), self.titulo.height()))
+
+        self.anterior = BotonAnterior(self.frameTitulo, arcadas[arc - 1])
+        self.anterior.setGeometry(QRect(((self.width() - self.titulo.width()) // 2) - 145, 10, 125, 25))
+
+        self.siguiente = BotonSiguiente(self.frameTitulo, arcadas[arc + 1])
+        self.siguiente.setGeometry(
+            QRect((((self.width() - self.titulo.width()) // 2) + self.titulo.width() + 20), 10, 125, 25))
 
         self.frameTodo = QFrame(self)
 
@@ -1708,24 +1699,18 @@ class WindowDientes(QMainWindow):
         layoutDatosMedios.setSpacing(20)
 
         #self.clasificacion = Clasificacion(datos)
-        self.ppd = CuadroColores(datos.profundidades[16*pantallaAct:16+16*pantallaAct], None, 5, self.frameDatosMedios)
-        self.cal = CuadroColores(datos.profundidades[16*pantallaAct:16+16*pantallaAct], datos.margenes[16*pantallaAct:16+16*pantallaAct], 4, self.frameDatosMedios)
-        self.sangrado = BarraPorcentajes(datos.sangrados[16*pantallaAct:16+16*pantallaAct], 1, self.frameDatosMedios)
-        self.placa = BarraPorcentajes(datos.placas[16*pantallaAct:16+16*pantallaAct], 2, self.frameDatosMedios)
+        self.ppd = CuadroColores(datos.profundidades[16 * pantallaAct:16 + 16 * pantallaAct], None, 5,
+                                 self.frameDatosMedios)
+        self.cal = CuadroColores(datos.profundidades[16 * pantallaAct:16 + 16 * pantallaAct],
+                                 datos.margenes[16 * pantallaAct:16 + 16 * pantallaAct], 4, self.frameDatosMedios)
+        self.sangrado = BarraPorcentajes(datos.sangrados[16 * pantallaAct:16 + 16 * pantallaAct], 1,
+                                         self.frameDatosMedios)
+        self.placa = BarraPorcentajes(datos.placas[16 * pantallaAct:16 + 16 * pantallaAct], 2, self.frameDatosMedios)
 
-        """self.boton = QPushButton("Exportar")
-        self.boton.setGeometry(QRect(0, 0, 120, 50))
-        self.boton.setCheckable(True)
-        self.boton.setStyleSheet(
-            "QPushButton { background-color: #9747FF; font-size: 12px; border: none; border-radius: 20%; padding: 2px 5px;} QPushButton:hover { background-color: #623897; }")
-        self.boton.clicked.connect(lambda: datos.extraerDatos())"""
-
-        # layoutDatosMedios.addWidget(self.clasificacion)
         layoutDatosMedios.addWidget(self.ppd)
         layoutDatosMedios.addWidget(self.cal)
         layoutDatosMedios.addWidget(self.sangrado)
         layoutDatosMedios.addWidget(self.placa)
-        # layoutDatosMedios.addWidget(self.boton)
 
         self.frameDatosMedios.setLayout(layoutDatosMedios)
 
@@ -1762,6 +1747,9 @@ class WindowDientes(QMainWindow):
 
         for columna in self.frameColumnas.findChildren(Columna):
             columna.newsize(self.height())
+        self.anterior.setGeometry(QRect(((self.width() - self.titulo.width()) // 2) - 145, 10, 125, 25))
+        self.siguiente.setGeometry(
+            QRect((((self.width() - self.titulo.width()) // 2) + self.titulo.width() + 20), 10, 125, 25))
 
 
 class ColumnaFinal(QFrame):
@@ -1787,7 +1775,7 @@ class ColumnaFinal(QFrame):
                 self.muestreo.setChecked(True)
         else:
             self.muestreo = QLabel(self)
-        self.muestreo.setGeometry(QRect(0, 18, 45, 18))
+        self.muestreo.setGeometry(QRect(15, 18, 15, 18))
 
         # Columna abajo
         if dientes[numDiente + 16] not in datos.desactivados:
@@ -1800,13 +1788,12 @@ class ColumnaFinal(QFrame):
                 self.muestreo2.setChecked(True)
         else:
             self.muestreo2 = QLabel(self)
-        self.muestreo2.setGeometry(QRect(0, 650, 45, 18))
+        self.muestreo2.setGeometry(QRect(15, 650, 15, 18))
 
         botonNumeroDienteAbajo = QPushButton(str(dientes[numDiente + 16]), self)
         botonNumeroDienteAbajo.setCheckable(False)
         botonNumeroDienteAbajo.setStyleSheet(style + colorBoton + "font-weight: bold; font-size: 12px;")
         botonNumeroDienteAbajo.setGeometry(QRect(0, 668, 45, 18))
-
 
     def actmuestreo1(self):
         datos.actualizar_muestreo(dientes[self.ndiente], self.muestreo.isChecked())
@@ -1841,12 +1828,26 @@ class WindowFinal(QMainWindow):
             QRect((self.width() - self.titulo.width()) // 2, 10, self.titulo.width(), self.titulo.height())
         )
 
+        self.anterior = BotonAnterior(self.frameTitulo, "Arcada inferior")
+        self.anterior.setGeometry(QRect(((self.width() - self.titulo.width()) // 2) - 145, 10, 125, 25))
+
+        self.exportar = QPushButton("Exportar", self.frameTitulo)
+        self.exportar.setGeometry(QRect(((self.width() - self.titulo.width()) // 2) + self.titulo.width() + 20, 10, 125, 25))
+        self.exportar.setCheckable(True)
+        self.exportar.setStyleSheet(
+            "QPushButton { background-color: #9747FF; border-radius: 7px; font-size: 15px; font-family: Alata;}"
+            "QPushButton:hover { background-color: #623897; }"
+            "QPushButton:pressed { background-color: #4D2A7A; }")
+        self.exportar.clicked.connect(lambda: datos.extraerDatos())
+
         self.frameClasificacion = QFrame(self.frameTodo)
         self.frameClasificacion.setGeometry(QRect(0, 50, self.width(), 50))
 
         self.clasificacion = Clasificacion(self.frameClasificacion)
         self.clasificacion.actualizar()
-        self.clasificacion.setGeometry(QRect((self.width() - self.clasificacion.width()) // 2, 0, self.clasificacion.width(), self.clasificacion.height()))
+        self.clasificacion.setGeometry(
+            QRect((self.width() - self.clasificacion.width()) // 2, 0, self.clasificacion.width(),
+                  self.clasificacion.height()))
 
         self.frameCosas = QFrame(self.frameTodo)
 
@@ -1872,12 +1873,13 @@ class WindowFinal(QMainWindow):
         lPal.setStyleSheet("font-family: Alata; font-size: 20; font-weight: bold;")
 
         self.frameDibujosDientesSuperior = QFrame(self.frameCosas)
-        self.frameDibujosDientesSuperior.setGeometry(QRect(horizontalAdvanceEt + 35, 42, self.width() - 150*2, 270))
+        self.frameDibujosDientesSuperior.setGeometry(QRect(horizontalAdvanceEt + 35, 42, self.width() - 150 * 2, 270))
         pantallaAct = 0
         self.widgetDientesSuperiorArriba = LineasSobreDientes(datos, self.frameDibujosDientesSuperior)
         self.widgetDientesSuperiorAbajo = LineasSobreDientesAbajo(datos, self.frameDibujosDientesSuperior)
         pantallaAct = 2
-        self.widgetDientesSuperiorAbajo.setGeometry(QRect(0, 134, self.widgetDientesSuperiorAbajo.width(), self.widgetDientesSuperiorAbajo.height()))
+        self.widgetDientesSuperiorAbajo.setGeometry(
+            QRect(0, 134, self.widgetDientesSuperiorAbajo.width(), self.widgetDientesSuperiorAbajo.height()))
 
         # Labels bucal y palatal
         incrementoLeft = horizontalAdvanceEt + 30
@@ -1892,7 +1894,7 @@ class WindowFinal(QMainWindow):
             incrementoLeft += 45 + 4
 
         self.frameDatosMedios = QFrame(self.frameCosas)
-        self.frameDatosMedios.setGeometry(180, 300, 920, 90)
+        self.frameDatosMedios.setGeometry(180, 300, 750, 90)
         layoutDatosMedios = QHBoxLayout(self.frameDatosMedios)
         self.frameDatosMedios.setStyleSheet("background: none;")
         layoutDatosMedios.setSpacing(20)
@@ -1902,17 +1904,11 @@ class WindowFinal(QMainWindow):
         self.sangrado = BarraPorcentajes(datos.sangrados, 1,
                                          self.frameDatosMedios)
         self.placa = BarraPorcentajes(datos.placas, 2, self.frameDatosMedios)
-        self.boton = QPushButton("Exportar")
-        self.boton.setGeometry(QRect(0, 0, 120, 50))
-        self.boton.setCheckable(True)
-        self.boton.setStyleSheet(
-            "QPushButton { background-color: #9747FF; font-size: 12px; border: none; border-radius: 20%; padding: 2px 5px;} QPushButton:hover { background-color: #623897; }")
-        self.boton.clicked.connect(lambda: datos.extraerDatos())
+
         layoutDatosMedios.addWidget(self.ppd)
         layoutDatosMedios.addWidget(self.cal)
         layoutDatosMedios.addWidget(self.sangrado)
         layoutDatosMedios.addWidget(self.placa)
-        layoutDatosMedios.addWidget(self.boton)
         self.frameDatosMedios.setLayout(layoutDatosMedios)
 
         labEt2 = QLabel("Sitios de muestreo", self.frameEtiquetas)
@@ -1930,7 +1926,7 @@ class WindowFinal(QMainWindow):
         lPal.setStyleSheet("font-family: Alata; font-size: 20; font-weight: bold;")
 
         self.frameDibujosDientesInferior = QFrame(self.frameCosas)
-        self.frameDibujosDientesInferior.setGeometry(QRect(horizontalAdvanceEt + 35, 390, self.width() - 150*2, 260))
+        self.frameDibujosDientesInferior.setGeometry(QRect(horizontalAdvanceEt + 35, 390, self.width() - 150 * 2, 260))
         pantallaAct = 1
         self.wDInferiorArriba = LineasSobreDientes(datos, self.frameDibujosDientesInferior)
         self.wDInferiorAbajo = LineasSobreDientesAbajo(datos, self.frameDibujosDientesInferior)
@@ -1946,7 +1942,6 @@ class WindowFinal(QMainWindow):
         self.scroll_area.setFixedSize(self.frameTodo.width(), self.height())
         self.scroll_area.setWidgetResizable(False)
 
-
     def actualizar_tam(self, event):
         self.frameTodo.setGeometry(0, 0, self.width() - 18, 815)
         self.frameTitulo.setGeometry(QRect(0, 0, self.width(), 50))
@@ -1954,15 +1949,18 @@ class WindowFinal(QMainWindow):
             QRect((self.width() - self.titulo.width()) // 2, 10, self.titulo.width(), self.titulo.height())
         )
         self.frameClasificacion.setGeometry(QRect(0, 50, self.width(), 50))
-        self.clasificacion.setGeometry(QRect((self.width() - self.clasificacion.width()) // 2, 10, self.clasificacion.width(), self.clasificacion.height()))
-        #self.frameCosas.setGeometry(125, 100, self.width() - 250, 705)
+        self.clasificacion.setGeometry(
+            QRect((self.width() - self.clasificacion.width()) // 2, 10, self.clasificacion.width(),
+                  self.clasificacion.height()))
         self.frameColumnas.setGeometry(QRect(0, 0, self.width(), 705))
         horizontalAdvanceEt = QFontMetrics(QFont("Alata", 16)).horizontalAdvance("Sitio de muestreo")
-        #self.frameEtiquetas.setGeometry(QRect(10, 18, horizontalAdvanceEt + 10, self.height()))
-        self.frameDibujosDientesSuperior.setGeometry(QRect(horizontalAdvanceEt + 35, 42, self.width() - 150*2, 270))
-        self.frameDibujosDientesInferior.setGeometry(QRect(horizontalAdvanceEt + 35, 390, self.width() - 150*2, 260))
+        self.frameDibujosDientesSuperior.setGeometry(QRect(horizontalAdvanceEt + 35, 42, self.width() - 150 * 2, 270))
+        self.frameDibujosDientesInferior.setGeometry(QRect(horizontalAdvanceEt + 35, 390, self.width() - 150 * 2, 260))
         self.scroll_area.setGeometry(0, 0, self.width(), self.height())
         self.scroll_area.setFixedSize(self.width(), self.height())
+        self.anterior.setGeometry(QRect(((self.width() - self.titulo.width()) // 2) - 145, 10, 125, 25))
+        self.exportar.setGeometry(QRect(((self.width() - self.titulo.width()) // 2) + self.titulo.width() + 20, 10, 125, 25))
+
 
 
 window = None
@@ -1997,7 +1995,8 @@ def anteriorPantalla():
 app = QApplication(sys.argv)
 app.setWindowIcon(QtGui.QIcon(os.path.join(basedir, 'diente.ico')))
 datos = Datos()
-window = WindowFinal()
+window = Window1()
+# window = WindowFinal()
 # window = WindowDientes(pantallaAct)
 window.showMaximized()
 app.exec()
