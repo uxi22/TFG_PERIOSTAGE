@@ -1832,11 +1832,18 @@ class WindowFinal(QMainWindow):
 
         self.frameEtiquetas.setGeometry(QRect(0, 18, horizontalAdvanceEt + 10, 1000))
         labEt = QLabel("Sitios de muestreo", self.frameEtiquetas)
-        labEt2 = QLabel("Sitios de muestreo", self.frameEtiquetas)
         labEt.setAlignment(Qt.AlignRight)
-        labEt2.setAlignment(Qt.AlignRight)
         labEt.setGeometry(QRect(0, 0, horizontalAdvanceEt, 18))
-        labEt2.setGeometry(QRect(0, 632, horizontalAdvanceEt, 18))
+
+        lBuc = QLabel("Vestibular", self.frameEtiquetas)
+        lBuc.setAlignment(Qt.AlignRight)
+        lBuc.setGeometry(QRect(0, 75, horizontalAdvanceEt, 18))
+        lBuc.setStyleSheet("font-family: Alata; font-size: 20; font-weight: 400;")
+
+        lPal = QLabel("Palatal", self.frameEtiquetas)
+        lPal.setAlignment(Qt.AlignRight)
+        lPal.setGeometry(QRect(0, 220, horizontalAdvanceEt, 18))
+        lPal.setStyleSheet("font-family: Alata; font-size: 20; font-weight: 400;")
 
         self.frameDibujosDientesSuperior = QFrame(self.frameCosas)
         self.frameDibujosDientesSuperior.setGeometry(QRect(horizontalAdvanceEt + 35, 42, self.width() - 150*2, 270))
@@ -1881,6 +1888,20 @@ class WindowFinal(QMainWindow):
         layoutDatosMedios.addWidget(self.placa)
         layoutDatosMedios.addWidget(self.boton)
         self.frameDatosMedios.setLayout(layoutDatosMedios)
+
+        labEt2 = QLabel("Sitios de muestreo", self.frameEtiquetas)
+        labEt2.setAlignment(Qt.AlignRight)
+        labEt2.setGeometry(QRect(0, 632, horizontalAdvanceEt, 18))
+
+        lBuc = QLabel("Lingual", self.frameEtiquetas)
+        lBuc.setAlignment(Qt.AlignRight)
+        lBuc.setGeometry(QRect(0, 425, horizontalAdvanceEt, 18))
+        lBuc.setStyleSheet("font-family: Alata; font-size: 20; font-weight: 400;")
+
+        lPal = QLabel("Vestibular", self.frameEtiquetas)
+        lPal.setAlignment(Qt.AlignRight)
+        lPal.setGeometry(QRect(0, 555, horizontalAdvanceEt, 18))
+        lPal.setStyleSheet("font-family: Alata; font-size: 20; font-weight: 400;")
 
         self.frameDibujosDientesInferior = QFrame(self.frameCosas)
         self.frameDibujosDientesInferior.setGeometry(QRect(horizontalAdvanceEt + 35, 390, self.width() - 150*2, 260))
