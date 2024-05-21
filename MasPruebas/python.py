@@ -1,7 +1,11 @@
 import sys
 from PySide6.QtWidgets import QApplication, QFileDialog
 
-lista = [1, 2, 3, 4]
-print(lista)
-lista += [5, 6, 7, 8, 9]
-print(lista)
+tipo = 1
+tipo2 = True
+if tipo:
+    print("1")
+elif tipo2:
+    print("2")
+else:
+    print("3")
