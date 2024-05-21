@@ -45,7 +45,6 @@ class Fumador(QFrame):
     def __init__(self, parent, coordenadas, wtotal):
         super().__init__(parent)
         self.setGeometry(coordenadas[0], coordenadas[1], coordenadas[2], coordenadas[3])
-        # self.setStyleSheet("background-color: #DBDBDB; font-size: 18px;")
 
         self.wtotal = wtotal
 
@@ -53,6 +52,7 @@ class Fumador(QFrame):
 
         self.framePreguntaPpal = RecuadroPreguntaRadio(self, [0, 0, coordenadas[2], 50], "Fumador:", ["Sí", "No", "Ex"],
                                                        20)
+        # self.framePreguntaPpal.setStyleSheet("background-color:pink;")
         self.botones = self.framePreguntaPpal.getOpciones()
 
         self.frameSubpreguntaSi = QFrame(self)
@@ -155,12 +155,10 @@ class TratPrevio(QFrame):
         self.frameSubpregunta.hide()
 
         # Acciones de los botones
-        # self.botones[0].clicked.connect(self.subpregunta)
         for boton in self.botones:
             boton.clicked.connect(self.subpregunta)
             if boton.text() == datos.tratamiento_prev:
                 boton.setChecked(True)
-        # self.botones[-1].setChecked(True)
 
         self.botonessub = self.frameSubpregunta.getOpciones()
         for boton in self.botonessub:
@@ -384,14 +382,22 @@ class Window1(QMainWindow):
                                                      "Dientes perdidos por periodontitis:",
                                                      opc_dientes, 30)
         dientsperdidos = self.dientesperdidos.getOpciones()
-        for i, boton in enumerate(dientsperdidos):
-            dientsperdidos[i].clicked.connect(lambda: datos.set_dientes_perdidos(opc_dientes[i]))
+        for boton in dientsperdidos:
+            boton.clicked.connect(self.crear_conexion(boton))
             if boton.text() == datos.dientes_perdidos:
                 boton.setChecked(True)
 
         # FUMADOR
         self.fumador = Fumador(self.framePreguntas, [0, 120, self.framePreguntas.width() / 2, 50],
                                self.framePreguntas.width())
+
+    """def showEvent(self, event):
+        super().showEvent(event)
+        if self.tratprevio.botones[0].isChecked():
+            self.tratprevio.subpregunta()"""
+
+    def crear_conexion(self, boton):
+        return lambda: datos.set_dientes_perdidos(boton.text())
 
     def desplazarFrames(self, abierto):
         if abierto:
@@ -1922,7 +1928,7 @@ class WindowFinal(QMainWindow):
             incrementoLeft += 45 + 4
 
         self.frameDatosMedios = QFrame(self.frameCosas)
-        self.frameDatosMedios.setGeometry(180, 300, 750, 90)
+        self.frameDatosMedios.setGeometry(180, 300, 850, 90)
         layoutDatosMedios = QHBoxLayout(self.frameDatosMedios)
         self.frameDatosMedios.setStyleSheet("background: none;")
         layoutDatosMedios.setSpacing(20)
@@ -1980,10 +1986,11 @@ class WindowFinal(QMainWindow):
         self.clasificacion.setGeometry(
             QRect((self.width() - self.clasificacion.width()) // 2, 10, self.clasificacion.width(),
                   self.clasificacion.height()))
-        self.frameColumnas.setGeometry(QRect(0, 0, self.width(), 705))
+        self.frameColumnas.setGeometry(QRect(0, 0, self.width() - 250, 705))
         horizontalAdvanceEt = QFontMetrics(QFont("Alata", 16)).horizontalAdvance("Sitio de muestreo")
         self.frameDibujosDientesSuperior.setGeometry(QRect(horizontalAdvanceEt + 35, 42, self.width() - 150 * 2, 270))
         self.frameDibujosDientesInferior.setGeometry(QRect(horizontalAdvanceEt + 35, 390, self.width() - 150 * 2, 260))
+        self.frameCosas.setGeometry(QRect(125, 100, self.frameColumnas.width(), 705))
         self.scroll_area.setGeometry(0, 0, self.width(), self.height())
         self.scroll_area.setFixedSize(self.width(), self.height())
         self.anterior.setGeometry(QRect(((self.width() - self.titulo.width()) // 2) - 145, 10, 125, 25))
@@ -2023,8 +2030,8 @@ def anteriorPantalla():
 app = QApplication(sys.argv)
 app.setWindowIcon(QtGui.QIcon(os.path.join(basedir, 'diente.ico')))
 datos = Datos()
-window = Window1()
-# window = WindowFinal()
+# window = Window1()
+window = WindowFinal()
 # window = WindowDientes(pantallaAct)
 window.showMaximized()
 app.exec()
