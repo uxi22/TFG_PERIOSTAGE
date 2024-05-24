@@ -646,6 +646,13 @@ class LineasSobreDientesAbajo(QWidget):
         self.imagen = ImagenDiente("b")
         self.update()
 
+    def actualizar_todas_alturas(self):
+        for i in range(16):
+            for j in range(3):
+                self.actualizar_alturas(i, 1, j)
+                self.actualizar_alturas(i, 2, j)
+        self.update()
+
     def actualizar_alturas(self, numeroDiente, tipo, indice):
         if tipo == 1:  # Margen gingival
             aux = self.points[numeroDiente * 3 + indice]
@@ -793,6 +800,13 @@ class LineasSobreDientes(QWidget):
 
     def actualizar_imagen(self):
         self.imagen = ImagenDiente()
+        self.update()
+
+    def actualizar_todas_alturas(self):
+        for i in range(16):
+            for j in range(3):
+                self.actualizar_alturas(i, 1, j)
+                self.actualizar_alturas(i, 2, j)
         self.update()
 
     def actualizar_alturas(self, numeroDiente, tipo, indice):
@@ -960,7 +974,10 @@ class Columna(QFrame):
 
         self.hijos = [botonNumeroDiente]
 
-        self.anhadir_elementos(numDiente)
+        if (numDiente + 16*pantallaAct) not in datos.desactivadosInferior and (numDiente + 16*pantallaAct) not in datos.desactivadosSuperior:
+            self.anhadir_elementos(numDiente)
+        else:
+            self.eliminar_elementos()
 
     def newsize(self, height):
         self.setGeometry(self.geometry().left(), 0, 45, height)
@@ -1746,6 +1763,7 @@ class WindowDientes(QMainWindow):
         self.frameDibujoDientes = QFrame(self.frameTodo)
         self.frameDibujoDientes.setGeometry(QRect(170, 170, self.width() - 176, 137))
         self.widgetDientes = LineasSobreDientes(self.frameDibujoDientes)
+        self.widgetDientes.actualizar_todas_alturas()
         etq1 = ["Bucal", "Lingual"]
         labelBucal = QLabel(etq1[pantallaAct], self.frameEtiquetas)
         labelBucal.setStyleSheet("font-weight: bold; font-size: 16px;")
@@ -1802,6 +1820,7 @@ class WindowDientes(QMainWindow):
         labelPalatal.setGeometry(QRect(70, 420, 125, 18))
 
         self.widgetDientesAbajo = LineasSobreDientesAbajo(self.frameDibujoDientesAbajo)
+        self.widgetDientesAbajo.actualizar_todas_alturas()
         self.frameTodo.adjustSize()
         self.frameTodo.setGeometry(QRect(150, 50, self.frameTodo.width(), self.frameTodo.height()))
 
@@ -1950,9 +1969,20 @@ class WindowFinal(QMainWindow):
         pantallaAct = 0
         self.widgetDientesSuperiorArriba = LineasSobreDientes(self.frameDibujosDientesSuperior)
         self.widgetDientesSuperiorAbajo = LineasSobreDientesAbajo(self.frameDibujosDientesSuperior)
-        pantallaAct = 2
+        self.widgetDientesSuperiorArriba.actualizar_todas_alturas()
+        self.widgetDientesSuperiorAbajo.actualizar_todas_alturas()
+        pantallaAct = 1
         self.widgetDientesSuperiorAbajo.setGeometry(
             QRect(0, 134, self.widgetDientesSuperiorAbajo.width(), self.widgetDientesSuperiorAbajo.height()))
+
+        self.frameDibujosDientesInferior = QFrame(self.frameCosas)
+        self.frameDibujosDientesInferior.setGeometry(QRect(horizontalAdvanceEt + 35, 390, self.width() - 150 * 2, 260))
+        self.wDInferiorArriba = LineasSobreDientes(self.frameDibujosDientesInferior)
+        self.wDInferiorAbajo = LineasSobreDientesAbajo(self.frameDibujosDientesInferior)
+        self.widgetDientesSuperiorArriba.actualizar_todas_alturas()
+        self.widgetDientesSuperiorAbajo.actualizar_todas_alturas()
+        pantallaAct = 2
+        self.wDInferiorAbajo.setGeometry(0, 120, self.wDInferiorAbajo.width(), self.wDInferiorAbajo.height())
 
         # Labels bucal y palatal
         incrementoLeft = horizontalAdvanceEt + 30
@@ -1997,14 +2027,6 @@ class WindowFinal(QMainWindow):
         lPal.setAlignment(Qt.AlignRight)
         lPal.setGeometry(QRect(0, 555, horizontalAdvanceEt, 18))
         lPal.setStyleSheet("font-family: Alata; font-size: 20; font-weight: bold;")
-
-        self.frameDibujosDientesInferior = QFrame(self.frameCosas)
-        self.frameDibujosDientesInferior.setGeometry(QRect(horizontalAdvanceEt + 35, 390, self.width() - 150 * 2, 260))
-        pantallaAct = 1
-        self.wDInferiorArriba = LineasSobreDientes(self.frameDibujosDientesInferior)
-        self.wDInferiorAbajo = LineasSobreDientesAbajo(self.frameDibujosDientesInferior)
-        pantallaAct = 2
-        self.wDInferiorAbajo.setGeometry(0, 120, self.wDInferiorAbajo.width(), self.wDInferiorAbajo.height())
 
         self.frameCosas.adjustSize()
         self.frameCosas.setGeometry(QRect(125, 100, self.frameCosas.width(), 705))
