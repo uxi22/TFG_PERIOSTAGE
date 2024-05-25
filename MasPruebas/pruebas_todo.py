@@ -15,7 +15,7 @@ from PySide6.QtWidgets import (
     QDateEdit,
     QRadioButton,
     QMainWindow,
-    QWidget, QHBoxLayout, QLineEdit, QPushButton, QPointList, QFrame, QFileDialog, QCheckBox, QScrollArea, QVBoxLayout
+    QWidget, QHBoxLayout, QLineEdit, QPushButton, QPointList, QFrame, QFileDialog, QCheckBox, QScrollArea
 )
 from ctypes import windll
 
@@ -449,7 +449,17 @@ def es_numero(texto):
 
 def calcular_cal(i, t):
     if i not in datos.desactivadosInferior and i not in datos.desactivadosSuperior:
-        return (datos.profundidades[i][t] + datos.margenes[i][t]) - 2
+        mg = datos.margenes[i][t]
+        ppd = datos.profundidades[i][t]
+        if mg >= 0:
+            mg = 0
+            if ppd < 4:
+                return 0
+            elif ppd >= 4:
+                return ppd - 2
+        else:
+            mg = abs(mg)
+            return ppd + mg
     else:
         return -1
 
@@ -932,7 +942,7 @@ class Input3(QFrame):
                     datos.actualizar_margen(int(ndiente + 16 * pantallaAct), num + 3, int(inpt.text()))
                     window.widgetDientesAbajo.actualizar_alturas(int(ndiente), tipo, num)
                     window.cal.actualizarDatos(int(ndiente) * 6 + num,
-                                               calcular_cal(int(ndiente + 16 * pantallaAct), num))
+                                               calcular_cal(int(ndiente + 16 * pantallaAct), num + 3))
             else:
                 inpt.setText("0")
         elif tipo == 2 and es_numero(inpt.text()):  # Profundidad de sondaje
@@ -952,7 +962,7 @@ class Input3(QFrame):
                     window.widgetDientesAbajo.actualizar_alturas(int(ndiente), tipo, num)
                     window.ppd.actualizarDatos(int(ndiente) * 6 + num, int(inpt.text()))
                     window.cal.actualizarDatos(int(ndiente) * 6 + num,
-                                               calcular_cal(int(ndiente + 16 * pantallaAct), num))
+                                               calcular_cal(int(ndiente + 16 * pantallaAct), num + 3))
             else:
                 inpt.setText("0")
 
@@ -1135,8 +1145,8 @@ class Columna(QFrame):
             inptfurca = self.hijos[2]
             self.hijos[2] = None
             inptfurca.deleteLater()
-            inptfurcaabajo = self.hijos[-1]
-            self.hijos[len(self.hijos) - 1] = None
+            inptfurcaabajo = self.hijos[14]
+            self.hijos[14] = None
             inptfurcaabajo.deleteLater()
             if boton.isChecked():
                 newArriba = QLabel("")
@@ -1144,18 +1154,19 @@ class Columna(QFrame):
                 newArriba.setGeometry(QRect(0, 18*2, 45, 18))
                 newAbajo = QLabel("")
                 newAbajo.setParent(self)
-                newAbajo.setGeometry(QRect(0, 137*2 + 85 + 18*5, 45, 18))
+                newAbajo.setGeometry(QRect(0, 611, 45, 18))
             else:
                 newArriba = Input03(18*2, True, numDiente, self)
                 # Añadimos el dato anterior a desactivar la furca por activar implante
                 newArriba.setText(str(datos.defectosfurca[numDiente + 16*pantallaAct][0]))
-                newAbajo = Input2Furcas(self, 137*2 + 85 + 18*5, numDiente)
+                newAbajo = Input2Furcas(self, 611, numDiente)
+                print(newAbajo)
                 newAbajo.inputs[0].setText(str(datos.defectosfurca[numDiente + 16*pantallaAct][1]))
                 newAbajo.inputs[1].setText(str(datos.defectosfurca[numDiente + 16*pantallaAct][2]))
             newArriba.show()
             newAbajo.show()
             self.hijos[2] = newArriba
-            self.hijos[-1] = newAbajo
+            self.hijos[14] = newAbajo
 
     def eliminar_elementos(self):
         while len(self.hijos) > 1:
@@ -1632,6 +1643,97 @@ def calcular_estadio(cal):
                 return "Stage IV"
     return "??"
 
+
+def clasificacion_inicial():
+    interdental = [0, 2, 3, 5]
+    ultimo_d_caso1 = -2
+    ultimo_d_caso2 = -2
+    cal_interd_maximo = 0
+    maxppd = 0
+    for diente in range(16):
+        if diente not in datos.desactivadosSuperior.extend(datos.desactivadosInferior):
+            for punto in range(6):
+                maxppd = max(maxppd, datos.profundidades[diente][punto])
+                cal = calcular_cal(diente, punto)
+                if punto in interdental and cal >= 1:  # Puntos interdentales
+                    if diente != ultimo_d_caso1 and diente != ultimo_d_caso1 + 1:  # En dos dientes no adyacentes
+                        # PERIODONTITIS
+                        return "Periodontitis", clasificacion_periodontitis(cal, maxppd)
+                    cal_interd_maximo = max(cal, cal_interd_maximo)
+                    ultimo_d_caso1 = diente
+                elif punto not in interdental and cal >= 3:  # Puntos mediales
+                    if diente == ultimo_d_caso2 + 1:  # En dos dientes adyacentes
+                        # PERIODONTITIS
+                        return "Periodontitis", clasificacion_periodontitis(cal)
+                    ultimo_d_caso2 = diente
+                else:
+                    # Si no se cumple ninguno de esos dos casos
+                    # Salud o gingivitis
+                    return clasificacion_salud_gingivitis(maxppd)
+
+
+def clasificacion_salud_gingivitis(maxppd):
+    bop = sum(aplanar_lista(datos.sangrados)) / (
+            len(aplanar_lista(datos.sangrados)) - (len(datos.desactivadosSuperior) * 6))
+    calmaxtodo = 0
+    if bop < 0.1:
+        if maxppd <= 3:
+            if calmaxtodo >= 1 and datos.tratamiento_prev == "No":
+                return "Sano con periodonto reducido"
+            else:
+                return "Sano"
+        if maxppd <= 4:
+            if calmaxtodo >= 1 and datos.tratamiento_prev == "Si":
+                return "Salud con periodontitis estable tratado con éxito"
+        if maxppd > 3:
+            if calmaxtodo == 0:
+                return "Sano"
+    else:
+        if maxppd <= 3:
+            if calmaxtodo == 0:
+                return "Gingivitis"
+            elif calmaxtodo >= 1:
+                if datos.tratamiento_prev == "No":
+                    return "Gingivitis con periodonto reducido"
+                else:
+                    return "Gingivitis con periodonto reducido y periodontitis estable tratado con éxito"
+        else:  # maxppd > 3
+            if calmaxtodo == 0:
+                return "Gingivitis"
+
+
+def clasificacion_periodontitis(cal, maxppd):
+    estadios = []
+    dientes_naturales = 32 - len(datos.desactivadosSuperior) - len(datos.desactivadosInferior) - sum(datos.implantes)
+    if 1 <= cal <= 2:
+        if maxppd <= 4:
+            estadios.append("Estadío I")  # Stage I
+        if datos.dientes_perdidos == "1-4":
+            estadios.append("Estadío III")  # Stage III
+    elif 3 <= cal <= 4:
+        if maxppd <= 5 and (not 2 in datos.defectosfurca or not 3 in datos.defectosfurca):
+            estadios.append("Estadío II")
+        if (datos.dientes_perdidos in ["0", "1-4", "Desconocido"] and (maxppd >= 6 or 2 in datos.defectosfurca
+                or 3 in datos.defectosfurca or dientes_naturales >= 20)):
+            estadios.append("Estadío III")
+        if datos.dientes_perdidos == "1-4" and dientes_naturales < 20:
+            estadios.append("Estadío IV")
+        if datos.dientes_perdidos == ">=5":
+            estadios.append("Estadío IV")
+    elif cal >= 5:
+        if datos.dientes_perdidos in ["0", "1-4", "Desconocido"]:
+            movilidad = contar_movilidad()
+            if movilidad < 2 or datos.colapso_mordida == "No" or dientes_naturales >= 20:
+                estadios.append("Estadío III")
+            if movilidad >= 2 or datos.colapso_mordida == "Sí" or dientes_naturales < 20:
+                estadios.append("Estadío IV")
+        else: # dientes perdidos >= 5
+            estadios.append("Estadío IV")
+    return estadios
+
+
+def contar_movilidad():
+    return datos.movilidad.count(2) + datos.movilidad.count(3)
 
 def clasificacion_esquema1():
     global colorClasificacion
