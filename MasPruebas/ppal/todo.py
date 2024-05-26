@@ -1076,7 +1076,7 @@ class Columna(QFrame):
         self.incrementoHeight += 18
         self.hijos.append(furca2)
 
-        if window and numDiente in datos.inicializados:
+        if window and (numDiente + 16*pantallaAct) in datos.inicializados:
             movilidad.setText(str(datos.movilidad[numDiente + 16*pantallaAct]))
             if datos.implantes[numDiente + 16*pantallaAct]:
                 implante.setChecked(True)
@@ -1140,7 +1140,6 @@ class Columna(QFrame):
                 # Añadimos el dato anterior a desactivar la furca por activar implante
                 newArriba.setText(str(datos.defectosfurca[numDiente + 16*pantallaAct][0]))
                 newAbajo = Input2Furcas(self, 611, numDiente)
-                print(newAbajo)
                 newAbajo.inputs[0].setText(str(datos.defectosfurca[numDiente + 16*pantallaAct][1]))
                 newAbajo.inputs[1].setText(str(datos.defectosfurca[numDiente + 16*pantallaAct][2]))
             newArriba.show()
@@ -1577,15 +1576,14 @@ class Datos:
             self.inicializados.append(int(diente))
 
     def actualizar_desactivados(self, diente):
-
         if diente in self.desactivadosSuperior:
             self.desactivadosSuperior.remove(diente)
         elif diente in self.desactivadosInferior:
             self.desactivadosInferior.remove(diente)
         else:
-            if diente <= 28:
+            if diente < 16:
                 self.desactivadosSuperior.append(diente)
-            elif diente > 28:
+            else:
                 self.desactivadosInferior.append(diente)
 
     def actualizar_muestreo(self, diente, valor):
@@ -1604,7 +1602,7 @@ def clasificacion_inicial():
     cal_max_todo = 0
     maxppd = 0
     for diente in range(16):
-        if diente not in datos.desactivadosSuperior.extend(datos.desactivadosInferior):
+        if diente not in datos.desactivadosSuperior and diente not in datos.desactivadosInferior:
             for punto in range(6):
                 maxppd = max(maxppd, datos.profundidades[diente][punto])
                 cal = calcular_cal(diente, punto)
@@ -1874,7 +1872,7 @@ class ColumnaFinal(QFrame):
         botonNumeroDiente.setGeometry(QRect(0, 0, 45, 18))
 
         # Sitio de muestreo
-        if dientes[numDiente] not in datos.desactivadosSuperior:
+        if numDiente not in datos.desactivadosSuperior:
             self.muestreo = QCheckBox(self)
             self.muestreo.setCheckable(True)
             self.muestreo.clicked.connect(self.actmuestreo1)
@@ -1887,7 +1885,7 @@ class ColumnaFinal(QFrame):
         self.muestreo.setGeometry(QRect(15, 18, 15, 18))
 
         # Columna abajo
-        if dientes[numDiente + 16] not in datos.desactivadosInferior:
+        if numDiente + 16 not in datos.desactivadosInferior:
             self.muestreo2 = QCheckBox(self)
             self.muestreo2.setCheckable(True)
             self.muestreo2.clicked.connect(self.actmuestreo2)
@@ -1997,8 +1995,8 @@ class WindowFinal(QMainWindow):
         self.frameDibujosDientesInferior.setGeometry(QRect(horizontalAdvanceEt + 35, 390, self.width() - 150 * 2, 260))
         self.wDInferiorArriba = LineasSobreDientes(self.frameDibujosDientesInferior)
         self.wDInferiorAbajo = LineasSobreDientesAbajo(self.frameDibujosDientesInferior)
-        self.widgetDientesSuperiorArriba.actualizar_todas_alturas()
-        self.widgetDientesSuperiorAbajo.actualizar_todas_alturas()
+        self.wDInferiorArriba.actualizar_todas_alturas()
+        self.wDInferiorAbajo.actualizar_todas_alturas()
         pantallaAct = 2
         self.wDInferiorAbajo.setGeometry(0, 120, self.wDInferiorAbajo.width(), self.wDInferiorAbajo.height())
 
