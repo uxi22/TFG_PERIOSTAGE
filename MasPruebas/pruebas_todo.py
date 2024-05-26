@@ -456,7 +456,7 @@ def calcular_cal(i, t):
             if ppd < 4:
                 return 0
             elif ppd >= 4:
-                return ppd - 2
+                return ppd + mg - 2
         else:
             mg = abs(mg)
             return ppd + mg
@@ -1649,12 +1649,14 @@ def clasificacion_inicial():
     ultimo_d_caso1 = -2
     ultimo_d_caso2 = -2
     cal_interd_maximo = 0
+    cal_max_todo = 0
     maxppd = 0
     for diente in range(16):
         if diente not in datos.desactivadosSuperior.extend(datos.desactivadosInferior):
             for punto in range(6):
                 maxppd = max(maxppd, datos.profundidades[diente][punto])
                 cal = calcular_cal(diente, punto)
+                cal_max_todo = max(cal, cal_max_todo)
                 if punto in interdental and cal >= 1:  # Puntos interdentales
                     if diente != ultimo_d_caso1 and diente != ultimo_d_caso1 + 1:  # En dos dientes no adyacentes
                         # PERIODONTITIS
@@ -1664,18 +1666,17 @@ def clasificacion_inicial():
                 elif punto not in interdental and cal >= 3:  # Puntos mediales
                     if diente == ultimo_d_caso2 + 1:  # En dos dientes adyacentes
                         # PERIODONTITIS
-                        return "Periodontitis", clasificacion_periodontitis(cal)
+                        return "Periodontitis", clasificacion_periodontitis(cal, maxppd)
                     ultimo_d_caso2 = diente
                 else:
                     # Si no se cumple ninguno de esos dos casos
                     # Salud o gingivitis
-                    return clasificacion_salud_gingivitis(maxppd)
+                    return clasificacion_salud_gingivitis(maxppd, cal_max_todo)
 
 
-def clasificacion_salud_gingivitis(maxppd):
+def clasificacion_salud_gingivitis(maxppd, calmaxtodo):
     bop = sum(aplanar_lista(datos.sangrados)) / (
             len(aplanar_lista(datos.sangrados)) - (len(datos.desactivadosSuperior) * 6))
-    calmaxtodo = 0
     if bop < 0.1:
         if maxppd <= 3:
             if calmaxtodo >= 1 and datos.tratamiento_prev == "No":
