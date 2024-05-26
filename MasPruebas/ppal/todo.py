@@ -565,7 +565,8 @@ class LineasSobreDientesAbajo(QWidget):
 
         # Dibujamos líneas y polígonos sobre los dientes
         for i in range(16):
-            if (i + 16 * self.pantalla) not in datos.desactivadosInferior and (i + 16 * self.pantalla) not in datos.desactivadosSuperior:
+            if (i + 16 * self.pantalla) not in datos.desactivadosInferior and (
+                    i + 16 * self.pantalla) not in datos.desactivadosSuperior:
                 qp.setBrush(brush)
                 qp.setPen(QPen(Qt.blue, 2, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
                 auxpuntos.append(self.points2[i * 3])
@@ -582,7 +583,8 @@ class LineasSobreDientesAbajo(QWidget):
                 poligono.append(list(reversed(auxpuntos)))
                 qp.setPen(QPen(Qt.NoPen))
                 qp.drawPolygon(poligono)
-                if ((i + 16 * self.pantalla) + 1 not in datos.desactivadosInferior and (i + 16 * self.pantalla) + 1 not in datos.desactivadosSuperior) and i != 7 and i != 15:
+                if ((i + 16 * self.pantalla) + 1 not in datos.desactivadosInferior and (
+                        i + 16 * self.pantalla) + 1 not in datos.desactivadosSuperior) and i != 7 and i != 15:
                     poligono.clear()
                     auxpuntos.clear()
                     qp.setPen(QPen(Qt.blue, 2, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
@@ -605,9 +607,9 @@ class LineasSobreDientesAbajo(QWidget):
                 # defectos de furca
                 for w in range(1, 3):
                     if not datos.implantes[i + 16 * self.pantalla] and dientes[i + 16 * self.pantalla] in furcas and \
-                            datos.defectosfurca[i + 16 * self.pantalla][w] > 0:
+                            datos.defectosfurca[dientes[i + 16 * self.pantalla]][w] > 0:
                         auxindice = furcas.index(dientes[i])
-                        valor = datos.defectosfurca[i + 16 * self.pantalla][w]
+                        valor = datos.defectosfurca[dientes[i + 16 * self.pantalla]][w]
                         qp.setPen(QPen(QColor(165, 10, 135, 210), 1.5, Qt.SolidLine, Qt.SquareCap))
                         auxpuntos = [self.puntos_furca[auxindice * 2 + w - 1].x(),
                                      self.puntos_furca[auxindice * 2 + w - 1].y()]
@@ -645,15 +647,16 @@ class LineasSobreDientesAbajo(QWidget):
     def actualizar_alturas(self, numeroDiente, tipo, indice):
         if tipo == 1:  # Margen gingival
             aux = self.points[numeroDiente * 3 + indice]
-            aux.setY(int(self.altura - 5 * datos.margenes[numeroDiente + 16 *pantallaAct][indice + 3]))
+            aux.setY(int(self.altura - 5 * datos.margenes[numeroDiente + 16 * pantallaAct][indice + 3]))
             self.points[numeroDiente * 3 + indice] = aux
             aux.setY(
-                int(self.points[numeroDiente * 3 + indice].y() + 5 * datos.profundidades[numeroDiente + 16*pantallaAct][indice + 3]))
+                int(self.points[numeroDiente * 3 + indice].y() + 5 *
+                    datos.profundidades[numeroDiente + 16 * pantallaAct][indice + 3]))
             self.points2[numeroDiente * 3 + indice] = aux
         elif tipo == 2:  # Profundidad de sondaje
             aux = self.points[numeroDiente * 3 + indice]
-            aux.setY(int(self.altura + 5 * (abs(datos.margenes[numeroDiente + 16*pantallaAct][indice + 3]) + abs(
-                datos.profundidades[numeroDiente + 16*pantallaAct][indice + 3]))))
+            aux.setY(int(self.altura + 5 * (abs(datos.margenes[numeroDiente + 16 * pantallaAct][indice + 3]) + abs(
+                datos.profundidades[numeroDiente + 16 * pantallaAct][indice + 3]))))
             self.points2[numeroDiente * 3 + indice] = aux
         self.update()
 
@@ -723,7 +726,8 @@ class LineasSobreDientes(QWidget):
         auxpuntos = []
 
         for i in range(16):
-            if (i + 16 * self.pantalla) not in datos.desactivadosInferior and (i + 16 * self.pantalla) not in datos.desactivadosSuperior:
+            if (i + 16 * self.pantalla) not in datos.desactivadosInferior and (
+                    i + 16 * self.pantalla) not in datos.desactivadosSuperior:
                 qp.setBrush(brush)
                 qp.setPen(QPen(Qt.blue, 2, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
                 auxpuntos.append(self.points2[i * 3])
@@ -740,7 +744,8 @@ class LineasSobreDientes(QWidget):
                 poligono.append(list(reversed(auxpuntos)))
                 qp.setPen(QPen(Qt.NoPen))
                 qp.drawPolygon(poligono)
-                if (i + 16 * self.pantalla + 1 not in datos.desactivadosSuperior and (i + 16 * self.pantalla) + 1 not in datos.desactivadosInferior) and i != 7 and i != 15:
+                if (i + 16 * self.pantalla + 1 not in datos.desactivadosSuperior and (
+                        i + 16 * self.pantalla) + 1 not in datos.desactivadosInferior) and i != 7 and i != 15:
                     poligono.clear()
                     auxpuntos.clear()
                     qp.setPen(QPen(Qt.blue, 2, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
@@ -762,9 +767,9 @@ class LineasSobreDientes(QWidget):
 
                 # defectos de furca
                 if not datos.implantes[i + 16 * self.pantalla] and dientes[i + 16 * self.pantalla] in furcas and \
-                        datos.defectosfurca[i + 16 * self.pantalla][0] > 0:
+                        datos.defectosfurca[dientes[i + 16 * self.pantalla]][0] > 0:
                     auxindice = furcas.index(dientes[i])
-                    valor = datos.defectosfurca[i + 16 * self.pantalla][0]
+                    valor = datos.defectosfurca[dientes[i + 16 * self.pantalla]][0]
                     qp.setPen(QPen(QColor(165, 10, 135, 210), 1.5, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
                     auxpuntos = [self.puntos_furca[auxindice].x(),
                                  self.puntos_furca[auxindice].y()]
@@ -964,7 +969,8 @@ class Columna(QFrame):
 
         self.hijos = [botonNumeroDiente]
 
-        if (numDiente + 16*pantallaAct) not in datos.desactivadosInferior and (numDiente + 16*pantallaAct) not in datos.desactivadosSuperior:
+        if (numDiente + 16 * pantallaAct) not in datos.desactivadosInferior and (
+                numDiente + 16 * pantallaAct) not in datos.desactivadosSuperior:
             self.anhadir_elementos(numDiente)
         else:
             self.eliminar_elementos()
@@ -982,7 +988,7 @@ class Columna(QFrame):
         self.hijos.append(movilidad)
 
         # DEFECTO DE FURCA
-        if dientes[numDiente] in furcas and not datos.implantes[numDiente + 16*pantallaAct]:
+        if dientes[numDiente] in furcas and not datos.implantes[numDiente + 16 * pantallaAct]:
             furca = Input03(self.incrementoHeight, True, numDiente, self, ind=0)
         else:
             furca = QLabel("", self)
@@ -1067,7 +1073,7 @@ class Columna(QFrame):
         self.hijos.append(profSondaje2)
 
         # FURCAS
-        if dientes[numDiente] in furcas and not datos.implantes[numDiente + 16*pantallaAct]:
+        if dientes[numDiente] in furcas and not datos.implantes[numDiente + 16 * pantallaAct]:
             furca2 = Input2Furcas(self, self.incrementoHeight, numDiente)
         else:
             furca2 = QLabel("", self)
@@ -1076,40 +1082,40 @@ class Columna(QFrame):
         self.incrementoHeight += 18
         self.hijos.append(furca2)
 
-        if window and (numDiente + 16*pantallaAct) in datos.inicializados:
-            movilidad.setText(str(datos.movilidad[numDiente + 16*pantallaAct]))
-            if datos.implantes[numDiente + 16*pantallaAct]:
+        if window and (numDiente + 16 * pantallaAct) in datos.inicializados:
+            movilidad.setText(str(datos.movilidad[numDiente + 16 * pantallaAct]))
+            if datos.implantes[numDiente + 16 * pantallaAct]:
                 implante.setChecked(True)
                 cambiar_color(implante, "#333333")
             # Si el diente actual tiene furca y no implante, buscamos el dato a introducir
-            if dientes[numDiente + 16*pantallaAct] in furcas and not datos.implantes[numDiente + 16*pantallaAct]:
-                furca.setText(str(datos.defectosfurca[furcas.index(dientes[numDiente + 16*pantallaAct])][0]))
-                furca2.inputs[0].setText(str(datos.defectosfurca[numDiente + 16*pantallaAct][1]))
-                furca2.inputs[1].setText(str(datos.defectosfurca[numDiente + 16*pantallaAct][2]))
+            if dientes[numDiente + 16 * pantallaAct] in furcas and not datos.implantes[numDiente + 16 * pantallaAct]:
+                furca.setText(str(datos.defectosfurca[dientes[numDiente + 16 * pantallaAct]][0]))
+                furca2.inputs[0].setText(str(datos.defectosfurca[dientes[numDiente + 16 * pantallaAct]][1]))
+                furca2.inputs[1].setText(str(datos.defectosfurca[dientes[numDiente + 16 * pantallaAct]][2]))
             for i in range(0, 3):
-                if datos.sangrados[numDiente + 16*pantallaAct][i]:
+                if datos.sangrados[numDiente + 16 * pantallaAct][i]:
                     sangrado.botones[i].setChecked(True)
                     cambiar_color(sangrado.botones[i], "#FF2B32")
-                if datos.placas[numDiente + 16*pantallaAct][i]:
+                if datos.placas[numDiente + 16 * pantallaAct][i]:
                     placa.botones[i].setChecked(True)
                     cambiar_color(placa.botones[i], "#5860FF")
-                if datos.supuraciones[numDiente + 16*pantallaAct][i]:
+                if datos.supuraciones[numDiente + 16 * pantallaAct][i]:
                     supuracion.botones[i].setChecked(True)
                     cambiar_color(supuracion.botones[i], "#7CEBA0")
-                margenGingival.inpts[i].setText(str(datos.margenes[numDiente + 16*pantallaAct][i]))
-                profSondaje.inpts[i].setText(str(datos.profundidades[numDiente + 16*pantallaAct][i]))
+                margenGingival.inpts[i].setText(str(datos.margenes[numDiente + 16 * pantallaAct][i]))
+                profSondaje.inpts[i].setText(str(datos.profundidades[numDiente + 16 * pantallaAct][i]))
             for i in range(0, 3):
-                if datos.sangrados[numDiente + 16*pantallaAct][i + 3]:
+                if datos.sangrados[numDiente + 16 * pantallaAct][i + 3]:
                     sangrado2.botones[i].setChecked(True)
                     cambiar_color(sangrado2.botones[i], "#FF2B32")
-                if datos.placas[numDiente + 16*pantallaAct][i + 3]:
+                if datos.placas[numDiente + 16 * pantallaAct][i + 3]:
                     placa2.botones[i].setChecked(True)
                     cambiar_color(placa2.botones[i], "#5860FF")
-                if datos.supuraciones[numDiente + 16*pantallaAct][i + 3]:
+                if datos.supuraciones[numDiente + 16 * pantallaAct][i + 3]:
                     supuracion2.botones[i].setChecked(True)
                     cambiar_color(supuracion2.botones[i], "#7CEBA0")
-                margenGingival2.inpts[i].setText(str(datos.margenes[numDiente + 16*pantallaAct][i + 3]))
-                profSondaje2.inpts[i].setText(str(datos.profundidades[numDiente + 16*pantallaAct][i + 3]))
+                margenGingival2.inpts[i].setText(str(datos.margenes[numDiente + 16 * pantallaAct][i + 3]))
+                profSondaje2.inpts[i].setText(str(datos.profundidades[numDiente + 16 * pantallaAct][i + 3]))
 
     def diente_implante(self, numDiente):
         boton = self.hijos[3]
@@ -1131,17 +1137,17 @@ class Columna(QFrame):
             if boton.isChecked():
                 newArriba = QLabel("")
                 newArriba.setParent(self)
-                newArriba.setGeometry(QRect(0, 18*2, 45, 18))
+                newArriba.setGeometry(QRect(0, 18 * 2, 45, 18))
                 newAbajo = QLabel("")
                 newAbajo.setParent(self)
                 newAbajo.setGeometry(QRect(0, 611, 45, 18))
             else:
-                newArriba = Input03(18*2, True, numDiente, self)
+                newArriba = Input03(18 * 2, True, numDiente, self)
                 # Añadimos el dato anterior a desactivar la furca por activar implante
-                newArriba.setText(str(datos.defectosfurca[numDiente + 16*pantallaAct][0]))
+                newArriba.setText(str(datos.defectosfurca[dientes[numDiente + 16 * pantallaAct]][0]))
                 newAbajo = Input2Furcas(self, 611, numDiente)
-                newAbajo.inputs[0].setText(str(datos.defectosfurca[numDiente + 16*pantallaAct][1]))
-                newAbajo.inputs[1].setText(str(datos.defectosfurca[numDiente + 16*pantallaAct][2]))
+                newAbajo.inputs[0].setText(str(datos.defectosfurca[dientes[numDiente + 16 * pantallaAct]][1]))
+                newAbajo.inputs[1].setText(str(datos.defectosfurca[dientes[numDiente + 16 * pantallaAct]][2]))
             newArriba.show()
             newAbajo.show()
             self.hijos[2] = newArriba
@@ -1203,7 +1209,7 @@ class Columna(QFrame):
             window.ppd.anhadirDiente(numDiente)
             for i in range(6):
                 window.sangrado.actualizarDatos(numDiente * 6 + i,
-                                                      datos.sangrados[numDiente + 16 * pantallaAct][i])
+                                                datos.sangrados[numDiente + 16 * pantallaAct][i])
                 window.placa.actualizarDatos(numDiente * 6 + i, datos.placas[numDiente + 16 * pantallaAct][i])
 
 
@@ -1330,20 +1336,20 @@ class BarraPorcentajes(QWidget):
                 self.porcentaje = 0
             else:
                 self.porcentaje = (sum(self.datosbarras)) / (
-                            len(self.datosbarras) - (len(datos.desactivadosSuperior) * 6))
+                        len(self.datosbarras) - (len(datos.desactivadosSuperior) * 6))
         elif pantallaAct == 1:
             if len(datos.desactivadosInferior) == 16:
                 self.porcentaje = 0
             else:
                 self.porcentaje = (sum(self.datosbarras)) / (
-                            len(self.datosbarras) - (len(datos.desactivadosInferior) * 6))
+                        len(self.datosbarras) - (len(datos.desactivadosInferior) * 6))
         else:  # en la pantalla final
             if len(datos.desactivadosSuperior) + len(datos.desactivadosInferior) == 32:
                 self.porcentaje = 0
             else:
                 self.porcentaje = (sum(self.datosbarras)) / (
-                            len(self.datosbarras) - (len(datos.desactivadosSuperior) * 6) - (
-                                len(datos.desactivadosInferior) * 6))
+                        len(self.datosbarras) - (len(datos.desactivadosSuperior) * 6) - (
+                        len(datos.desactivadosInferior) * 6))
 
     def actualizarDatos(self, indice, nuevo):
         self.datosbarras[indice] = nuevo
@@ -1410,7 +1416,9 @@ class Datos:
         self.supuraciones = [[False, False, False, False, False, False] for _ in range(32)]
         self.margenes = [[0, 0, 0, 0, 0, 0] for _ in range(32)]
         self.profundidades = [[0, 0, 0, 0, 0, 0] for _ in range(32)]
-        self.defectosfurca = [[0, 0, 0] for _ in range(32)]
+        self.defectosfurca = {}
+        for i in furcas:
+            self.defectosfurca[i] = [0, 0, 0]
         self.implantes = [False] * 32
         self.movilidad = [0] * 32
         self.desactivadosSuperior = []
@@ -1432,22 +1440,30 @@ class Datos:
                 diente = dientes[i]
                 if i not in self.desactivadosInferior and i not in self.desactivadosSuperior and diente in self.puntosMuestreo:
                     # Primera columna con el número del diente
-                    data = [self.movilidad[i], self.implantes[i], self.defectosfurca[i], self.sangrados[i][0],
-                            self.placas[i][0], self.supuraciones[i][0], self.margenes[i][0], self.profundidades[i][0],
-                            self.sangrados[i][3], self.placas[i][3], self.supuraciones[i][3], self.margenes[i][3],
-                            self.profundidades[i][3]]
-                    data = [1 if x else 0 if isinstance(x, bool) else x for x in data]
+                    data = [self.movilidad[i], self.implantes[i]]
+                    if diente in furcas:
+                        data.append(self.defectosfurca[diente][0])
+                    else:
+                        data.append("")
+                    data.extend([self.sangrados[i][0], self.placas[i][0], self.supuraciones[i][0], self.margenes[i][0],
+                                 self.profundidades[i][0], self.sangrados[i][3], self.placas[i][3],
+                                 self.supuraciones[i][3],
+                                 self.margenes[i][3], self.profundidades[i][3]])
+                    data = [1 if (x == True and isinstance(x, bool)) else 0 if isinstance(x, bool) else x for x in data]
                     dfs.append(pd.DataFrame(data=data, columns=[diente]))
                     data.clear()
                     # Columnas sin número de diente
                     for j in range(1, 3):
-                        data = ["", "", "", self.sangrados[i][j], self.placas[i][j],
-                                self.supuraciones[i][j], self.margenes[i][j],
-                                self.profundidades[i][j], self.sangrados[i][j + 3],
-                                self.placas[i][j + 3],
-                                self.supuraciones[i][j + 3], self.margenes[i][j + 3],
-                                self.profundidades[i][j + 3]]
-                        data = [1 if x else 0 if isinstance(x, bool) else x for x in data]
+                        data = ["", ""]
+                        if diente in furcas:
+                            data.append(self.defectosfurca[diente][j])
+                        else:
+                            data.append("")
+                        data.extend(
+                            [self.sangrados[i][j], self.placas[i][j], self.supuraciones[i][j], self.margenes[i][j],
+                             self.profundidades[i][j], self.sangrados[i][j + 3], self.placas[i][j + 3],
+                             self.supuraciones[i][j + 3], self.margenes[i][j + 3], self.profundidades[i][j + 3]])
+                        data = [1 if (x == True and isinstance(x, bool)) else 0 if isinstance(x, bool) else x for x in data]
                         dfs.append(pd.DataFrame(data=data, columns=[""]))
             df = pd.concat(dfs, axis=1)
             # Ext para parte externa (vestibular/bucal)
@@ -1469,23 +1485,28 @@ class Datos:
             datadf3 = []
             # Cuantitativos:
             nimplantes = sum(self.implantes)
-            ppdmedia = sum(aplanar_lista(self.profundidades)) / (32 - len(self.desactivadosSuperior) - len(self.desactivadosInferior)) * 6
+            ppdmedia = sum(aplanar_lista(self.profundidades)) / (
+                    32 - len(self.desactivadosSuperior) - len(self.desactivadosInferior)) * 6
             cal = 0
             movilidadmedia = sum(self.movilidad) / 32 - len(self.desactivadosSuperior) - len(self.desactivadosInferior)
-            datadf3 += [nimplantes, 32 - len(self.desactivadosSuperior) - len(self.desactivadosInferior) - nimplantes, ppdmedia, cal, movilidadmedia]
+            datadf3 += [nimplantes, 32 - len(self.desactivadosSuperior) - len(self.desactivadosInferior) - nimplantes,
+                        ppdmedia, cal, movilidadmedia]
             datadf3 += [sum(1 for i in self.movilidad if i == 0),
                         sum(1 for i in self.movilidad if i == 1), sum(1 for i in self.movilidad if i == 2),
                         sum(1 for i in self.movilidad if i == 3)]
-            f_plana = aplanar_lista(self.defectosfurca)
+            f_plana = aplanar_lista(list(self.defectosfurca.values()))
             furcamedia = sum(f_plana) / (32 - len(self.desactivadosSuperior) - len(self.desactivadosInferior))
             datadf3 += [furcamedia, sum(1 for i in f_plana if i == 0), sum(1 for i in f_plana if i == 1),
                         sum(1 for i in f_plana if i == 2), sum(1 for i in f_plana if i == 3)]
             # Cualitativos
             bop = sum(aplanar_lista(self.sangrados)) / (
-                    len(aplanar_lista(self.sangrados)) - ((len(self.desactivadosSuperior) + len(self.desactivadosInferior)) * 6))
-            placa = sum(aplanar_lista(self.placas)) / (len(aplanar_lista(self.placas)) - ((len(self.desactivadosSuperior) + len(self.desactivadosInferior)) * 6))
+                    len(aplanar_lista(self.sangrados)) - (
+                    (len(self.desactivadosSuperior) + len(self.desactivadosInferior)) * 6))
+            placa = sum(aplanar_lista(self.placas)) / (len(aplanar_lista(self.placas)) - (
+                    (len(self.desactivadosSuperior) + len(self.desactivadosInferior)) * 6))
             supuracion = sum(aplanar_lista(self.supuraciones)) / (
-                    len(aplanar_lista(self.supuraciones)) - ((len(self.desactivadosSuperior) + len(self.desactivadosInferior)) * 6))
+                    len(aplanar_lista(self.supuraciones)) - (
+                    (len(self.desactivadosSuperior) + len(self.desactivadosInferior)) * 6))
             datadf3 += [bop, placa, supuracion]
             datadf3 += [self.tabaquismo, self.tratamiento_prev, self.colapso_mordida]
 
@@ -1497,11 +1518,13 @@ class Datos:
                          "Dientes afectación furca 3", "BOP %", "Placa %", "Supuración %", "Tabaquismo/vapeo",
                          "Tratamiento previo",
                          "Colapso de mordida"]
-
-            with pd.ExcelWriter(ruta) as writer:
-                df2.to_excel(writer, sheet_name="Datos paciente")
-                df.to_excel(writer, sheet_name="Datos periodontograma")
-                df3.to_excel(writer, sheet_name="Datos calculados")
+            try:
+                with pd.ExcelWriter(ruta) as writer:
+                    df2.to_excel(writer, sheet_name="Datos paciente")
+                    df.to_excel(writer, sheet_name="Datos periodontograma")
+                    df3.to_excel(writer, sheet_name="Datos calculados")
+            except PermissionError:
+                print("No se ha podido guardar el archivo")
         else:
             print("Acción cancelada")
 
@@ -1546,7 +1569,7 @@ class Datos:
             self.inicializados.append(int(diente))
 
     def actualizar_defecto_furca(self, diente, valor, ind):
-        self.defectosfurca[int(diente)][int(ind)] = abs(int(valor))
+        self.defectosfurca[dientes[int(diente)]][int(ind)] = int(valor)
         if int(diente) not in self.inicializados:
             self.inicializados.append(int(diente))
 
@@ -1665,7 +1688,7 @@ def clasificacion_periodontitis(cal, maxppd):
         if maxppd <= 5 and (not 2 in datos.defectosfurca or not 3 in datos.defectosfurca):
             estadios.append("Estadío II")
         if (datos.dientes_perdidos in ["0", "1-4", "Desconocido"] and (maxppd >= 6 or 2 in datos.defectosfurca
-                or 3 in datos.defectosfurca or dientes_naturales >= 20)):
+                                                                       or 3 in datos.defectosfurca or dientes_naturales >= 20)):
             estadios.append("Estadío III")
         if datos.dientes_perdidos == "1-4" and dientes_naturales < 20:
             estadios.append("Estadío IV")
@@ -1678,7 +1701,7 @@ def clasificacion_periodontitis(cal, maxppd):
                 estadios.append("Estadío III")
             if movilidad >= 2 or datos.colapso_mordida == "Sí" or dientes_naturales < 20:
                 estadios.append("Estadío IV")
-        else: # dientes perdidos >= 5
+        else:  # dientes perdidos >= 5
             estadios.append("Estadío IV")
     return estadios
 
