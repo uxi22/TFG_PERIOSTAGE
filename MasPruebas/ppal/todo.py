@@ -5,37 +5,32 @@ from collections import defaultdict
 
 import pandas as pd
 from PIL import Image
-from PySide6 import QtGui
-from PySide6.QtCore import Qt, QRegularExpression, QRect, QSize, QPoint, QDate
-from PySide6.QtGui import QRegularExpressionValidator, QImage, QPolygon, QBrush, QColor, QPainter, QPen, QFontMetrics, \
-    QFont
-from PySide6.QtWidgets import (
-    QApplication,
-    QLabel,
-    QDateEdit,
-    QRadioButton,
-    QMainWindow,
-    QWidget, QHBoxLayout, QLineEdit, QPushButton, QPointList, QFrame, QFileDialog, QCheckBox, QScrollArea
-)
 from ctypes import windll
+
+from PySide6.QtCore import (Qt, QRegularExpression, QRect, QSize, QPoint, QDate)
+from PySide6.QtGui import (QRegularExpressionValidator, QImage, QPolygon, QBrush, QColor,
+                           QPainter, QPen, QFontMetrics, QFont, QIcon)
+from PySide6.QtWidgets import (QApplication, QLabel, QDateEdit, QRadioButton, QMainWindow,
+                               QWidget, QHBoxLayout, QLineEdit, QPushButton, QPointList, QFrame,
+                               QFileDialog, QCheckBox, QScrollArea)
 
 try:
     myappid = 'mycompany.myproduct.subproduct.version'
     windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 except ImportError:
     pass
+
 # Obtenemos la ruta al directorio del script
 basedir = os.path.dirname(__file__)
 basedir = os.path.join(basedir, os.pardir)
 
-arriba = [[1, 5], [5, 6], [4, 8], [9, 8], [9, 8], [7, 7], [6, 8], [10, 6], [7, 11], [6, 6], [7, 8], [8, 9], [8, 10],
-          [7, 5], [5, 5], [2, 1]]
+# Datos de la aplicación
 separaciones = [8, 6, 9, 11, 10, 12, 10, 29, 9, 8, 13, 7, 4, 7, 5, 3]
-
-dientes = [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28, 48, 47, 46, 45, 44, 43, 42, 41, 31,
-           32, 33, 34, 35, 36, 37, 38]
+dientes = [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28,
+           48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38]
 furcas = [18, 17, 16, 26, 27, 28, 48, 47, 46, 36, 37, 38]
 
+# Datos de estilo
 colorBoton = "background-color: #BEBEBE;"
 colorClasificacion = "green"
 style = "margin: 0.5px; border: 1px solid grey; border-radius: 3px;"
@@ -52,7 +47,6 @@ class Fumador(QFrame):
 
         self.framePreguntaPpal = RecuadroPreguntaRadio(self, [0, 0, coordenadas[2], 50], "Fumador:", ["Sí", "No", "Ex"],
                                                        20)
-        # self.framePreguntaPpal.setStyleSheet("background-color:pink;")
         self.botones = self.framePreguntaPpal.getOpciones()
 
         self.frameSubpreguntaSi = QFrame(self)
@@ -78,10 +72,6 @@ class Fumador(QFrame):
             boton.clicked.connect(self.subpregunta)
             if boton.text() == datos.tabaquismo:
                 boton.setChecked(True)
-
-        """self.botones[0].toggled.connect(self.subpregunta)
-        self.botones[-1].toggled.connect(self.subpregunta)
-        self.botones[1].setChecked(True)"""
 
     def subpregunta(self):
         if self.botones[0].isChecked():  # Sí
@@ -113,7 +103,6 @@ class Fumador(QFrame):
 
     def actualizarh(self, height):
         self.coordenadas[1] += height
-        # self.setGeometry(self.coordenadas[0], self.coordenadas[1], self.coordenadas[2], 50)
         self.subpregunta()  # para establecer las dimensiones del desplegable como corresponda
 
 
@@ -228,6 +217,7 @@ class Window1(QMainWindow):
     def __init__(self):
         super().__init__()
 
+        self.fumador = None
         self.setWindowTitle("Periostage")
         self.setStyleSheet("background-color: #ECECEC ")
         self.setMinimumSize(QSize(1000, 500))
@@ -272,7 +262,6 @@ class Window1(QMainWindow):
         fecha2.setDate(datos.fecha)
         fecha2.setCalendarPopup(True)
         fecha2.setStyleSheet("background-color: #BDBDBD; padding: 8px; border-radius: 7px; font-size: 14px;")
-        # datos.set_fecha(fecha2.date().toString("dd/MM/yyyy"))
         fecha2.dateChanged.connect(lambda: datos.set_fecha(fecha2.date()))
         layfecha.addWidget(fecha1)
         layfecha.addWidget(fecha2)
@@ -392,11 +381,6 @@ class Window1(QMainWindow):
         self.fumador = Fumador(self.framePreguntas, [0, 120, self.framePreguntas.width() / 2, 50],
                                self.framePreguntas.width())
 
-    """def showEvent(self, event):
-        super().showEvent(event)
-        if self.tratprevio.botones[0].isChecked():
-            self.tratprevio.subpregunta()"""
-
     def crear_conexion(self, boton):
         return lambda: datos.set_dientes_perdidos(boton.text())
 
@@ -427,7 +411,6 @@ class Window1(QMainWindow):
         self.dientesperdidos.widthOpciones(self.framePreguntas.width())
         self.fumador.setGeometry(0, 120, int(self.framePreguntas.width() / 2), 50)
         self.fumador.actualizarw(self.framePreguntas.width() / 2, self.framePreguntas.width())
-        # self.botonSiguiente.setGeometry(self.width() - 205, self.height() - 125, 100, 40)
         self.siguiente.setGeometry(
             QRect(((self.width() - self.titu.width()) // 2) + self.titu.width() + 20, 15, 125, 30))
 
@@ -471,16 +454,6 @@ def aplanar_lista(lista):
             salida.extend(i)
         else:
             salida.append(i)
-    return salida
-
-
-def aplanar_abs_lista(lista):
-    salida = []
-    for i in lista:
-        if isinstance(i, list):
-            salida.extend(aplanar_abs_lista(i))
-        else:
-            salida.append(abs(i))
     return salida
 
 
@@ -533,6 +506,12 @@ class LineasSobreDientesAbajo(QWidget):
         triangulos_abajo = [[70, 8], [74, 30], [72, 10], [75, 32], [71, 9], [73, 33],
                             [69, 10], [72, 34], [77, 12], [78, 26], [75, 10], [73, 31]]
 
+        # Puntos de inicio y fin de la imagen del diente en la parte superior (no en el límite con la encía)
+        # 2 valores por diente
+        # En píxeles sobre el eje x
+        puntos_arriba = [[1, 5], [5, 6], [4, 8], [9, 8], [9, 8], [7, 7], [6, 8], [10, 6], [7, 11], [6, 6], [7, 8],
+                         [8, 9], [8, 10], [7, 5], [5, 5], [2, 1]]
+
         dist = 0
         self.altura = 57
         # Valores iniciales de los puntos de los dientes
@@ -544,16 +523,16 @@ class LineasSobreDientesAbajo(QWidget):
                 self.puntos_furca.append(QPoint(dist + triangulos_abajo[furcas.index(dientes[i]) * 2 + 1][1],
                                                 triangulos_abajo[furcas.index(dientes[i]) * 2 + 1][0]))
 
-            dist += arriba[i][0]
+            dist += puntos_arriba[i][0]
             self.points.append(QPoint(dist, int(self.altura)))
             self.points2.append(QPoint(dist, int(self.altura)))
-            wdiente = diente_imagen.width - arriba[i][0] - arriba[i][1]
+            wdiente = diente_imagen.width - puntos_arriba[i][0] - puntos_arriba[i][1]
             self.points.append(QPoint(dist + wdiente // 2, int(self.altura)))
             self.points2.append(QPoint(dist + wdiente // 2, int(self.altura)))
             dist += wdiente
             self.points.append(QPoint(dist, int(self.altura)))
             self.points2.append(QPoint(dist, int(self.altura)))
-            dist += arriba[i][1] + separaciones[i]
+            dist += puntos_arriba[i][1] + separaciones[i]
 
     def paintEvent(self, event):
         qp = QPainter(self)
@@ -695,7 +674,8 @@ class LineasSobreDientes(QWidget):
         self.puntos_furca = QPointList()
 
         triangulos_arriba = [[55, 23], [58, 21], [61, 19], [60, 25], [58, 24], [54, 23]]
-
+        puntos_arriba = [[1, 5], [5, 6], [4, 8], [9, 8], [9, 8], [7, 7], [6, 8], [10, 6], [7, 11], [6, 6], [7, 8],
+                         [8, 9], [8, 10], [7, 5], [5, 5], [2, 1]]
         dist = 0
         self.altura = 80
         # Valores iniciales de los puntos de los dientes
@@ -703,16 +683,16 @@ class LineasSobreDientes(QWidget):
             if dientes[i + 16 * pantallaAct] in furcas:
                 self.puntos_furca.append(QPoint(dist + triangulos_arriba[furcas.index(dientes[i])][1],
                                                 triangulos_arriba[furcas.index(dientes[i])][0]))
-            dist += arriba[i][0]
+            dist += puntos_arriba[i][0]
             self.points.append(QPoint(dist, int(self.altura)))  # inicio diente
             self.points2.append(QPoint(dist, int(self.altura)))
-            wdiente = diente_imagen.width - arriba[i][0] - arriba[i][1]
+            wdiente = diente_imagen.width - puntos_arriba[i][0] - puntos_arriba[i][1]
             self.points.append(QPoint(dist + wdiente // 2, int(self.altura)))
             self.points2.append(QPoint(dist + wdiente // 2, int(self.altura)))
             dist += wdiente
             self.points.append(QPoint(dist, int(self.altura)))  # fin diente, ppio siguiente
             self.points2.append(QPoint(dist, int(self.altura)))
-            dist += arriba[i][1] + separaciones[i]
+            dist += puntos_arriba[i][1] + separaciones[i]
 
     def paintEvent(self, event):
         qp = QPainter(self)
@@ -1250,7 +1230,7 @@ class CuadroColores(QWidget):
         return QSize(1, 1)
 
     def quitarDiente(self, indice):
-        # Restamos las aparición de los valores de los inputs que tenía diente desactivado
+        # Restamos las apariciones de los valores de los inputs que tenía diente desactivado
         for i in range(6):
             self.datoscolores[self.listadatos[indice * 6 + i]] -= 1
         self.update()
@@ -1415,7 +1395,7 @@ class BarraPorcentajes(QWidget):
 
 class Datos:
     def __init__(self):
-        self.fecha = QDate.currentDate() # .strftime("%d/%m/%Y")
+        self.fecha = QDate.currentDate()
         self.examen_inicial = "Examen inicial"
         self.odontologa = ""
         self.paciente = ""
@@ -1616,34 +1596,6 @@ class Datos:
                 self.puntosMuestreo.remove(diente)
 
 
-# if periodontitis
-def calcular_estadio(cal):
-    global colorClasificacion
-    # No se consideran dientes perdidos
-    maxpd = max(aplanar_abs_lista(datos.profundidades))
-    # if len(datos.desactivados) == 0:
-    if 1 <= cal <= 2:
-        if maxpd <= 4:
-            colorClasificacion = "light orange"
-            return "Stage I"
-    elif 3 <= cal <= 4:
-        if maxpd <= 5:
-            colorClasificacion = "orange"
-            return "Stage II"
-    else:  # >= 5
-        if maxpd >= 6:
-            n_afectacionfurca = sum(1 for elemento in datos.defectosfurca if elemento > 1)
-            if n_afectacionfurca >= 1:
-                if (len(datos.desactivadosSuperior) + len(datos.desactivadosInferior)) < 2:  # Cantidad de dientes totales >= 20
-                    # if no colapso de mordida / disfuncion masticatoria
-                    colorClasificacion = "red"
-                    return "Stage III"
-                # if colapso de mordida / disfuncion masticatoria
-                colorClasificacion = "dark red"
-                return "Stage IV"
-    return "??"
-
-
 def clasificacion_inicial():
     interdental = [0, 2, 3, 5]
     ultimo_d_caso1 = -2
@@ -1736,42 +1688,6 @@ def clasificacion_periodontitis(cal, maxppd):
 def contar_movilidad():
     return datos.movilidad.count(2) + datos.movilidad.count(3)
 
-def clasificacion_esquema1():
-    global colorClasificacion
-    # Calcular sangrado medio
-    pd = int(sum(aplanar_abs_lista(datos.profundidades)) / (
-            len(aplanar_abs_lista(datos.profundidades)) - (len(datos.desactivadosSuperior) * 6)))
-    bop = sum(aplanar_lista(datos.sangrados)) / (
-            len(aplanar_lista(datos.sangrados)) - (len(datos.desactivadosSuperior) * 6))
-    margen = sum(aplanar_abs_lista(datos.margenes)) / (
-            len(aplanar_abs_lista(datos.margenes)) - (len(datos.desactivadosSuperior) * 6))
-    # calcular rbl/cal
-    cal = int((pd + margen) - 2)
-
-    if pd <= 3:
-        if bop < 0.1:
-            colorClasificacion = "green"
-            return "SANO"
-        if cal == 0:
-            colorClasificacion = "light orange"
-            return "Gingivitis"
-        # if tratamiento periodontal -> "Gingivitis en periodonto reducido"
-        # if not tratamiento periodontal
-        return calcular_estadio(cal)
-    if bop < 0.1:
-        if cal == 0:
-            colorClasificacion = "green"
-            return "SANO"
-        # if tratamiento periodontal -> "Sano en periodonto reducido"
-        if pd == 4:
-            colorClasificacion = "yellow"
-            return "Sano en periodonto reducido"
-        return calcular_estadio(cal)
-    if cal == 0:
-        colorClasificacion = "light orange"
-        return "Gingivitis"
-    return calcular_estadio(cal)
-
 
 class Clasificacion(QLabel):
     def __init__(self, parent):
@@ -1782,7 +1698,7 @@ class Clasificacion(QLabel):
 
     def actualizar(self):
         global colorClasificacion
-        self.setText(clasificacion_esquema1())
+        self.setText(clasificacion_inicial())
         self.setStyleSheet("font-weight: bold; font-size: 16px; margin: 5px;" "text-color: " + colorClasificacion)
 
 
@@ -1889,7 +1805,6 @@ class WindowDientes(QMainWindow):
         self.frameDatosMedios.setStyleSheet("background: none;")
         layoutDatosMedios.setSpacing(20)
 
-        # self.clasificacion = Clasificacion(datos)
         self.ppd = CuadroColores(datos.profundidades[16 * pantallaAct:16 + 16 * pantallaAct], None, 5,
                                  self.frameDatosMedios)
         self.cal = CuadroColores(datos.profundidades[16 * pantallaAct:16 + 16 * pantallaAct],
@@ -2192,7 +2107,7 @@ def anteriorPantalla():
 
 
 app = QApplication(sys.argv)
-app.setWindowIcon(QtGui.QIcon(os.path.join(basedir, 'diente.ico')))
+app.setWindowIcon(QIcon(os.path.join(basedir, 'diente.ico')))
 datos = Datos()
 window = Window1()
 # window = WindowFinal()
