@@ -33,7 +33,7 @@ furcas_abajo = [18, 17, 16, 14, 24, 26, 27, 28, 48, 47, 46, 36, 37, 38]
 
 # Datos de estilo
 colorBoton = "background-color: #BEBEBE;"
-colorClasificacion = "green"
+colorClasificacion = "lightgreen"
 style = "margin: 0.5px; border: 1px solid grey; border-radius: 3px;"
 
 
@@ -55,10 +55,15 @@ class Fumador(QFrame):
         self.frameMesesFum = PreguntaInput(self.frameSubpreguntaSi, "Meses fumando:",
                                            [0, 0, int((wtotal - 10) / 3) - 20, 50], 60, 10, "0", 16)
         self.frameMesesFum.input.editingFinished.connect(lambda: datos.set_meses_fum(self.frameMesesFum.input.text()))
+        if datos.meses_fumando != "0":
+            self.frameMesesFum.input.setText(datos.meses_fumando)
+
         self.frameSesDia = PreguntaInput(self.frameSubpreguntaSi, "Cigarros o sesiones/día:",
                                          [int((wtotal - 10) / 3) - 15, 0, int((wtotal - 10) / 3) + 30, 50], 60, 10, "0",
                                          16)
         self.frameSesDia.input.editingFinished.connect(lambda: datos.set_cigarrillos(self.frameSesDia.input.text()))
+        if datos.cigarrillos_dia != "0":
+            self.frameSesDia.input.setText(datos.cigarrillos_dia)
 
         self.frameDuracionSesion = PreguntaInput(self.frameSubpreguntaSi, "Minutos/sesión:",
                                                  [int(2 * (wtotal - 10) / 3) - 5, 0, int((wtotal - 10) / 3) - 15, 50],
@@ -66,6 +71,8 @@ class Fumador(QFrame):
                                                  10, "0", 16)
         self.frameDuracionSesion.input.editingFinished.connect(
             lambda: datos.set_duracion_ses(self.frameDuracionSesion.input.text()))
+        if datos.duracion_ses != "0":
+            self.frameDuracionSesion.input.setText(datos.duracion_ses)
         self.frameSubpreguntaSi.hide()
 
         self.frameSubpreguntaEx = QFrame(self)
@@ -73,6 +80,8 @@ class Fumador(QFrame):
         self.frameMesesSinFum = PreguntaInput(self.frameSubpreguntaEx, "Meses sin fumar:", [0, 0, 300, 50], 60, 10, "0")
         self.frameMesesSinFum.input.editingFinished.connect(
             lambda: datos.set_meses_sin_f(self.frameMesesSinFum.input.text()))
+        if datos.meses_sin_f != "0":
+            self.frameMesesSinFum.input.setText(datos.meses_sin_f)
         self.frameSubpreguntaEx.hide()
 
         for boton in self.botones:
@@ -87,6 +96,7 @@ class Fumador(QFrame):
             datos.set_meses_sin_f("0")
             self.frameSubpreguntaEx.hide()
             self.frameSubpreguntaSi.show()
+            self.frameMesesSinFum.input.setText("0")
         elif self.botones[-1].isChecked():  # Ex
             datos.set_tabaquismo("Ex")
             self.setGeometry(self.coordenadas[0], self.coordenadas[1], self.wtotal, 105)
@@ -95,6 +105,9 @@ class Fumador(QFrame):
             datos.set_duracion_ses("0")
             self.frameSubpreguntaSi.hide()
             self.frameSubpreguntaEx.show()
+            self.frameSesDia.input.setText("0")
+            self.frameMesesFum.input.setText("0")
+            self.frameDuracionSesion.input.setText("0")
         else:
             datos.set_tabaquismo("No")
             self.setGeometry(self.coordenadas[0], self.coordenadas[1], self.coordenadas[2], 50)
@@ -448,7 +461,7 @@ def es_numero(texto):
 
 
 def calcular_cal(i, t):
-    if i not in datos.desactivadosInferior and i not in datos.desactivadosSuperior:
+    if i not in datos.desactivadosInferior + datos.desactivadosSuperior:
         mg = datos.margenes[i][t]
         ppd = datos.profundidades[i][t]
         if mg >= 0:
@@ -933,7 +946,7 @@ class Input3(QFrame):
 
     def guardar_texto(self, ndiente, tipo, num, arriba):
         inpt = self.inpts[num]
-        if tipo == 1 and es_numero(inpt.text()):
+        if tipo == 1 and es_numero(inpt.text()):  # Margen gingival
             if -21 < int(inpt.text()) < 21:
                 if arriba:
                     datos.actualizar_margen(int(ndiente + 16 * pantallaAct), num, int(inpt.text()))
@@ -943,7 +956,7 @@ class Input3(QFrame):
                 else:
                     datos.actualizar_margen(int(ndiente + 16 * pantallaAct), num + 3, int(inpt.text()))
                     window.widgetDientesAbajo.actualizar_alturas(int(ndiente), tipo, num)
-                    window.cal.actualizarDatos(int(ndiente) * 6 + num,
+                    window.cal.actualizarDatos(int(ndiente) * 6 + num + 3,
                                                calcular_cal(int(ndiente + 16 * pantallaAct), num + 3))
             else:
                 inpt.setText("0")
@@ -962,8 +975,8 @@ class Input3(QFrame):
                 else:
                     datos.actualizar_profundidad(int(ndiente + 16 * pantallaAct), num + 3, int(inpt.text()))
                     window.widgetDientesAbajo.actualizar_alturas(int(ndiente), tipo, num)
-                    window.ppd.actualizarDatos(int(ndiente) * 6 + num, int(inpt.text()))
-                    window.cal.actualizarDatos(int(ndiente) * 6 + num,
+                    window.ppd.actualizarDatos(int(ndiente) * 6 + num + 3, int(inpt.text()))
+                    window.cal.actualizarDatos(int(ndiente) * 6 + num + 3,
                                                calcular_cal(int(ndiente + 16 * pantallaAct), num + 3))
             else:
                 inpt.setText("0")
@@ -1239,8 +1252,12 @@ class CuadroColores(QWidget):
             # Un site por cada medida del diente (6 por diente, 192 con todos los dientes en la final, 96 con una arcada)
             self.margenes = margenes
             self.profundidades = profundidades
-            # Se inicializa con todo a 0
+            # Se inicializa
             self.listadatos = [0] * len(margenes) * 6
+            self.p = pantallaAct if pantallaAct <= 1 else 0
+            for i in range(len(margenes)):
+                for j in range(6):
+                    self.listadatos[i * 6 + j] = calcular_cal(i + 16*self.p, j)
         else:
             self.listadatos = aplanar_lista(profundidades)
         self.datoscolores = defaultdict(int)
@@ -1507,19 +1524,31 @@ class Datos:
             datadf3 = []
             # Cuantitativos:
             nimplantes = sum(self.implantes)
-            ppdmedia = sum(aplanar_lista(self.profundidades)) / (
-                    32 - len(self.desactivadosSuperior) - len(self.desactivadosInferior)) * 6
-            cal = 0
-            movilidadmedia = sum(self.movilidad) / 32 - len(self.desactivadosSuperior) - len(self.desactivadosInferior)
+            # Media de PPD para los sitios de muestreo
+            ppd_suma = sum([sum(self.profundidades[dientes.index(i)]) for i in self.puntosMuestreo])
+            ppdmedia = ppd_suma / (len(self.puntosMuestreo) * 6)
+            cal_suma = sum([sum([calcular_cal(dientes.index(i), t) for t in range(6)]) for i in self.puntosMuestreo])
+            calmedia = cal_suma / (len(self.puntosMuestreo) * 6)
+            movilidadmedia = sum([self.movilidad[dientes.index(i)] for i in self.puntosMuestreo]) / len(self.puntosMuestreo)
             datadf3 += [nimplantes, 32 - len(self.desactivadosSuperior) - len(self.desactivadosInferior) - nimplantes,
-                        ppdmedia, cal, movilidadmedia]  # 5
-            datadf3 += [sum(1 for i in self.movilidad if i == 0),
-                        sum(1 for i in self.movilidad if i == 1), sum(1 for i in self.movilidad if i == 2),
-                        sum(1 for i in self.movilidad if i == 3)]  # 4
-            f_plana = aplanar_lista(list(self.defectosfurca.values()))
-            furcamedia = sum(f_plana) / (32 - len(self.desactivadosSuperior) - len(self.desactivadosInferior))
-            datadf3 += [furcamedia, sum(1 for i in f_plana if i == 0), sum(1 for i in f_plana if i == 1),
-                        sum(1 for i in f_plana if i == 2), sum(1 for i in f_plana if i == 3)]  # 5
+                        ppdmedia, calmedia, movilidadmedia]
+            datadf3 += [sum(1 for ind, i in enumerate(self.movilidad) if i == 0 and dientes[ind] in self.puntosMuestreo),
+                        sum(1 for ind, i in enumerate(self.movilidad) if i == 1 and dientes[ind] in self.puntosMuestreo),
+                        sum(1 for ind, i in enumerate(self.movilidad) if i == 2 and dientes[ind] in self.puntosMuestreo),
+                        sum(1 for ind, i in enumerate(self.movilidad) if i == 3 and dientes[ind] in self.puntosMuestreo)]
+            furcas_no_desact = []
+            for i in furcas_abajo:
+                if i in self.puntosMuestreo:
+                    furcas_no_desact.append(i)
+            # Media de valores de furca con los dientes con furcas no desactivados
+            # Le restamos las dos posiciones de furca superior de 14 y 24
+            datadf3 += [sum(aplanar_lista(list(self.defectosfurca.values()))) / (len(furcas_no_desact) * 3 - 2)]
+            valores_furcas = [0, 0, 0, 0]  # 0, 1, 2 o 3
+            # recorremos las listas con los 3 valores de furca de cada diente
+            # para el 14 y 24, el primer valor va a ser siempre 0
+            for i in list(self.defectosfurca.values()):
+                valores_furcas[max(i)] += 1
+            datadf3 += valores_furcas
             # Cualitativos
             bop = sum(aplanar_lista(self.sangrados)) / (
                     len(aplanar_lista(self.sangrados)) - (
@@ -1529,10 +1558,10 @@ class Datos:
             supuracion = sum(aplanar_lista(self.supuraciones)) / (
                     len(aplanar_lista(self.supuraciones)) - (
                     (len(self.desactivadosSuperior) + len(self.desactivadosInferior)) * 6))
-            datadf3 += [bop, placa, supuracion] # 3
+            datadf3 += [bop, placa, supuracion]
             datadf3 += [self.tratamiento_prev, self.tipo_trat, self.dientes_perdidos, self.colapso_mordida,
                         self.tabaquismo,
-                        self.meses_fumando, self.cigarrillos_dia, self.duracion_ses, self.meses_sin_f] # 9
+                        self.meses_fumando, self.cigarrillos_dia, self.duracion_ses, self.meses_sin_f]
 
             df3 = pd.DataFrame(data=datadf3)
             df3.index = ["Número total implantes", "Número dientes naturales", "PPD media", "CAL media",
@@ -1651,7 +1680,7 @@ class Datos:
     def actualizar_muestreo(self, diente, valor):
         if valor and diente not in self.puntosMuestreo:
             self.puntosMuestreo.append(diente)
-        else:
+        elif not valor:
             if diente in self.puntosMuestreo:
                 self.puntosMuestreo.remove(diente)
 
@@ -1663,85 +1692,123 @@ def clasificacion_inicial():
     cal_interd_maximo = 0
     cal_max_todo = 0
     maxppd = 0
-    for diente in range(16):
-        if diente not in datos.desactivadosSuperior and diente not in datos.desactivadosInferior:
-            for punto in range(6):
-                maxppd = max(maxppd, datos.profundidades[diente][punto])
-                cal = calcular_cal(diente, punto)
+    respuesta = []
+    for diente in dientes:
+        # No se tienen en cuenta los 8s ni los dientes desactivados (no hay diente)
+        if diente not in datos.desactivadosSuperior and diente not in datos.desactivadosInferior and diente % 10 != 8:
+            if diente % 10 != 7:
+                puntos = range(6)
+            else:
+                # no se tienen en cuenta los puntos distales de los 7s
+                # quitamos 0 y 3 para 17 y 47
+                # 2 y 5 para 27 y 37
+                if diente in [17, 47]:
+                    puntos = [1, 2, 4, 5]
+                else:  # diente in [27, 37]:
+                    puntos = [0, 1, 3, 4]
+            for punto in puntos:
+                maxppd = max(maxppd, datos.profundidades[dientes.index(diente)][punto])
+                cal = calcular_cal(dientes.index(diente), punto)
                 cal_max_todo = max(cal, cal_max_todo)
                 if punto in interdental and cal >= 1:  # Puntos interdentales
-                    if diente != ultimo_d_caso1 and diente != ultimo_d_caso1 + 1:  # En dos dientes no adyacentes
+                    if ultimo_d_caso1 != -2 and diente != dientes[ultimo_d_caso1] and diente != dientes[ultimo_d_caso1 + 1]:  # En dos dientes no adyacentes
                         # PERIODONTITIS
-                        return "Periodontitis: ", clasificacion_periodontitis(cal, maxppd)
+                        respuesta = ["Periodontitis: "]
+                        respuesta.extend(clasificacion_periodontitis(cal, maxppd))
                     cal_interd_maximo = max(cal, cal_interd_maximo)
-                    ultimo_d_caso1 = diente
+                    ultimo_d_caso1 = dientes.index(diente)
                 elif punto not in interdental and cal >= 3:  # Puntos mediales
-                    if diente == ultimo_d_caso2 + 1:  # En dos dientes adyacentes
+                    if ultimo_d_caso2 != -2 and diente == dientes[ultimo_d_caso2 + 1]:  # En dos dientes adyacentes
                         # PERIODONTITIS
-                        return "Periodontitis: ", clasificacion_periodontitis(cal, maxppd)
-                    ultimo_d_caso2 = diente
-                else:
-                    # Si no se cumple ninguno de esos dos casos
-                    # Salud o gingivitis
-                    return clasificacion_salud_gingivitis(maxppd, cal_max_todo)
+                        respuesta = ["Periodontitis: "]
+                        respuesta.extend(clasificacion_periodontitis(cal, maxppd))
+                    ultimo_d_caso2 = dientes.index(diente)
+    # Si no se cumplió ninguno de esos dos casos
+    # Salud o gingivitis
+    if not respuesta:
+        return [clasificacion_salud_gingivitis(maxppd, cal_max_todo)]
+    else:
+        return respuesta
 
 
 def clasificacion_salud_gingivitis(maxppd, calmaxtodo):
+    global colorClasificacion
     bop = sum(aplanar_lista(datos.sangrados)) / (
             len(aplanar_lista(datos.sangrados)) - (len(datos.desactivadosSuperior) * 6))
     if bop < 0.1:
         if maxppd <= 3:
             if calmaxtodo >= 1 and datos.tratamiento_prev == "No":
+                colorClasificacion = "yellow"
                 return "Sano con periodonto reducido"
             else:
+                colorClasificacion = "lightgreen"
                 return "Sano"
         if maxppd <= 4:
             if calmaxtodo >= 1 and datos.tratamiento_prev == "Si":
+                colorClasificacion = "lightgreen"
                 return "Salud con periodontitis estable tratado con éxito"
         if maxppd > 3:
             if calmaxtodo == 0:
+                colorClasificacion = "lightgreen"
                 return "Sano"
     else:
         if maxppd <= 3:
             if calmaxtodo == 0:
+                colorClasificacion = "light orange"
                 return "Gingivitis"
             elif calmaxtodo >= 1:
                 if datos.tratamiento_prev == "No":
+                    colorClasificacion = "orange"
                     return "Gingivitis con periodonto reducido"
                 else:
+                    colorClasificacion = "orange"
                     return "Gingivitis con periodonto reducido y periodontitis estable tratado con éxito"
         else:  # maxppd > 3
             if calmaxtodo == 0:
-                return "Gingivitis"
+                colorClasificacion = "light orange"
+                return "Gingivitis "
+    return "Desconocido"
 
 
 def clasificacion_periodontitis(cal, maxppd):
+    global colorClasificacion
     estadios = []
     dientes_naturales = 32 - len(datos.desactivadosSuperior) - len(datos.desactivadosInferior) - sum(datos.implantes)
     if 1 <= cal <= 2:
         if maxppd <= 4:
-            estadios.append("Estadío I")  # Stage I
+            colorClasificacion = "yellow"
+            estadios.append("Estadío I ")  # Stage I
         if datos.dientes_perdidos == "1-4":
-            estadios.append("Estadío III")  # Stage III
+            colorClasificacion = "red"
+            estadios.append("Estadío III ")  # Stage III
     elif 3 <= cal <= 4:
         if maxppd <= 5 and (not 2 in datos.defectosfurca or not 3 in datos.defectosfurca):
-            estadios.append("Estadío II")
+            colorClasificacion = "orange"
+            estadios.append("Estadío II ")
         if (datos.dientes_perdidos in ["0", "1-4", "Desconocido"] and (maxppd >= 6 or 2 in datos.defectosfurca
                                                                        or 3 in datos.defectosfurca or dientes_naturales >= 20)):
-            estadios.append("Estadío III")
+            colorClasificacion = "red"
+            estadios.append("Estadío III ")
         if datos.dientes_perdidos == "1-4" and dientes_naturales < 20:
-            estadios.append("Estadío IV")
+            colorClasificacion = "dark red"
+            estadios.append("Estadío IV ")
         if datos.dientes_perdidos == ">=5":
-            estadios.append("Estadío IV")
+            colorClasificacion = "dark red"
+            estadios.append("Estadío IV ")
     elif cal >= 5:
         if datos.dientes_perdidos in ["0", "1-4", "Desconocido"]:
             movilidad = contar_movilidad()
             if movilidad < 2 or datos.colapso_mordida == "No" or dientes_naturales >= 20:
-                estadios.append("Estadío III")
+                colorClasificacion = "red"
+                estadios.append("Estadío III ")
             if movilidad >= 2 or datos.colapso_mordida == "Sí" or dientes_naturales < 20:
-                estadios.append("Estadío IV")
+                colorClasificacion = "dark red"
+                estadios.append("Estadío IV ")
         else:  # dientes perdidos >= 5
-            estadios.append("Estadío IV")
+            colorClasificacion = "dark red"
+            estadios.append("Estadío IV ")
+    if not estadios:
+        return ["Estadío no determinado"]
     return estadios
 
 
@@ -1753,13 +1820,18 @@ class Clasificacion(QLabel):
     def __init__(self, parent):
         global colorClasificacion
         super().__init__(parent)
-        self.setStyleSheet("font-weight: bold; font-size: 16px; margin: 5px;" "text-color: " + colorClasificacion)
+        self.setStyleSheet("font-weight: bold; font-size: 16px; margin: 5px;" "text-color: " + colorClasificacion + "; padding: 3px; border: 1px solid grey;")
         self.setText("SANO")
 
     def actualizar(self):
         global colorClasificacion
-        self.setText("Diagnóstico: " + clasificacion_inicial())
-        self.setStyleSheet("font-weight: bold; font-size: 16px; margin: 5px;" "text-color: " + colorClasificacion + "; padding: 3px; border: 1px solid grey;")
+        clasf = "Diagnóstico: "
+        res = clasificacion_inicial()
+        for t in res:
+            clasf += t
+        self.setText(clasf)
+        self.setStyleSheet("background-color: " + colorClasificacion + "; font-weight: bold; font-size: 16px; margin: 5px; color: black; padding: 3px; border: 1px solid " + colorClasificacion + "; border-radius: 5px")
+        self.adjustSize()
 
 
 class BotonAnterior(QPushButton):
