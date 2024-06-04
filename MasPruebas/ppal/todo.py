@@ -17,6 +17,7 @@ from PySide6.QtWidgets import (QApplication, QLabel, QDateEdit, QRadioButton, QM
 try:
     myappid = 'mycompany.myproduct.subproduct.version'
     windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+    from PySide6 import QtWidgets
 except ImportError:
     pass
 
@@ -436,11 +437,11 @@ class windowIni(QMainWindow):
             self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
             self.framePpal.setGeometry((self.width() - 920) / 2, 100, 920, 625)
             self.siguiente.setGeometry(
-                QRect(self.framePpal.width() + int((self.width() - 1030) / 2) - 125, 15, 125, 30))
+                QRect(self.framePpal.width() + int((self.width() - 1030) / 2) - 125, 15, 135, 30))
         else:
             self.framePpal.setGeometry(15, 100, 920, 625)
             self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-            self.siguiente.setGeometry(QRect(self.framePpal.width() + 15 - 125, 15, 125, 30))
+            self.siguiente.setGeometry(QRect(self.framePpal.width() + 15 - 125, 15, 135, 30))
         self.scroll_area.setGeometry(0, 0, self.width(), self.height())
 
 
@@ -1829,32 +1830,42 @@ class Clasificacion(QLabel):
         self.adjustSize()
 
 
-class BotonAnterior(QPushButton):
+class BotonAnterior(QWidget):
     def __init__(self, parent, texto):
         super().__init__(parent)
-        self.setText(texto)
-        self.setStyleSheet(
-            "QPushButton { background-color: #DCB5FF; border-radius: 7px; font-size: 15px; font-family: Alata;}"
+        self.boton = QPushButton("<", self)
+        self.boton.setStyleSheet(
+            "QPushButton { background-color: #DCB5FF; border-radius: 12px; font-size: 20px; font-family: Alata; padding: 2px 2px 4px 2px;}"
             "QPushButton:hover { background-color: #BF98E2; }"
             "QPushButton:pressed { background-color: #AC92C4; }")
-        self.setCheckable(True)
-        self.clicked.connect(self.funcion_clickado)
+        self.boton.setGeometry(0, 3, 25, 25)
+        self.boton.setCheckable(True)
+        self.boton.clicked.connect(self.funcion_clickado)
+        self.label = QLabel(texto, self)
+        self.label.setStyleSheet("font-size: 15px;")
+        self.label.setGeometry(30, 4, 120, 25)
 
     def funcion_clickado(self):
         if window:
             anteriorPantalla()
 
 
-class BotonSiguiente(QPushButton):
+class BotonSiguiente(QWidget):
     def __init__(self, parent, texto):
         super().__init__(parent)
-        self.setText(texto)
-        self.setStyleSheet(
-            "QPushButton { background-color: #DCB5FF; border-radius: 7px; font-size: 15px; font-family: Alata;}"
+        self.boton = QPushButton(">", self)
+        self.boton.setStyleSheet(
+            "QPushButton { background-color: #DCB5FF; border-radius: 12px; font-size: 20px; font-family: Alata; padding: 2px 2px 4px 2px;}"
             "QPushButton:hover { background-color: #BF98E2; }"
             "QPushButton:pressed { background-color: #AC92C4; }")
-        self.setCheckable(True)
-        self.clicked.connect(self.funcion_clickado)
+        self.boton.setCheckable(True)
+        self.boton.clicked.connect(self.funcion_clickado)
+        self.label = QLabel(texto, self)
+        self.label.setStyleSheet("font-size: 15px;")
+        self.label.adjustSize()
+        self.label.setGeometry(0, 4, self.label.width(), 25)
+        self.boton.setGeometry(self.label.width() + 5, 3, 25, 25)
+
 
     def funcion_clickado(self):
         if window:
@@ -1981,13 +1992,13 @@ class WindowDientes(QMainWindow):
         if self.width() >= 995:
             self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
             self.frameTodo.setGeometry(QRect((self.width() - 950) // 2, 60, self.frameTodo.width(), self.frameTodo.height()))
-            self.anterior.setGeometry(QRect(((self.width() - 950) //2) + 170, 10, 125, 25))
-            self.siguiente.setGeometry(QRect(((self.width() - 950) // 2) + 800, 10, 125, 25))
+            self.anterior.setGeometry(QRect(((self.width() - 950) //2) + 170, 10, 135, 30))
+            self.siguiente.setGeometry(QRect(((self.width() - 950) // 2) + 800, 10, 135, 30))
         else:
             self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
             self.frameTodo.setGeometry(QRect(15, 60, self.frameTodo.width(), self.frameTodo.height()))
-            self.anterior.setGeometry(QRect(185, 10, 125, 25))
-            self.siguiente.setGeometry(QRect(835, 10, 125, 25))
+            self.anterior.setGeometry(QRect(185, 10, 135, 30))
+            self.siguiente.setGeometry(QRect(835, 10, 135, 30))
 
         """for columna in self.frameColumnas.findChildren(Columna):
             columna.newsize(self.height())"""
@@ -2070,7 +2081,9 @@ class WindowFinal(QMainWindow):
 
         self.anterior = BotonAnterior(self.frameTitulo, "Arcada inferior")
 
-        self.exportar = QPushButton("Exportar", self.frameTitulo)
+        icono = QtWidgets.QApplication.style().standardIcon(QtWidgets.QStyle.SP_DialogSaveButton)
+        self.exportar = QPushButton(icono, "Exportar", self.frameTitulo)
+        self.exportar.setLayoutDirection(Qt.LeftToRight)
         self.exportar.setCheckable(True)
         self.exportar.setStyleSheet(
             "QPushButton { background-color: #9747FF; border-radius: 7px; font-size: 15px; font-family: Alata;}"
@@ -2190,14 +2203,14 @@ class WindowFinal(QMainWindow):
         if self.width() >= 1080:
             self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
             self.frameCosas.setGeometry((self.width() - 1180) / 2, 100, 1030, 705)
-            self.exportar.setGeometry(self.frameCosas.width() + int((self.width() - 1180) / 2) - 190, 10, 125, 25)
+            self.exportar.setGeometry(self.frameCosas.width() + int((self.width() - 1180) / 2) - 190, 10, 135, 30)
         else:
             self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
             self.frameCosas.setGeometry(0, 100, 1000, 705)
-            self.exportar.setGeometry(self.frameCosas.width() - 190, 10, 125, 25)
+            self.exportar.setGeometry(self.frameCosas.width() - 190, 10, 135, 30)
 
         self.scroll_area.setGeometry(0, 0, self.width(), self.height())
-        self.anterior.setGeometry(self.frameCosas.x() + 220, 10, 125, 25)
+        self.anterior.setGeometry(self.frameCosas.x() + 220, 10, 135, 30)
 
 
 window = None
