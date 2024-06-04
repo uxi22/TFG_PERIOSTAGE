@@ -240,7 +240,7 @@ class RecuadroPreguntaRadio(QFrame):
         self.frameOpciones.setGeometry(self.wp, 0, w - self.wp, h)
 
 
-class Window1(QMainWindow):
+class windowIni(QMainWindow):
     def __init__(self):
         super().__init__()
 
@@ -1542,22 +1542,21 @@ class Datos:
                     furcas_no_desact.append(i)
             # Media de valores de furca con los dientes con furcas no desactivados
             # Le restamos las dos posiciones de furca superior de 14 y 24
-            datadf3 += [sum(aplanar_lista(list(self.defectosfurca.values()))) / (len(furcas_no_desact) * 3 - 2)]
+            furcas_suma = sum([sum(self.defectosfurca[i]) for i in furcas_no_desact])
+            datadf3 += [furcas_suma / (len(furcas_no_desact) * 3 - 2)]
             valores_furcas = [0, 0, 0, 0]  # 0, 1, 2 o 3
             # recorremos las listas con los 3 valores de furca de cada diente
             # para el 14 y 24, el primer valor va a ser siempre 0
-            for i in list(self.defectosfurca.values()):
-                valores_furcas[max(i)] += 1
+            for i in furcas_no_desact:
+                valores_furcas[max(self.defectosfurca[i])] += 1
             datadf3 += valores_furcas
             # Cualitativos
-            bop = sum(aplanar_lista(self.sangrados)) / (
-                    len(aplanar_lista(self.sangrados)) - (
-                    (len(self.desactivadosSuperior) + len(self.desactivadosInferior)) * 6))
-            placa = sum(aplanar_lista(self.placas)) / (len(aplanar_lista(self.placas)) - (
-                    (len(self.desactivadosSuperior) + len(self.desactivadosInferior)) * 6))
-            supuracion = sum(aplanar_lista(self.supuraciones)) / (
-                    len(aplanar_lista(self.supuraciones)) - (
-                    (len(self.desactivadosSuperior) + len(self.desactivadosInferior)) * 6))
+            bop = sum([sum(self.sangrados[dientes.index(i)]) for i in self.puntosMuestreo]) / (
+                    len(self.puntosMuestreo) * 6)
+            placa = sum([sum(self.placas[dientes.index(i)]) for i in self.puntosMuestreo]) / (
+                    len(self.puntosMuestreo) * 6)
+            supuracion = sum([sum(self.supuraciones[dientes.index(i)]) for i in self.puntosMuestreo]) / (
+                    len(self.puntosMuestreo) * 6)
             datadf3 += [bop, placa, supuracion]
             datadf3 += [self.tratamiento_prev, self.tipo_trat, self.dientes_perdidos, self.colapso_mordida,
                         self.tabaquismo,
@@ -2061,15 +2060,14 @@ class WindowFinal(QMainWindow):
         super().__init__()
         self.setWindowTitle("Periostage")
         self.setStyleSheet("background-color: #ECECEC ")
-        self.setMinimumSize(QSize(1000, 500))
+        self.setMinimumSize(QSize(300, 300))
         self.resizeEvent = self.actualizar_tam
 
         self.frameTodo = QFrame()
-        self.frameTodo.setGeometry(0, 0, self.width() - 10, 805)
 
         self.scroll_area = QScrollArea(self)
         self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        # Siempre va a haber scroll vertical
 
         self.frameTitulo = QFrame(self.frameTodo)
         self.frameTitulo.setGeometry(QRect(0, 0, self.width(), 50))
@@ -2195,8 +2193,6 @@ class WindowFinal(QMainWindow):
 
         self.scroll_area.setStyleSheet("border: None;")
         self.scroll_area.setWidget(self.frameTodo)
-        self.scroll_area.setMinimumSize(QSize(self.frameTodo.width(), 200))
-        self.scroll_area.setFixedSize(self.frameTodo.width(), self.height())
         self.scroll_area.setWidgetResizable(False)
 
     def actualizar_tam(self, event):
@@ -2246,14 +2242,14 @@ def anteriorPantalla():
     if pantallaAct >= 0:
         window = WindowDientes(pantallaAct)
     else:
-        window = Window1()
+        window = windowIni()
     window.showMaximized()
 
 
 app = QApplication(sys.argv)
 app.setWindowIcon(QIcon(os.path.join(basedir, 'diente.ico')))
 datos = Datos()
-window = Window1()
+window = windowIni()
 # window = WindowFinal()
 # window = WindowDientes(pantallaAct)
 window.showMaximized()
