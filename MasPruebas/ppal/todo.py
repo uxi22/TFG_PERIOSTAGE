@@ -258,7 +258,6 @@ class windowIni(QMainWindow):
 
         # TITULO
         self.frameTitulo = QFrame(self.frameTodo)
-        self.frameTitulo.setStyleSheet("text-align: center;")
 
         self.titu = QLabel(self.frameTitulo)
         self.titu.setText("Periodontograma")
@@ -437,7 +436,7 @@ class windowIni(QMainWindow):
             self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
             self.framePpal.setGeometry((self.width() - 920) / 2, 100, 920, 625)
             self.siguiente.setGeometry(
-                QRect(self.framePpal.width() + int((self.width() - 920) / 2) - 125, 15, 125, 30))
+                QRect(self.framePpal.width() + int((self.width() - 1030) / 2) - 125, 15, 125, 30))
         else:
             self.framePpal.setGeometry(15, 100, 920, 625)
             self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
@@ -985,7 +984,7 @@ class Input3(QFrame):
 class Columna(QFrame):
     def __init__(self, numDiente, left, parent=None):
         super().__init__(parent)
-        self.setGeometry(QRect(left, 0, 45, parent.height()))
+        self.setGeometry(QRect(left, 0, 45, 645))
 
         self.incrementoHeight = 0
 
@@ -1004,9 +1003,6 @@ class Columna(QFrame):
             self.anhadir_elementos(numDiente)
         else:
             self.eliminar_elementos()
-
-    def newsize(self, height):
-        self.setGeometry(self.geometry().left(), 0, 45, height)
 
     def anhadir_elementos(self, numDiente):
         self.incrementoHeight = 18
@@ -1877,10 +1873,10 @@ class WindowDientes(QMainWindow):
         self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
 
         self.frameTodoTodo = QFrame()
-        self.frameTodoTodo.setGeometry(0, 0, self.width() - 10, 675)
+        # self.frameTodoTodo.setGeometry(0, 0, self.width() - 10, 675)
 
         self.frameTitulo = QFrame(self.frameTodoTodo)
-        self.frameTitulo.setGeometry(QRect(0, 0, self.width(), 50))
+        # self.frameTitulo.setGeometry(QRect(0, 0, self.width(), 50))
 
         arcadas = ["Arcada superior", "Arcada inferior", "Pantalla final", "Datos paciente"]
 
@@ -1888,23 +1884,17 @@ class WindowDientes(QMainWindow):
         self.titulo.setText(arcadas[arc])
         self.titulo.setStyleSheet("font-size: 16pt; font-weight: 350; color: black;")
         self.titulo.adjustSize()
-        self.titulo.setGeometry(
-            QRect((self.width() - self.titulo.width()) // 2, 10, self.titulo.width(), self.titulo.height()))
 
         self.anterior = BotonAnterior(self.frameTitulo, arcadas[arc - 1])
-        self.anterior.setGeometry(QRect(((self.width() - self.titulo.width()) // 2) - 145, 10, 125, 25))
-
         self.siguiente = BotonSiguiente(self.frameTitulo, arcadas[arc + 1])
-        self.siguiente.setGeometry(
-            QRect((((self.width() - self.titulo.width()) // 2) + self.titulo.width() + 20), 10, 125, 25))
 
         self.frameTodo = QFrame(self.frameTodoTodo)
 
         self.frameColumnas = QFrame(self.frameTodo)
-        self.frameColumnas.setGeometry(QRect(0, 0, self.width(), self.height()))
+        self.frameColumnas.setGeometry(QRect(0, 0, 970, 645))
 
         self.frameEtiquetas = QFrame(self.frameColumnas)
-        tam = QRect(25, 18, 125, self.height())
+        tam = QRect(0, 18, 125, 645)
         self.frameEtiquetas.setGeometry(tam)
 
         etiquetas = ["Movilidad", "Defecto de furca", "Implante", "Sangrado al sondaje", "Placa", "Supuración",
@@ -1917,7 +1907,7 @@ class WindowDientes(QMainWindow):
             label.setGeometry(QRect(0, incrementoHeight, 125, 18))
             incrementoHeight += 18
         self.frameDibujoDientes = QFrame(self.frameTodo)
-        self.frameDibujoDientes.setGeometry(QRect(170, 170, self.width() - 176, 137))
+        self.frameDibujoDientes.setGeometry(QRect(150, 170, 800, 137))
         self.widgetDientes = LineasSobreDientes(self.frameDibujoDientes)
         self.widgetDientes.actualizar_todas_alturas()
         etq1 = ["Bucal", "Lingual"]
@@ -1925,7 +1915,7 @@ class WindowDientes(QMainWindow):
         labelBucal.setStyleSheet("font-weight: bold; font-size: 16px;")
         labelBucal.setGeometry(QRect(70, 205, 125, 18))
 
-        incrementoLeft = 170
+        incrementoLeft = 150
         for n in range(0, 8):
             Columna(n, incrementoLeft, parent=self.frameColumnas)
             incrementoLeft += 45 + 4
@@ -1937,7 +1927,7 @@ class WindowDientes(QMainWindow):
             incrementoLeft += 45 + 4
 
         self.frameDatosMedios = QFrame(self.frameTodo)
-        self.frameDatosMedios.setGeometry(200, 297, 970, 90)
+        self.frameDatosMedios.setGeometry(145, 297, 810, 90)
         layoutDatosMedios = QHBoxLayout(self.frameDatosMedios)
         self.frameDatosMedios.setStyleSheet("background: none;")
         layoutDatosMedios.setSpacing(20)
@@ -1968,7 +1958,7 @@ class WindowDientes(QMainWindow):
             incrementoHeight += 18
 
         self.frameDibujoDientesAbajo = QFrame(self.frameTodo)
-        self.frameDibujoDientesAbajo.setGeometry(QRect(170, 385, self.width() - 176, 137))
+        self.frameDibujoDientesAbajo.setGeometry(QRect(150, 385, 800, 137))
         etq2 = ["Palatal", "Bucal"]
         labelPalatal = QLabel(etq2[pantallaAct], self.frameEtiquetas)
         labelPalatal.setStyleSheet("font-weight: bold; font-size: 16px;")
@@ -1977,29 +1967,30 @@ class WindowDientes(QMainWindow):
         self.widgetDientesAbajo = LineasSobreDientesAbajo(self.frameDibujoDientesAbajo)
         self.widgetDientesAbajo.actualizar_todas_alturas()
         self.frameTodo.adjustSize()
-        self.frameTodo.setGeometry(QRect(150, 50, self.frameTodo.width(), self.frameTodo.height()))
+        # self.frameTodo.setGeometry(QRect(150, 50, self.frameTodo.width(), self.frameTodo.height()))
 
         self.scroll_area.setStyleSheet("border: None;")
         self.scroll_area.setWidget(self.frameTodoTodo)
         self.scroll_area.setWidgetResizable(False)
 
     def actualizar_tam(self, event):
-        self.frameTodoTodo.setGeometry(0, 0, self.width(), self.height())
-        self.frameTitulo.setGeometry(QRect(0, 0, self.width(), 60))
+        self.frameTodoTodo.setGeometry(0, 0, max(self.width(), 995), 700)
+        self.frameTitulo.setGeometry(QRect(0, 0, max(self.width(), 995), 60))
         self.titulo.setGeometry(
-            QRect((self.width() - self.titulo.width()) // 2, 10, self.titulo.width(), self.titulo.height()))
-        self.frameColumnas.setGeometry(QRect(0, 0, self.width(), self.height()))
-        self.frameEtiquetas.setGeometry(QRect(25, 18, 125, self.height()))
-        self.frameDibujoDientes.setGeometry(QRect(170, 170, self.width() - 176, 137))
-        self.frameDatosMedios.setGeometry(QRect(150, 297, 820, 90))
-        self.frameDibujoDientesAbajo.setGeometry(QRect(170, 380, self.width() - 176, 137))
-        self.frameTodo.setGeometry(QRect(150, 50, self.frameTodo.width(), self.height()))
+            QRect(((max(self.width(), 995) - self.titulo.width()) // 2) + 70, 10, self.titulo.width(), self.titulo.height()))
+        if self.width() >= 995:
+            self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+            self.frameTodo.setGeometry(QRect((self.width() - 950) // 2, 60, self.frameTodo.width(), self.frameTodo.height()))
+            self.anterior.setGeometry(QRect(((self.width() - 950) //2) + 170, 10, 125, 25))
+            self.siguiente.setGeometry(QRect(((self.width() - 950) // 2) + 800, 10, 125, 25))
+        else:
+            self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+            self.frameTodo.setGeometry(QRect(15, 60, self.frameTodo.width(), self.frameTodo.height()))
+            self.anterior.setGeometry(QRect(185, 10, 125, 25))
+            self.siguiente.setGeometry(QRect(835, 10, 125, 25))
 
-        for columna in self.frameColumnas.findChildren(Columna):
-            columna.newsize(self.height())
-        self.anterior.setGeometry(QRect(((self.width() - self.titulo.width()) // 2) - 145, 10, 125, 25))
-        self.siguiente.setGeometry(
-            QRect((((self.width() - self.titulo.width()) // 2) + self.titulo.width() + 20), 10, 125, 25))
+        """for columna in self.frameColumnas.findChildren(Columna):
+            columna.newsize(self.height())"""
         self.scroll_area.setGeometry(0, 0, self.width(), self.height())
 
 
@@ -2070,21 +2061,16 @@ class WindowFinal(QMainWindow):
         # Siempre va a haber scroll vertical
 
         self.frameTitulo = QFrame(self.frameTodo)
-        self.frameTitulo.setGeometry(QRect(0, 0, self.width(), 50))
+        # self.frameTitulo.setGeometry(QRect(0, 0, self.width(), 50))
 
         self.titulo = QLabel("Vista general", self.frameTitulo)
-        self.titulo.setStyleSheet("font-size: 16pt; font-weight: 350; color: black;")
+        self.titulo.setStyleSheet("font-family: Alata; font-size: 16pt; font-weight: 300; color: black;")
         self.titulo.adjustSize()
-        self.titulo.setGeometry(
-            QRect((self.width() - self.titulo.width()) // 2, 10, self.titulo.width(), self.titulo.height())
-        )
+        self.frameTitulo.show()
 
         self.anterior = BotonAnterior(self.frameTitulo, "Arcada inferior")
-        self.anterior.setGeometry(QRect(((self.width() - self.titulo.width()) // 2) - 145, 10, 125, 25))
 
         self.exportar = QPushButton("Exportar", self.frameTitulo)
-        self.exportar.setGeometry(
-            QRect(((self.width() - self.titulo.width()) // 2) + self.titulo.width() + 20, 10, 125, 25))
         self.exportar.setCheckable(True)
         self.exportar.setStyleSheet(
             "QPushButton { background-color: #9747FF; border-radius: 7px; font-size: 15px; font-family: Alata;}"
@@ -2093,22 +2079,17 @@ class WindowFinal(QMainWindow):
         self.exportar.clicked.connect(lambda: datos.extraerDatos())
 
         self.frameClasificacion = QFrame(self.frameTodo)
-        self.frameClasificacion.setGeometry(QRect(0, 50, self.width(), 50))
 
         self.clasificacion = Clasificacion(self.frameClasificacion)
         self.clasificacion.actualizar()
-        self.clasificacion.setGeometry(
-            QRect((self.width() - self.clasificacion.width()) // 2, 0, self.clasificacion.width(),
-                  self.clasificacion.height()))
 
         self.frameCosas = QFrame(self.frameTodo)
 
         self.frameColumnas = QFrame(self.frameCosas)
-        self.frameColumnas.setGeometry(QRect(0, 0, self.width() - 250, 800))
+        self.frameColumnas.setGeometry(0, 0, 1030, 705)
 
         self.frameEtiquetas = QFrame(self.frameColumnas)
         horizontalAdvanceEt = QFontMetrics(QFont("Alata", 16)).horizontalAdvance("Sitio de muestreo")
-
         self.frameEtiquetas.setGeometry(QRect(0, 18, horizontalAdvanceEt + 10, 1000))
         labEt = QLabel("Sitios de muestreo", self.frameEtiquetas)
         labEt.setAlignment(Qt.AlignRight)
@@ -2125,7 +2106,6 @@ class WindowFinal(QMainWindow):
         lPal.setStyleSheet("font-family: Alata; font-size: 20; font-weight: bold;")
 
         self.frameDibujosDientesSuperior = QFrame(self.frameCosas)
-        self.frameDibujosDientesSuperior.setGeometry(QRect(horizontalAdvanceEt + 35, 42, self.width() - 150 * 2, 270))
         pantallaAct = 0
         self.widgetDientesSuperiorArriba = LineasSobreDientes(self.frameDibujosDientesSuperior)
         self.widgetDientesSuperiorAbajo = LineasSobreDientesAbajo(self.frameDibujosDientesSuperior)
@@ -2136,7 +2116,6 @@ class WindowFinal(QMainWindow):
             QRect(0, 134, self.widgetDientesSuperiorAbajo.width(), self.widgetDientesSuperiorAbajo.height()))
 
         self.frameDibujosDientesInferior = QFrame(self.frameCosas)
-        self.frameDibujosDientesInferior.setGeometry(QRect(horizontalAdvanceEt + 35, 390, self.width() - 150 * 2, 260))
         self.wDInferiorArriba = LineasSobreDientes(self.frameDibujosDientesInferior)
         self.wDInferiorAbajo = LineasSobreDientesAbajo(self.frameDibujosDientesInferior)
         self.wDInferiorArriba.actualizar_todas_alturas()
@@ -2144,17 +2123,20 @@ class WindowFinal(QMainWindow):
         pantallaAct = 2
         self.wDInferiorAbajo.setGeometry(0, 120, self.wDInferiorAbajo.width(), self.wDInferiorAbajo.height())
 
+        self.frameDibujosDientesSuperior.setGeometry(QRect(horizontalAdvanceEt + 35, 42, 850, 270))
+        self.frameDibujosDientesInferior.setGeometry(QRect(horizontalAdvanceEt + 35, 390, 850, 260))
+
         # Labels bucal y palatal
         incrementoLeft = horizontalAdvanceEt + 30
         for n in range(0, 8):
             ColumnaFinal(n, incrementoLeft, parent=self.frameColumnas)
-            incrementoLeft += 45 + 4
+            incrementoLeft += 49
 
         incrementoLeft += 16
 
         for n in range(8, 16):
             ColumnaFinal(n, incrementoLeft, parent=self.frameColumnas)
-            incrementoLeft += 45 + 4
+            incrementoLeft += 49
 
         self.frameDatosMedios = QFrame(self.frameCosas)
         self.frameDatosMedios.setGeometry(180, 300, 850, 90)
@@ -2196,25 +2178,26 @@ class WindowFinal(QMainWindow):
         self.scroll_area.setWidgetResizable(False)
 
     def actualizar_tam(self, event):
-        self.frameTodo.setGeometry(0, 0, self.width() - 18, 815)
-        self.frameTitulo.setGeometry(QRect(0, 0, self.width(), 50))
+        self.frameTodo.setGeometry(0, 0, max(self.width(), 1030), 815)
+        self.frameTitulo.setGeometry(QRect(0, 0, max(self.width(), 1190), 50))
         self.titulo.setGeometry(
-            QRect((self.width() - self.titulo.width()) // 2, 10, self.titulo.width(), self.titulo.height())
+            QRect((max(self.width(), 1190) - self.titulo.width()) // 2, 10, self.titulo.width(), self.titulo.height())
         )
-        self.frameClasificacion.setGeometry(QRect(0, 50, self.width(), 50))
+        self.frameClasificacion.setGeometry(QRect(0, 50, max(self.width(), 1190), 50))
         self.clasificacion.setGeometry(
-            QRect((self.width() - self.clasificacion.width()) // 2, 10, self.clasificacion.width(),
+            QRect((max(self.width(), 1190) - self.clasificacion.width()) // 2, 10, self.clasificacion.width(),
                   self.clasificacion.height()))
-        self.frameColumnas.setGeometry(QRect(0, 0, self.width() - 250, 705))
-        horizontalAdvanceEt = QFontMetrics(QFont("Alata", 16)).horizontalAdvance("Sitio de muestreo")
-        self.frameDibujosDientesSuperior.setGeometry(QRect(horizontalAdvanceEt + 35, 42, self.width() - 150 * 2, 270))
-        self.frameDibujosDientesInferior.setGeometry(QRect(horizontalAdvanceEt + 35, 390, self.width() - 150 * 2, 260))
-        self.frameCosas.setGeometry(QRect(125, 100, self.frameColumnas.width(), 705))
+        if self.width() >= 1080:
+            self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+            self.frameCosas.setGeometry((self.width() - 1180) / 2, 100, 1030, 705)
+            self.exportar.setGeometry(self.frameCosas.width() + int((self.width() - 1180) / 2) - 190, 10, 125, 25)
+        else:
+            self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+            self.frameCosas.setGeometry(0, 100, 1000, 705)
+            self.exportar.setGeometry(self.frameCosas.width() - 190, 10, 125, 25)
+
         self.scroll_area.setGeometry(0, 0, self.width(), self.height())
-        self.scroll_area.setFixedSize(self.width(), self.height())
-        self.anterior.setGeometry(QRect(((self.width() - self.titulo.width()) // 2) - 145, 10, 125, 25))
-        self.exportar.setGeometry(
-            QRect(((self.width() - self.titulo.width()) // 2) + self.titulo.width() + 20, 10, 125, 25))
+        self.anterior.setGeometry(self.frameCosas.x() + 220, 10, 125, 25)
 
 
 window = None
