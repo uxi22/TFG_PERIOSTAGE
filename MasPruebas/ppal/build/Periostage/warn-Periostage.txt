@@ -42,3 +42,4 @@ missing module named olefile - imported by PIL.FpxImagePlugin (top-level), PIL.M
 missing module named numpy - imported by PIL.Image (delayed, conditional, optional)
 missing module named cffi - imported by PIL.Image (optional), PIL.PyAccess (optional)
 missing module named defusedxml - imported by PIL.Image (optional)
+missing module named pandas - imported by C:\Users\Uxi\Documents\TFG\MasPruebas\ppal\todo.py (top-level)

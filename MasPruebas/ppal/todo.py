@@ -9,10 +9,10 @@ from ctypes import windll
 
 from PySide6.QtCore import (Qt, QRegularExpression, QRect, QSize, QPoint, QDate)
 from PySide6.QtGui import (QRegularExpressionValidator, QImage, QPolygon, QBrush, QColor,
-                           QPainter, QPen, QFontMetrics, QFont, QIcon)
+                           QPainter, QPen, QFontMetrics, QFont, QIcon, QAction)
 from PySide6.QtWidgets import (QApplication, QLabel, QDateEdit, QRadioButton, QMainWindow,
                                QWidget, QHBoxLayout, QLineEdit, QPushButton, QPointList, QFrame,
-                               QFileDialog, QCheckBox, QScrollArea)
+                               QFileDialog, QCheckBox, QScrollArea, QToolBar)
 
 try:
     myappid = 'mycompany.myproduct.subproduct.version'
@@ -1722,6 +1722,8 @@ def clasificacion_inicial():
     # Si no se cumplió ninguno de esos dos casos
     # Salud o gingivitis
     if not respuesta:
+        print("maxppd: ", maxppd)
+        print("calmaxtodo: ", cal_max_todo)
         return [clasificacion_salud_gingivitis(maxppd, cal_max_todo)]
     else:
         return respuesta
@@ -1740,7 +1742,7 @@ def clasificacion_salud_gingivitis(maxppd, calmaxtodo):
                 colorClasificacion = "lightgreen"
                 return "Sano"
         if maxppd <= 4:
-            if calmaxtodo >= 1 and datos.tratamiento_prev == "Si":
+            if calmaxtodo >= 1 and datos.tratamiento_prev == "Sí":
                 colorClasificacion = "lightgreen"
                 return "Salud con periodontitis estable tratado con éxito"
         if maxppd > 3:
@@ -1758,7 +1760,7 @@ def clasificacion_salud_gingivitis(maxppd, calmaxtodo):
                     return "Gingivitis con periodonto reducido"
                 else:
                     colorClasificacion = "orange"
-                    return "Gingivitis con periodonto reducido y periodontitis estable tratado con éxito"
+                    return "Gingivitis con periodontitis estable tratado con éxito"
         else:  # maxppd > 3
             if calmaxtodo == 0:
                 colorClasificacion = "light orange"
@@ -1773,37 +1775,38 @@ def clasificacion_periodontitis(cal, maxppd):
     if 1 <= cal <= 2:
         if maxppd <= 4:
             colorClasificacion = "yellow"
-            estadios.append("Estadío I ")  # Stage I
+            estadios.append("Estadio I ")  # Stage I
         if datos.dientes_perdidos == "1-4":
             colorClasificacion = "red"
-            estadios.append("Estadío III ")  # Stage III
+            estadios.append("Estadio III ")  # Stage III
     elif 3 <= cal <= 4:
         if maxppd <= 5 and (not 2 in datos.defectosfurca or not 3 in datos.defectosfurca):
             colorClasificacion = "orange"
-            estadios.append("Estadío II ")
+            estadios.append("Estadio II ")
         if (datos.dientes_perdidos in ["0", "1-4", "Desconocido"] and (maxppd >= 6 or 2 in datos.defectosfurca
                                                                        or 3 in datos.defectosfurca or dientes_naturales >= 20)):
             colorClasificacion = "red"
-            estadios.append("Estadío III ")
+            estadios.append("Estadio III ")
         if datos.dientes_perdidos == "1-4" and dientes_naturales < 20:
             colorClasificacion = "dark red"
-            estadios.append("Estadío IV ")
+            estadios.append("Estadio IV ")
         if datos.dientes_perdidos == ">=5":
             colorClasificacion = "dark red"
-            estadios.append("Estadío IV ")
+            estadios.append("Estadio IV ")
     elif cal >= 5:
         if datos.dientes_perdidos in ["0", "1-4", "Desconocido"]:
             movilidad = contar_movilidad()
             if movilidad < 2 or datos.colapso_mordida == "No" or dientes_naturales >= 20:
                 colorClasificacion = "red"
-                estadios.append("Estadío III ")
+                estadios.append("Estadio III ")
             if movilidad >= 2 or datos.colapso_mordida == "Sí" or dientes_naturales < 20:
                 colorClasificacion = "dark red"
-                estadios.append("Estadío IV ")
+                estadios.append("Estadio IV ")
         else:  # dientes perdidos >= 5
             colorClasificacion = "dark red"
-            estadios.append("Estadío IV ")
+            estadios.append("Estadio IV ")
     if not estadios:
+        colorClasificacion = "yellow"
         return ["Estadío no determinado"]
     return estadios
 
@@ -1878,6 +1881,14 @@ class WindowDientes(QMainWindow):
         self.setWindowTitle("Periostage")
         self.setStyleSheet("background-color: #ECECEC;")
         self.setMinimumSize(QSize(300, 300))
+
+        toolbar = QToolBar("Main toolbar", self)
+        toolbar.setMinimumSize(300, 30)
+        self.addToolBar(Qt.TopToolBarArea, toolbar)
+        action = QAction("Nuevo periodontograma", self)
+        action.triggered.connect(lambda: nuevoPeriodontograma())
+        toolbar.addAction(action)
+
         self.resizeEvent = self.actualizar_tam
 
         self.scroll_area = QScrollArea(self)
@@ -1986,23 +1997,21 @@ class WindowDientes(QMainWindow):
 
     def actualizar_tam(self, event):
         self.frameTodoTodo.setGeometry(0, 0, max(self.width(), 995), 700)
-        self.frameTitulo.setGeometry(QRect(0, 0, max(self.width(), 995), 60))
+        self.frameTitulo.setGeometry(QRect(0, 0, max(self.width(), 995), 50))
         self.titulo.setGeometry(
             QRect(((max(self.width(), 995) - self.titulo.width()) // 2) + 70, 10, self.titulo.width(), self.titulo.height()))
         if self.width() >= 995:
             self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-            self.frameTodo.setGeometry(QRect((self.width() - 950) // 2, 60, self.frameTodo.width(), self.frameTodo.height()))
+            self.frameTodo.setGeometry(QRect((self.width() - 950) // 2, 45, self.frameTodo.width(), self.frameTodo.height()))
             self.anterior.setGeometry(QRect(((self.width() - 950) //2) + 170, 10, 135, 30))
             self.siguiente.setGeometry(QRect(((self.width() - 950) // 2) + 800, 10, 135, 30))
         else:
             self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-            self.frameTodo.setGeometry(QRect(15, 60, self.frameTodo.width(), self.frameTodo.height()))
+            self.frameTodo.setGeometry(QRect(15, 45, self.frameTodo.width(), self.frameTodo.height()))
             self.anterior.setGeometry(QRect(185, 10, 135, 30))
             self.siguiente.setGeometry(QRect(835, 10, 135, 30))
 
-        """for columna in self.frameColumnas.findChildren(Columna):
-            columna.newsize(self.height())"""
-        self.scroll_area.setGeometry(0, 0, self.width(), self.height())
+        self.scroll_area.setGeometry(0, 30, self.width(), self.height())
 
 
 class ColumnaFinal(QFrame):
@@ -2063,6 +2072,14 @@ class WindowFinal(QMainWindow):
         self.setWindowTitle("Periostage")
         self.setStyleSheet("background-color: #ECECEC ")
         self.setMinimumSize(QSize(300, 300))
+
+        toolbar = QToolBar("Main toolbar", self)
+        toolbar.setMinimumSize(300, 30)
+        self.addToolBar(Qt.TopToolBarArea, toolbar)
+        action = QAction("Nuevo periodontograma", self)
+        action.triggered.connect(lambda: nuevoPeriodontograma())
+        toolbar.addAction(action)
+
         self.resizeEvent = self.actualizar_tam
 
         self.frameTodo = QFrame()
@@ -2086,8 +2103,8 @@ class WindowFinal(QMainWindow):
         self.exportar.setLayoutDirection(Qt.LeftToRight)
         self.exportar.setCheckable(True)
         self.exportar.setStyleSheet(
-            "QPushButton { background-color: #9747FF; border-radius: 7px; font-size: 15px; font-family: Alata;}"
-            "QPushButton:hover { background-color: #623897; }"
+            "QPushButton { background-color: #A55EFF; border-radius: 7px; font-size: 15px; font-family: Alata;}"
+            "QPushButton:hover { background-color: #9747FF; }"
             "QPushButton:pressed { background-color: #4D2A7A; }")
         self.exportar.clicked.connect(lambda: datos.extraerDatos())
 
@@ -2162,6 +2179,10 @@ class WindowFinal(QMainWindow):
         self.sangrado = BarraPorcentajes(datos.sangrados, 1,
                                          self.frameDatosMedios)
         self.placa = BarraPorcentajes(datos.placas, 2, self.frameDatosMedios)
+        self.sangrado.actualizarPorcentajes()
+        self.sangrado.update()
+        self.placa.actualizarPorcentajes()
+        self.sangrado.update()
 
         layoutDatosMedios.addWidget(self.ppd)
         layoutDatosMedios.addWidget(self.cal)
@@ -2191,26 +2212,37 @@ class WindowFinal(QMainWindow):
         self.scroll_area.setWidgetResizable(False)
 
     def actualizar_tam(self, event):
-        self.frameTodo.setGeometry(0, 0, max(self.width(), 1030), 815)
-        self.frameTitulo.setGeometry(QRect(0, 0, max(self.width(), 1190), 50))
+        self.frameTodo.setGeometry(0, 30, max(self.width(), 1030), 815)
+        self.frameTitulo.setGeometry(QRect(0, 0, max(self.width(), 1190), 40))
         self.titulo.setGeometry(
             QRect((max(self.width(), 1190) - self.titulo.width()) // 2, 10, self.titulo.width(), self.titulo.height())
         )
-        self.frameClasificacion.setGeometry(QRect(0, 50, max(self.width(), 1190), 50))
+        self.frameClasificacion.setGeometry(QRect(0, 40, max(self.width(), 1190), 50))
         self.clasificacion.setGeometry(
             QRect((max(self.width(), 1190) - self.clasificacion.width()) // 2, 10, self.clasificacion.width(),
                   self.clasificacion.height()))
         if self.width() >= 1080:
             self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-            self.frameCosas.setGeometry((self.width() - 1180) / 2, 100, 1030, 705)
+            self.frameCosas.setGeometry((self.width() - 1180) / 2, 90, 1030, 705)
             self.exportar.setGeometry(self.frameCosas.width() + int((self.width() - 1180) / 2) - 190, 10, 135, 30)
         else:
             self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-            self.frameCosas.setGeometry(0, 100, 1000, 705)
+            self.frameCosas.setGeometry(0, 90, 1000, 705)
             self.exportar.setGeometry(self.frameCosas.width() - 190, 10, 135, 30)
 
-        self.scroll_area.setGeometry(0, 0, self.width(), self.height())
+        self.scroll_area.setGeometry(0, 30, self.width(), self.height())
         self.anterior.setGeometry(self.frameCosas.x() + 220, 10, 135, 30)
+
+
+def nuevoPeriodontograma():
+    global datos
+    global window
+    global pantallaAct
+    window.deleteLater()
+    datos = Datos()
+    pantallaAct = -1
+    window = windowIni()
+    window.showMaximized()
 
 
 window = None
