@@ -21,6 +21,8 @@ try:
 except ImportError:
     pass
 
+pantallaAct = -1
+
 # Obtenemos la ruta al directorio del script
 basedir = os.path.dirname(__file__)
 basedir = os.path.join(basedir, os.pardir)
@@ -1242,6 +1244,7 @@ class Columna(QFrame):
 
 class CuadroColores(QWidget):
     def __init__(self, profundidades, margenes, n, parent=None):
+        global pantallaAct
         super().__init__(parent)
         self.n = n
         if margenes is not None:
@@ -1261,6 +1264,9 @@ class CuadroColores(QWidget):
         # Para cada valor que hay en la lista de los datos, contamos el número de veces que aparece
         for i in self.listadatos:
             self.datoscolores[int(i)] += 1
+        if pantallaAct == 2:
+            for diente in datos.desactivadosInferior + datos.desactivadosSuperior:
+                self.quitarDiente(diente)
 
     def minimumSizeHint(self):
         return QSize(1, 1)
@@ -1292,7 +1298,7 @@ class CuadroColores(QWidget):
             d = ["0", "1-2", "3-4", "≥5"]
             nsites = [str(self.datoscolores[0]), str(self.datoscolores[1] + self.datoscolores[2]),
                       str(self.datoscolores[3] + self.datoscolores[4]),
-                      str(sum(self.datoscolores.values()) - sum([self.datoscolores[i] for i in range(0, 5)]))]
+                      str(sum(self.datoscolores.values()) - sum([self.datoscolores[i] for i in range(-1, 5)]))]
         else:
             self.setMinimumSize(228, 87)
             text = "PPD"
@@ -1301,7 +1307,7 @@ class CuadroColores(QWidget):
                       str(self.datoscolores[4]),
                       str(self.datoscolores[5]),
                       str(self.datoscolores[6] + self.datoscolores[7] + self.datoscolores[8]),
-                      str(sum(self.datoscolores.values()) - sum([self.datoscolores[i] for i in range(0, 9)]))]
+                      str(sum(self.datoscolores.values()) - sum([self.datoscolores[i] for i in range(-1, 9)]))]
 
         # Título del cuadro
         qp.setPen(QPen(Qt.black, 5, Qt.SolidLine, Qt.SquareCap, Qt.MiterJoin))
@@ -1722,8 +1728,6 @@ def clasificacion_inicial():
     # Si no se cumplió ninguno de esos dos casos
     # Salud o gingivitis
     if not respuesta:
-        print("maxppd: ", maxppd)
-        print("calmaxtodo: ", cal_max_todo)
         return [clasificacion_salud_gingivitis(maxppd, cal_max_todo)]
     else:
         return respuesta
@@ -1738,7 +1742,7 @@ def clasificacion_salud_gingivitis(maxppd, calmaxtodo):
             if calmaxtodo >= 1 and datos.tratamiento_prev == "No":
                 colorClasificacion = "yellow"
                 return "Sano con periodonto reducido"
-            else:
+            elif calmaxtodo < 1:
                 colorClasificacion = "lightgreen"
                 return "Sano"
         if maxppd <= 4:
@@ -1752,7 +1756,7 @@ def clasificacion_salud_gingivitis(maxppd, calmaxtodo):
     else:
         if maxppd <= 3:
             if calmaxtodo == 0:
-                colorClasificacion = "light orange"
+                colorClasificacion = "lightSalmon"
                 return "Gingivitis"
             elif calmaxtodo >= 1:
                 if datos.tratamiento_prev == "No":
@@ -1763,7 +1767,7 @@ def clasificacion_salud_gingivitis(maxppd, calmaxtodo):
                     return "Gingivitis con periodontitis estable tratado con éxito"
         else:  # maxppd > 3
             if calmaxtodo == 0:
-                colorClasificacion = "light orange"
+                colorClasificacion = "lightSalmon"
                 return "Gingivitis "
     return "Desconocido"
 
@@ -1788,10 +1792,10 @@ def clasificacion_periodontitis(cal, maxppd):
             colorClasificacion = "red"
             estadios.append("Estadio III ")
         if datos.dientes_perdidos == "1-4" and dientes_naturales < 20:
-            colorClasificacion = "dark red"
+            colorClasificacion = "darkRed"
             estadios.append("Estadio IV ")
         if datos.dientes_perdidos == ">=5":
-            colorClasificacion = "dark red"
+            colorClasificacion = "darkRed"
             estadios.append("Estadio IV ")
     elif cal >= 5:
         if datos.dientes_perdidos in ["0", "1-4", "Desconocido"]:
@@ -1800,10 +1804,10 @@ def clasificacion_periodontitis(cal, maxppd):
                 colorClasificacion = "red"
                 estadios.append("Estadio III ")
             if movilidad >= 2 or datos.colapso_mordida == "Sí" or dientes_naturales < 20:
-                colorClasificacion = "dark red"
+                colorClasificacion = "darkRed"
                 estadios.append("Estadio IV ")
         else:  # dientes perdidos >= 5
-            colorClasificacion = "dark red"
+            colorClasificacion = "darkRed"
             estadios.append("Estadio IV ")
     if not estadios:
         colorClasificacion = "yellow"
@@ -1820,7 +1824,7 @@ class Clasificacion(QLabel):
         global colorClasificacion
         super().__init__(parent)
         self.setStyleSheet("font-weight: bold; font-size: 16px; margin: 5px;" "text-color: " + colorClasificacion + "; padding: 3px; border: 1px solid grey;")
-        self.setText("SANO")
+        self.setText("")
 
     def actualizar(self):
         global colorClasificacion
@@ -2246,9 +2250,6 @@ def nuevoPeriodontograma():
 
 
 window = None
-
-pantallaAct = -1
-
 
 def siguientePantalla():
     global pantallaAct
