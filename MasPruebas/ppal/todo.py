@@ -1689,15 +1689,15 @@ class Datos:
 
 def clasificacion_inicial():
     interdental = [0, 2, 3, 5]
-    ultimo_d_caso1 = -2
-    ultimo_d_caso2 = -2
+    dientes_caso1 = []
+    dientes_caso2 = []
     cal_interd_maximo = 0
     cal_max_todo = 0
     maxppd = 0
     respuesta = []
     for diente in dientes:
         # No se tienen en cuenta los 8s ni los dientes desactivados (no hay diente)
-        if diente not in datos.desactivadosSuperior and diente not in datos.desactivadosInferior and diente % 10 != 8:
+        if diente not in datos.desactivadosSuperior + datos.desactivadosInferior and diente % 10 != 8:
             if diente % 10 != 7:
                 puntos = range(6)
             else:
@@ -1713,19 +1713,55 @@ def clasificacion_inicial():
                 cal = calcular_cal(dientes.index(diente), punto)
                 cal_max_todo = max(cal, cal_max_todo)
                 if punto in interdental and cal >= 1:  # Puntos interdentales
-                    if ultimo_d_caso1 != -2 and diente != dientes[ultimo_d_caso1] and diente != dientes[ultimo_d_caso1 + 1]:  # En dos dientes no adyacentes
+                    if diente not in dientes_caso1:
+                        dientes_caso1.append(diente)
+                    """if ultimo_d_caso1 != -2 and diente != dientes[ultimo_d_caso1] and diente != dientes[ultimo_d_caso1 + 1]:  # En dos dientes no adyacentes
                         # PERIODONTITIS
                         respuesta = ["Periodontitis: "]
-                        respuesta.extend(clasificacion_periodontitis(cal, maxppd))
+                        respuesta.extend(clasificacion_periodontitis(cal, maxppd))"""
                     cal_interd_maximo = max(cal, cal_interd_maximo)
-                    ultimo_d_caso1 = dientes.index(diente)
-                elif punto not in interdental and cal >= 3:  # Puntos mediales
-                    if ultimo_d_caso2 != -2 and diente == dientes[ultimo_d_caso2 + 1]:  # En dos dientes adyacentes
+                    # ultimo_d_caso1 = dientes.index(diente)
+                elif punto not in interdental and cal >= 3 and datos.profundidades[dientes.index(diente)][punto] > 3:  # Puntos mediales
+                    if diente not in dientes_caso2:
+                        dientes_caso2.append(diente)
+                    """if ultimo_d_caso2 != -2 and diente == dientes[ultimo_d_caso2 + 1]:  # En dos dientes adyacentes
                         # PERIODONTITIS
                         respuesta = ["Periodontitis: "]
-                        respuesta.extend(clasificacion_periodontitis(cal, maxppd))
-                    ultimo_d_caso2 = dientes.index(diente)
-    # Si no se cumplió ninguno de esos dos casos
+                        respuesta.extend(clasificacion_periodontitis(cal, maxppd))"""
+                    # ultimo_d_caso2 = dientes.index(diente)
+    # Si CAL interdental >= 1 en >= 2 dientes no adyacentes
+    # si hay más de dos casos en los que se cumple, siempre va a haber dos no adyacentes
+
+    if len(dientes_caso1) > 2:
+        respuesta = ["Periodontitis: "]
+        respuesta.extend(clasificacion_periodontitis(cal_interd_maximo, maxppd))
+        if len(dientes_caso1) >= (32 - len(datos.desactivadosSuperior + datos.desactivadosInferior)):
+            respuesta.extend([" generalizada"])
+        else:
+            respuesta.extend([" localizada"])
+    elif len(dientes_caso1) == 2:
+        if dientes.index(dientes_caso1[0]) + 1 != dientes.index(dientes_caso1[1]):
+            respuesta = ["Periodontitis: "]
+            respuesta.extend(clasificacion_periodontitis(cal_interd_maximo, maxppd))
+            if len(dientes_caso1) >= (32 - len(datos.desactivadosSuperior + datos.desactivadosInferior)):
+                respuesta.extend([" generalizada"])
+            else:
+                respuesta.extend([" localizada"])
+
+    if not respuesta:
+        # Si CAL medial >= 3 en >= 2 dientes adyacentes
+        for diente in dientes_caso2:
+            ind = dientes.index(diente)
+            # si el diente adyacente al actual se encuentra en la lista de casos que cumplen la condición
+            # ya son 2 dientes adyacentes, con lo que se cumple la condición de Periodontitis
+            if dientes[ind + 1] in dientes_caso2:
+                respuesta = ["Periodontitis: "]
+                respuesta.extend(clasificacion_periodontitis(cal_max_todo, maxppd))
+                if len(dientes_caso1) >= (32 - len(datos.desactivadosSuperior + datos.desactivadosInferior)):
+                    respuesta.extend([" generalizada"])
+                else:
+                    respuesta.extend([" localizada"])
+
     # Salud o gingivitis
     if not respuesta:
         return [clasificacion_salud_gingivitis(maxppd, cal_max_todo)]
@@ -1754,21 +1790,25 @@ def clasificacion_salud_gingivitis(maxppd, calmaxtodo):
                 colorClasificacion = "lightgreen"
                 return "Sano"
     else:
+        if bop > 0.3:
+            extension = "generalizada"
+        else:
+            extension = "localizada"
         if maxppd <= 3:
             if calmaxtodo == 0:
                 colorClasificacion = "lightSalmon"
-                return "Gingivitis"
+                return "Gingivitis " + extension
             elif calmaxtodo >= 1:
                 if datos.tratamiento_prev == "No":
                     colorClasificacion = "orange"
-                    return "Gingivitis con periodonto reducido"
+                    return "Gingivitis con periodonto reducido " + extension
                 else:
                     colorClasificacion = "orange"
-                    return "Gingivitis con periodontitis estable tratado con éxito"
+                    return "Gingivitis con periodontitis estable tratado con éxito " + extension
         else:  # maxppd > 3
             if calmaxtodo == 0:
                 colorClasificacion = "lightSalmon"
-                return "Gingivitis "
+                return "Gingivitis " + extension
     return "Desconocido"
 
 
@@ -1784,7 +1824,7 @@ def clasificacion_periodontitis(cal, maxppd):
             colorClasificacion = "red"
             estadios.append("Estadio III ")  # Stage III
     elif 3 <= cal <= 4:
-        if maxppd <= 5 and (not 2 in datos.defectosfurca or not 3 in datos.defectosfurca):
+        if maxppd <= 5 and (2 not in datos.defectosfurca or 3 not in datos.defectosfurca):
             colorClasificacion = "orange"
             estadios.append("Estadio II ")
         if (datos.dientes_perdidos in ["0", "1-4", "Desconocido"] and (maxppd >= 6 or 2 in datos.defectosfurca
