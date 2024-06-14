@@ -34,6 +34,8 @@ dientes = [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28,
 furcas = [18, 17, 16, 26, 27, 28, 48, 47, 46, 36, 37, 38]
 furcas_abajo = [18, 17, 16, 14, 24, 26, 27, 28, 48, 47, 46, 36, 37, 38]
 
+imagenes = [None, None]
+
 # Datos de estilo
 colorBoton = "background-color: #BEBEBE;"
 colorClasificacion = "lightgreen"
@@ -1475,6 +1477,9 @@ class Datos:
             "%y%m%d%H%M%S") + ".xlsx")
         ruta, _ = QFileDialog.getSaveFileName(window, "Guardar como", dir, "Libro de excel (*.xlsx)")
         if ruta != "":
+            window.frameTodo.grab(window.frameTodo.geometry()).save(str(ruta).replace(".xlsx", "")+"_final.png")
+            imagenes[0].save(str(ruta).replace(".xlsx", "")+"_superior.png")
+            imagenes[1].save(str(ruta).replace(".xlsx", "")+"_inferior.png")
             dfs = []
             # DATOS DE LOS DIENTES
             for i in range(len(dientes)):
@@ -1535,6 +1540,15 @@ class Datos:
             movilidadmedia = sum([self.movilidad[dientes.index(i)] for i in self.puntosMuestreo]) / len(self.puntosMuestreo)
             datadf3 += [nimplantes, 32 - len(self.desactivadosSuperior) - len(self.desactivadosInferior) - nimplantes,
                         ppdmedia, calmedia, movilidadmedia]
+            # Número de sites en cada intervalo de ppd
+            datadf3 += [window.ppd.datoscolores[0] + window.ppd.datoscolores[1] + window.ppd.datoscolores[2] + window.ppd.datoscolores[3],
+                        window.ppd.datoscolores[4], window.ppd.datoscolores[5],
+                        window.ppd.datoscolores[6] + window.ppd.datoscolores[7] + window.ppd.datoscolores[8],
+                        sum(window.ppd.datoscolores.values()) - sum([window.ppd.datoscolores[i] for i in range(-1, 9)])]
+            # Número de sites en cada intervalo de cal
+            datadf3 += [window.cal.datoscolores[0], window.cal.datoscolores[1] + window.cal.datoscolores[2],
+                        window.cal.datoscolores[3] + window.cal.datoscolores[4],
+                        sum(window.cal.datoscolores.values()) - sum([window.cal.datoscolores[i] for i in range(-1, 5)])]
             datadf3 += [sum(1 for ind, i in enumerate(self.movilidad) if i == 0 and dientes[ind] in self.puntosMuestreo),
                         sum(1 for ind, i in enumerate(self.movilidad) if i == 1 and dientes[ind] in self.puntosMuestreo),
                         sum(1 for ind, i in enumerate(self.movilidad) if i == 2 and dientes[ind] in self.puntosMuestreo),
@@ -1555,11 +1569,11 @@ class Datos:
             datadf3 += valores_furcas
             # Cualitativos
             bop = sum([sum(self.sangrados[dientes.index(i)]) for i in self.puntosMuestreo]) / (
-                    len(self.puntosMuestreo) * 6)
+                    len(self.puntosMuestreo) * 6) * 100
             placa = sum([sum(self.placas[dientes.index(i)]) for i in self.puntosMuestreo]) / (
-                    len(self.puntosMuestreo) * 6)
+                    len(self.puntosMuestreo) * 6) * 100
             supuracion = sum([sum(self.supuraciones[dientes.index(i)]) for i in self.puntosMuestreo]) / (
-                    len(self.puntosMuestreo) * 6)
+                    len(self.puntosMuestreo) * 6) * 100
             datadf3 += [bop, placa, supuracion]
             datadf3 += [self.tratamiento_prev, self.tipo_trat, self.dientes_perdidos, self.colapso_mordida,
                         self.tabaquismo,
@@ -1567,7 +1581,8 @@ class Datos:
 
             df3 = pd.DataFrame(data=datadf3)
             df3.index = ["Número total implantes", "Número dientes naturales", "PPD media", "CAL media",
-                         "Movilidad media", "Dientes movilidad 0", "Dientes movilidad 1",
+                         "Movilidad media", "Sites PPD 0-3", "Sites PPD 4", "Sites PPD 5", "Sites PPD 6-8", "Sites PPD >=9",
+                         "Sites CAL 0", "Sites CAL 1-2", "Sites CAL 3-4", "Sites CAL >=5", "Dientes movilidad 0", "Dientes movilidad 1",
                          "Dientes movilidad 2", "Dientes movilidad 3", "Afectación de furca media",
                          "Dientes afectación furca 0", "Dientes afectación furca 1", "Dientes afectación furca 2",
                          "Dientes afectación furca 3", "BOP %", "Placa %", "Supuración %",
@@ -1939,10 +1954,8 @@ class WindowDientes(QMainWindow):
         self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
 
         self.frameTodoTodo = QFrame()
-        # self.frameTodoTodo.setGeometry(0, 0, self.width() - 10, 675)
 
         self.frameTitulo = QFrame(self.frameTodoTodo)
-        # self.frameTitulo.setGeometry(QRect(0, 0, self.width(), 50))
 
         arcadas = ["Arcada superior", "Arcada inferior", "Pantalla final", "Datos paciente"]
 
@@ -2047,7 +2060,7 @@ class WindowDientes(QMainWindow):
         if self.width() >= 995:
             self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
             self.frameTodo.setGeometry(QRect((self.width() - 950) // 2, 45, self.frameTodo.width(), self.frameTodo.height()))
-            self.anterior.setGeometry(QRect(((self.width() - 950) //2) + 170, 10, 135, 30))
+            self.anterior.setGeometry(QRect(((self.width() - 950) // 2) + 170, 10, 135, 30))
             self.siguiente.setGeometry(QRect(((self.width() - 950) // 2) + 800, 10, 135, 30))
         else:
             self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
@@ -2294,6 +2307,8 @@ window = None
 def siguientePantalla():
     global pantallaAct
     global window
+    if 0 <= pantallaAct < 2:
+        imagenes[pantallaAct] = window.frameTodoTodo.grab(window.frameTodoTodo.geometry())
     window.deleteLater()
     pantallaAct += 1
     if pantallaAct < 2:
