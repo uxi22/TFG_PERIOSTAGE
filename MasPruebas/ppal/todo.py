@@ -1730,20 +1730,10 @@ def clasificacion_inicial():
                 if punto in interdental and cal >= 1:  # Puntos interdentales
                     if diente not in dientes_caso1:
                         dientes_caso1.append(diente)
-                    """if ultimo_d_caso1 != -2 and diente != dientes[ultimo_d_caso1] and diente != dientes[ultimo_d_caso1 + 1]:  # En dos dientes no adyacentes
-                        # PERIODONTITIS
-                        respuesta = ["Periodontitis: "]
-                        respuesta.extend(clasificacion_periodontitis(cal, maxppd))"""
                     cal_interd_maximo = max(cal, cal_interd_maximo)
-                    # ultimo_d_caso1 = dientes.index(diente)
                 elif punto not in interdental and cal >= 3 and datos.profundidades[dientes.index(diente)][punto] > 3:  # Puntos mediales
                     if diente not in dientes_caso2:
                         dientes_caso2.append(diente)
-                    """if ultimo_d_caso2 != -2 and diente == dientes[ultimo_d_caso2 + 1]:  # En dos dientes adyacentes
-                        # PERIODONTITIS
-                        respuesta = ["Periodontitis: "]
-                        respuesta.extend(clasificacion_periodontitis(cal, maxppd))"""
-                    # ultimo_d_caso2 = dientes.index(diente)
     # Si CAL interdental >= 1 en >= 2 dientes no adyacentes
     # si hay más de dos casos en los que se cumple, siempre va a haber dos no adyacentes
 
@@ -1843,7 +1833,7 @@ def clasificacion_periodontitis(cal, maxppd):
             colorClasificacion = "orange"
             estadios.append("Estadio II ")
         if (datos.dientes_perdidos in ["0", "1-4", "Desconocido"] and (maxppd >= 6 or 2 in datos.defectosfurca
-                                                                       or 3 in datos.defectosfurca or dientes_naturales >= 20)):
+                                                                       or 3 in datos.defectosfurca)):
             colorClasificacion = "red"
             estadios.append("Estadio III ")
         if datos.dientes_perdidos == "1-4" and dientes_naturales < 20:
@@ -2178,7 +2168,7 @@ class WindowFinal(QMainWindow):
         self.frameEtiquetas = QFrame(self.frameColumnas)
         horizontalAdvanceEt = QFontMetrics(QFont("Alata", 16)).horizontalAdvance("Sitio de muestreo")
         self.frameEtiquetas.setGeometry(QRect(0, 18, horizontalAdvanceEt + 10, 1000))
-        labEt = QLabel("Sitios de muestreo", self.frameEtiquetas)
+        labEt = QLabel("Dientes de muestreo", self.frameEtiquetas)
         labEt.setAlignment(Qt.AlignRight)
         labEt.setGeometry(QRect(0, 0, horizontalAdvanceEt, 18))
 
@@ -2247,7 +2237,7 @@ class WindowFinal(QMainWindow):
         layoutDatosMedios.addWidget(self.placa)
         self.frameDatosMedios.setLayout(layoutDatosMedios)
 
-        labEt2 = QLabel("Sitios de muestreo", self.frameEtiquetas)
+        labEt2 = QLabel("Dientes de muestreo", self.frameEtiquetas)
         labEt2.setAlignment(Qt.AlignRight)
         labEt2.setGeometry(QRect(0, 632, horizontalAdvanceEt, 18))
 
