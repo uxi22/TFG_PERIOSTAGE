@@ -12,7 +12,7 @@ from PySide6.QtGui import (QRegularExpressionValidator, QImage, QPolygon, QBrush
                            QPainter, QPen, QFontMetrics, QFont, QIcon, QAction)
 from PySide6.QtWidgets import (QApplication, QLabel, QDateEdit, QRadioButton, QMainWindow,
                                QWidget, QHBoxLayout, QLineEdit, QPushButton, QPointList, QFrame,
-                               QFileDialog, QCheckBox, QScrollArea, QToolBar)
+                               QFileDialog, QCheckBox, QScrollArea, QToolBar, QMessageBox)
 
 try:
     myappid = 'mycompany.myproduct.subproduct.version'
@@ -2059,6 +2059,19 @@ class WindowDientes(QMainWindow):
             self.siguiente.setGeometry(QRect(835, 10, 135, 30))
 
         self.scroll_area.setGeometry(0, 30, self.width(), self.height())
+        
+    def closeEvent(self, event):
+        # Ventana emergente para confirmar que se quiere cerrar la ventana
+        reply = QMessageBox.warning(self, 'Cerrar aplicación', "¿Guardar los cambios antes de salir?",
+                                     QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel,
+                                     QMessageBox.Save)
+        if reply == QMessageBox.Save:
+            datos.extraerDatos()
+            event.accept()
+        elif reply == QMessageBox.Discard:
+            event.accept()
+        else:
+            event.ignore()
 
 
 class ColumnaFinal(QFrame):
@@ -2279,6 +2292,19 @@ class WindowFinal(QMainWindow):
 
         self.scroll_area.setGeometry(0, 30, self.width(), self.height())
         self.anterior.setGeometry(self.frameCosas.x() + 220, 10, 135, 30)
+
+    def closeEvent(self, event):
+        # Ventana emergente para confirmar que se quiere cerrar la ventana
+        reply = QMessageBox.warning(self, 'Cerrar aplicación', "¿Guardar los cambios antes de salir?",
+                                     QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel,
+                                     QMessageBox.Save)
+        if reply == QMessageBox.Save:
+            datos.extraerDatos()
+            event.accept()
+        elif reply == QMessageBox.Discard:
+            event.accept()
+        else:
+            event.ignore()
 
 
 def nuevoPeriodontograma():
