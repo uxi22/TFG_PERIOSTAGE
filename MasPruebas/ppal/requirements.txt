@@ -1,0 +1,4 @@
+pandas==2.1
+pillow==10.2
+numpy==1.26
+pyside6==6.6
